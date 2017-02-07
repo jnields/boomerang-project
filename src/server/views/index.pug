@@ -1,0 +1,12 @@
+doctype html
+html(lang=lang)
+    head
+        title=title
+        meta(name="viewport", content="initial-scale=1, user-scalable=no")
+        meta(charset="UTF-8")
+        meta(http-equiv="refresh", content="43200")
+        link(type="text/css" rel="stylesheet" href="/public/build/bundle.css")
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.1/xlsx.core.min.js")
+    body
+        div(id="react-root")!=markup
+        script(src=bundlePath)

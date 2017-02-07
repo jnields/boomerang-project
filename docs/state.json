@@ -1,0 +1,40 @@
+{
+    "entities": {
+        "students": [
+            {
+                "id": 3,
+                "name": "example"
+            },
+            {
+                "id": 4,
+                "name": "example"
+            }
+        ],
+        "schools": [],
+        ""
+    },
+    "students": {
+
+        "isPosting": false,
+        "isGetting": false,
+        "isPutting": false,
+        "isDeleting": false,
+        "isParsing": false,
+
+        "postError": null,
+        "getError": null,
+        "putError": null,
+        "deleteError": null,
+        "parseError": null,
+
+        "savedItems": [3, 4],
+        "unsavedItems": [{"name": "foo"}, {"name": "bar"}]
+    },
+    "files": [],
+    "form": {
+        "firstName": "",
+        "lastName": "",
+        "type": "teacher/counselor/admin/student",
+        "grade": null
+    }
+}

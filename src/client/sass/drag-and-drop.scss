@@ -1,0 +1,13 @@
+.default {
+    display: block;
+    input[type="file"] {
+        display: none;
+    }
+    label {
+        cursor: pointer;
+    }
+    width: 100%;
+    border: 1px solid black;
+    padding: 200px 0;
+    text-align: center;
+}
