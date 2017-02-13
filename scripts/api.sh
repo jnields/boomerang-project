@@ -8,7 +8,7 @@ getId() {
     python -c 'import sys, json; print json.load(sys.stdin)["id"]'
 }
 echo "AUTHENTICATE"
-curl -I -k https://jnields:password@localhost:3000/api
+curl -c ./cookies -I -k https://jnields:password@localhost:3000/api
 w
 
 echo "GET SCHOOLS"

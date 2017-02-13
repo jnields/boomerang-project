@@ -117,7 +117,7 @@ function getUserSchool(req, res, next) {
     ).then(
         results => {
             req.schoolId =
-                results[0].length 
+                results[0].length
                     ? results[0][0].id
                     : null;
             next();
