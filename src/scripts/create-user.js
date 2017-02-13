@@ -1,46 +1,54 @@
-import User from "../server/models/user";
-
+import { User } from "../server/models";
 let flag, password;
 let user = {};
-console.log("args:", global.process.argv.length);
-global.process.argv.forEach((arg, ix) => {
-    console.log("arg:", arg);
-    console.log("ix:", ix);
+
+const fields = {
+    "-u": "username",
+    "-p": "password",
+    "-e": "email",
+    "-g": "gender",
+    "-a": "age",
+    "-dob": "dob",
+    "-t": "tier",
+    "-f": "firstName",
+    "-l": "lastName"
+};
+
+process.argv.forEach((arg, ix) => {
     if (ix < 2) return;
     if (flag == null) {
-        switch(arg) {
-        case "-u":
-        case "-p":
-        case "-e":
-            flag = arg;
-            break;
-        default:
-            throw "Usage: create-user -u [[username]] -p [[password]] -e [[email]]";
-        }
+        if (!(flag = fields[arg]))
+            throw "Usage: create-user "
+            + "-u [[username]] "
+            + "-p [[password]] "
+            + "-f [[firstName]] "
+            + "-l [[lastName]] "
+            + "-e [[email]] "
+            + "-g [[gender]] "
+            + "-a [[age]] "
+            + "-dob [[dateOfBirth]] "
+            + "-t  [[accessTier]]" ;
     } else {
-        switch(flag) {
-        case "-u":
-            user.username = arg;
-            break;
-        case "-p":
+        if (flag === "password") {
             password = arg;
-            break;
-        case "-e":
-            user.email = arg;
-            break;
-        default:
-            throw "Usage: create-user -u [[username]] -p [[password]] -e [[email]]";
+        } else {
+            user[flag] = arg;
         }
         flag = null;
     }
 });
-console.log(user);
-user = User.build(user);
-user.setPassword(password);
-user.save().then(saved => {
-    console.log("User successfully saved!");
-    console.log(saved);
+user.authMechanism = { type: "BASIC" };
+user = User.build(
+    user,
+    { include: [{ association: User.AuthMechanism }] }
+);
+
+user.authMechanism.setPassword(password);
+user.save().then(() => {
+    console.log("USER CREATED");
+    process.exit(0);
 }, error => {
     console.log("ERROR");
     console.log(error);
+    process.exit(1);
 });

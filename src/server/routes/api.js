@@ -2,29 +2,86 @@ import orm from "../helpers/orm";
 import {
     Student,
     School,
-    StudentSchool,
     User,
     Teacher,
-    TeacherSchool
+    AuthMechanism
 } from "../models";
+import { QueryTypes } from "sequelize";
 import crypto from "crypto";
-import config from "../../../config";
 import { Router } from "express";
 
-const router = Router();
+const tenYears = 1000 * 60 * 60 * 24 * 365 * 10,
+    cookieOptions = {
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        maxAge: tenYears
+    },
+    router = Router();
 
 export default orm.sync().then(initializeRoutes).then(() => router);
 
-function verifyAuthentication(req, res, next) {
-    const sessionId = req.cookies.SESSION_ID || "";
-    if (sessionId.length) {
-        User.findOne({ where: { sessionId } }).then(
+function authenticate(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Basic ")) {
+        return verifySessionId(req,res, next);
+    }
+    const parsed = Buffer.from(authHeader.slice(6), "base64").toString();
+    const ix = parsed.indexOf(":"),
+        username = parsed.slice(0, ix),
+        password = parsed.slice(ix + 1);
+    User.findOne({
+        where: { username },
+        include: [{ model: AuthMechanism }]
+    }).then(result => {
+        if (result == null
+                || result.authMechanism == null
+                || !result.authMechanism.correctPassword(password)){
+            return send422();
+        }
+
+        req.user = result;
+
+        if (result.authMechanism.sessionId == null) {
+            const sessionId = crypto.randomBytes(16).toString("base64");
+            result.authMechanism.update({ sessionId }).then(
+                () => {
+                    success(sessionId);
+                },
+                logServerError.bind(null, res)
+            );
+        } else {
+            success(result.authMechanism.sessionId);
+        }
+    });
+    function send422() {
+        res.status(422).send({ error: "invalid format" });
+    }
+
+    function success(sessionId) {
+        res.cookie(
+            "SESSION_ID",
+            sessionId,
+            cookieOptions
+        );
+        next();
+    }
+}
+
+function verifySessionId(req, res, next) {
+    let sessionId = req.cookies.SESSION_ID;
+    if (sessionId && sessionId.length) {
+        User.findOne({
+            include: [{
+                model: AuthMechanism,
+                where: { sessionId }
+            }]
+        }).then(
             result => {
                 if (result) {
                     req.user = result;
-                    return next();
+                    next();
                 } else {
-                    return send403();
+                    send403();
                 }
             },
             logServerError.bind(null, res)
@@ -37,16 +94,304 @@ function verifyAuthentication(req, res, next) {
     }
 }
 
+function getUserSchool(req, res, next) {
+    orm.query(
+        `
+        select school.id
+        from schools school
+        left join students student
+        on student.schoolid = school.id
+        left join users suser
+        on student.id = suser.studentid
+        left join teachers teacher
+        on teacher.schoolid = school.id
+        left join users tuser
+        on tuser.teacherid = teacher.id
+        where (
+            tuser.id = ${req.user.id}
+            or suser.id = ${req.user.id}
+        )
+        limit 1;
+        `,
+        { queryType: QueryTypes.SELECT }
+    ).then(
+        results => {
+            req.schoolId = results[0].length ? results[0][0].id : "";
+            res.cookie(
+                "SCHOOL_ID",
+                req.schoolId,
+                cookieOptions
+            );
+            next();
+        },
+        logServerError.bind(null, res)
+    );
+}
+
+function postType(type, schoolId, obj, res) {
+    type = type.toLowerCase();
+    const Model = getModel(type, res);
+    if (Model == null) return;
+
+    School.findOne({where:{id: schoolId}}).then(
+        school => {
+            if (school) {
+                process(school);
+            } else {
+                return res.status(404).send({error: "not found"});
+            }
+        },
+        logServerError.bind(null, res)
+    );
+    function process(school) {
+        if (obj == null || obj.id != null || obj.user == null) {
+            return res.stats(400).send({"error": "bad request"});
+        }
+        const password = obj.user.password;
+        delete obj.user.password;
+        if (password == null || obj.user.username == null) {
+            return res.status(400).send({"error": "bad request"});
+        }
+        obj.user.authMechanism = {
+            type: "BASIC"
+        };
+        switch(Model){
+        case Teacher:
+            obj.user.tier = "2";
+            break;
+        case Student:
+            obj.user.tier = "3";
+            break;
+        }
+        obj = Model.build(obj, {
+            include: [
+                {
+                    association: Model.User,
+                    include: [{
+                        association: User.AuthMechanism
+                    }]
+                }
+            ]
+        });
+        obj.user.authMechanism.setPassword(password);
+        obj.setSchool(school, { save: false });
+        return obj.save().then(
+            saved => {
+                saved = saved.toJSON();
+                delete saved.user.authMechanism;
+                res.set("Location", `/schools/${schoolId}/${type}/${saved.id}`)
+                    .status(201)
+                    .send(saved);
+            },
+            logServerError.bind(null,res)
+        );
+    }
+
+}
+
+function queryType(type, schoolId, query, res) {
+    type = type.toLowerCase();
+    const Model = getModel(type, res);
+    if (Model == null) return;
+
+    School.findOne({
+        where: { id: schoolId },
+        include: [{
+            model: Model
+        }]
+    }).then(
+        school => {
+            if (school) {
+                console.log(school.toJSON());
+                res.send(school[type] || []);
+            } else {
+                res.status(404).send({"error": "not found"});
+            }
+        },
+        logServerError.bind(null, res)
+    );
+
+}
+
+function getTypeById(type, schoolId, id, res) {
+
+    type = type.toLowerCase();
+    const Model = getModel(type, res);
+    if (Model == null) return;
+
+    Model.findOne({
+        where: { id },
+        include: [{
+            model: School,
+            where: {
+                id: schoolId
+            }
+        }]
+    }).then(
+        got => {
+            return got
+                ? res.send(got)
+                : res.status(404).send({"error": "not found"});
+        },
+        logServerError.bind(null, res)
+    );
+
+}
+
+function patchType(type, schoolId, id, obj, res) {
+    type = type.toLowerCase();
+    const Model = getModel(type, res);
+    if (Model == null) return;
+
+    if (obj.id !== undefined && id != obj.id) {
+        return res.status(400).send({"error": "id mismatch"});
+    }
+
+    delete obj.id, obj.schoolId, obj.school;
+
+    const include = [{
+        model: School,
+        where: {
+            id: schoolId
+        }
+    }];
+    if (obj.user) {
+        const userInclude = {
+            model: User
+        };
+        if (obj.user.password) {
+            userInclude.include = [{
+                model: AuthMechanism
+            }];
+            const authMechanism = AuthMechanism.build({});
+            authMechanism.setPassword(obj.user.password);
+            delete obj.user.password;
+            obj.user.authMechanism = {
+                salt: authMechanism.salt,
+                hash: authMechanism.hash,
+                sessionId: null
+            };
+        }
+        include.push(userInclude);
+    }
+
+    Model.findOne({ where: { id }, include }).then(
+        existing => {
+            if (!existing)
+                return res.status(404).send();
+            const promises = [];
+            if (obj.user) {
+                if (obj.user.authMechanism) {
+                    promises.push(
+                        existing.user.authMechanism.update(
+                            obj.user.authMechanism
+                        )
+                    );
+                    delete obj.user.authMechanism;
+                }
+                promises.push(
+                    existing.user.update(obj.user)
+                );
+                delete obj.user;
+            }
+            existing.update(obj).then(
+                self => {
+                    Promise.all(promises).then(()=>{
+                        self = self.toJSON();
+                        if (self.user)
+                            delete self.user.authMechanism;
+                        res.send(self);
+                    });
+                },
+                logServerError.bind(null, res)
+            );
+        }
+    );
+}
+
+function deleteType(type, schoolId, id, res) {
+    type = type.toString();
+    const Model = getModel(type, res);
+    if (Model == null) return;
+
+    Model.findOne({
+        where: { id },
+        include: [{
+            model: School,
+            where: { id: schoolId }
+        }]
+    }).then(
+        existing => {
+            if (existing) {
+                existing.destroy().then(
+                    () => {
+                        res.status(204).send();
+                    },
+                    logServerError.bind(null,res)
+                );
+            } else {
+                return res.status(404).end();
+            }
+
+        },
+        logServerError.bind(null, res)
+    );
+
+}
+
+function tier(n) {
+    return function(req, res, next) {
+        if (req.user.tier > n) {
+            return res.status(401).send({ error: "unauthorized"});
+        } else {
+            return next();
+        }
+    };
+}
+
+function logServerError(res, error) {
+    if (error.name.startsWith("Sequelize")) {
+        return res.status(409).send(error.errors ? error.errors : error);
+    } else {
+        console.log(error);
+        res.status(500).send({"error": "server error"});
+    }
+}
+
+function getModel(type, res) {
+    switch(type) {
+    case "students":
+        return Student;
+    case "teachers":
+        return Teacher;
+    default:
+        res.status(404).send({"error": "endpoint not found"});
+        return null;
+    }
+}
+
 function initializeRoutes() {
-    router.head("/", authorize);
+
+    router.use(authenticate, getUserSchool);
+
+    router.head("/", (req,res) => {
+        res.status(204).send();
+    });
 
     router.route("/schools")
-    .all(verifyAuthentication, tier(1))
+    .all(tier(1))
     .get((req,res) => {
-        const limit = Math.min(req.params.$pageSize || 10, 1000),
-            offset = limit * (req.params.$page || 0);
+        const limit = Math.min(req.query.$pageSize || 10, 1000),
+            offset = limit * (req.query.$page || 0),
+            $like = req.query.name$like;
+        let attributes = req.query.$select || void 0;
+        if (attributes && !Array.isArray(attributes)){
+            attributes = [ attributes ];
+        }
+        console.log("QUERY: ", req.query);
         School.findAll({
-            where: { },
+            attributes,
+            where: { name: { $like }},
             limit,
             offset
         }).then(
@@ -67,11 +412,44 @@ function initializeRoutes() {
                     return res
                         .set("Location", `/schools/${saved.id}`)
                         .status(201)
-                        .send(school);
+                        .send(saved);
                 },
                 logServerError.bind(null, res)
             );
         }
+    });
+
+    router.route("/schools/:school_id")
+    .all(tier(1))
+    .get((req,res) => {
+        School.findOne({ where: { id: req.params.school_id } }).then(
+            school => {
+                if (school) {
+                    res.send(school);
+                } else {
+                    res.status(404).send({error: "not found"});
+                }
+            },
+            logServerError.bind(null, res)
+        );
+    })
+    .patch((req, res) => {
+        const school = req.body;
+        if (!school
+                || (school.id != null && school.id != req.params.school_id)) {
+            return res.status(400).send({"error": "ID mismatch"});
+        }
+        delete school.id;
+        School.update(school, {where: { id: req.params.school_id }}).then(
+            arr => {
+                const count = arr[0];
+                if (count == 0) {
+                    return res.status(404).send({"error": "not found"});
+                } else {
+                    return res.status(204).send();
+                }
+            }
+        );
     })
     .delete((req, res) => {
         const id = req.params.school_id;
@@ -89,322 +467,229 @@ function initializeRoutes() {
         );
     });
 
-    router.route("/schools/:school_id")
-    .all(verifyAuthentication, tier(2), sameSchool)
+    router.route("/schools/:school_id/:type")
+    .all(tier(1))
     .get((req,res) => {
-        School.findOne({id: req.params.school_id}).then(
-            school => {
-                if (school) {
-                    res.send(school);
-                } else {
-                    res.status(404).send({error: "not found"});
-                }
-            },
-            logServerError.bind(null, res)
+        queryType(
+            req.params.type,
+            req.params.school_id,
+            req.query,
+            res
         );
     })
-    .put((req, res) => {
-        const school = req.body;
-        if ((school && (school.id == req.params.school_id)) == null) {
-            return res.status(400).send({"error": "ID mismatch"});
-        }
-        School.update(
-            school,
-            {
-                where: { id: school.id },
-                limit: 1
-            }
-        ).then(
-            arr => {
-                const count = arr[0], rows = arr[1];
-                if (count == 0) {
-                    return req.status(404).send({"error": "not found"});
-                } else {
-                    return req.status(200).send(rows[0]);
-                }
-            },
-            logServerError.bind(null, res)
+    .post((req, res) => {
+        postType(
+            req.params.type,
+            req.params.school_id,
+            req.body,
+            res
         );
     });
 
-    router.route("/schools/:school_id/teachers")
-    .all(verifyAuthentication, tier(2), sameSchool)
-    .get((req,res) => {
-        const limit = Math.min(req.params.$pageSize || 10, 1000),
-            offset = limit * (req.params.$page || 0);
-        Teacher.findAll({
+    router.route("/schools/:school_id/:type/:id")
+    .all(tier(1))
+    .get((req, res) => {
+        getTypeById(
+            req.params.type,
+            req.params.school_id,
+            req.params.id,
+            res
+        );
+    })
+    .patch((req, res) => {
+        patchType(
+            req.params.type,
+            req.params.school_id,
+            req.params.id,
+            req.body,
+            res
+        );
+    })
+    .delete((req, res) => {
+        deleteType(
+            req.params.type,
+            req.params.school_id,
+            req.params.id,
+            res
+        );
+    });
+
+    router.route("/users")
+    .all(tier(1))
+    .get((req, res) => {
+        const limit = Math.min(req.query.$pageSize || 10, 1000),
+            offset = limit * (req.query.$page || 0);
+        User.findAll({
             where: { },
             limit,
-            offset,
-            include: [{
-                model: School,
-                where: { id: req.params.school_id }
-            }]
+            offset
         }).then(
-            teachers => {
-                res.send(teachers);
+            users => {
+                res.send(users);
             },
             logServerError.bind(null, res)
         );
     })
     .post((req, res) => {
-        const schoolId = req.params.shool_id,
-            teacherId = req.params.teacher_id,
-            teacher = req.body;
-        if (schoolId == null
-                || teacherId != null
-                || teacher == null
-                || teacher.id != null) {
-            return res.stats(400).send({"error": "bad request"});
+        const user = req.body;
+        if (user == null || user.id != null) {
+            return res
+                .status(400)
+                .send({"error": "bad request"});
         }
-        Teacher.create(teacher).then(
-            saved => {
-                if (teacher) {
-                    res.set("Location", `/schools/${schoolId}/teachers/${teacherId}`)
-                        .status(201)
-                        .send(saved);
-                } else {
-                    res.status(500).send({error: "server error"});
-                }
+        User.create(user).then(
+            created => {
+                res.send(created);
             },
             logServerError.bind(null, res)
         );
     });
 
-    router.route("/schools/:school_id/students")
-    .all(verifyAuthentication, tier(2), sameSchool)
-    .get((req,res) => {
-        const limit = Math.min(req.params.$pageSize || 10, 1000),
-            offset = limit * (req.params.$page || 0);
-        Student.findAll({
-            where: { },
-            include: [{
-                model: School,
-                where: { id: req.parms.school_id }
-            }],
-            limit,
-            offset
-        }).then(
-            res.send,
-            logServerError.bind(null, res)
-        );
-    })
-    .post((req,res) => {
-
-    });
-
-    router.route("/schools/:school_id/teachers/:teacher_id")
-    .all(verifyAuthentication, tier(2), sameSchool)
+    router.route("/users/:id")
+    .all(tier(1))
     .get((req, res) => {
-        Teacher.findOne({
-            where: { id: req.params.teacher_id },
-            include: [{
-                model: School,
-                where: {
-                    id: req.params.school_id
-                }
-            }]
-        }).then(
-            teacher => {
-                return teacher
-                    ? res.send(teacher)
-                    : res.status(404).send({"error": "not found"});
-            },
-            logServerError.bind(null, res)
-        );
-    })
-    .put((req, res) => {
-        const teacher = req.body;
-        const schoolId = req.params.schoolId,
-            teacherId = req.params.teacherId;
-
-        if (teacher.id !== undefined && teacherId != teacher.id) {
-            return res.status(400).send({"error": "id mismatch"});
-        }
-
-        delete teacher.id;
-
-        Teacher.update(
-            teacher,
-            {
-                where: { id: teacherId },
-                limit: 1,
-                include: [{
-                    model: School,
-                    where: {
-                        id: schoolId
-                    }
-                }]
-            }
-        ).then(
-            arr => {
-                const count = arr[0], rows = arr[1];
-                if (count == 0) {
-                    return req.status(404).send({"error": "not found"});
+        User.findOne({ where: { id: req.params.id }}).then(
+            user => {
+                if (user) {
+                    res.send(user);
                 } else {
-                    return req.status(200).send(rows[0]);
+                    res.status(404).send();
                 }
             },
             logServerError.bind(null, res)
         );
     })
-    .delete((req, res) => {
-        Teacher.destroy({
-            where: { id: req.params.teacher_id },
-            include: [{
-                model: School,
-                where: { id: req.params.school_id }
-            }],
-            limit: 1
+    .patch((req, res) => {
+        const updates = req.body;
+        if (updates.id != null && updates.id != req.params.id) {
+            return res.status(400).send({"error": "bad request"});
+        }
+        if (req.params.id == req.user.id) {
+            delete updates.tier;
+        }
+        let include = void 0;
+        if (updates.password) {
+            include = [{
+                model: AuthMechanism
+            }];
+            const authMechanism = AuthMechanism.build({});
+            authMechanism.setPassword(updates.password);
+            updates.authMechanism = {
+                salt: authMechanism.salt,
+                hash: authMechanism.hash,
+                sessionId: null
+            };
+            delete updates.password;
+        }
+        User.findOne({
+            where: { id: req.params.id },
+            include
         }).then(
-            number => {
-                if (number) {
-                    return res.status(204).end();
-                } else {
-                    return res.status(404).end();
-                }
-            },
-            logServerError.bind(null, res)
-        );
-    });
-
-    router.route("/schools/:school_id/students/:student_id")
-    .all(verifyAuthentication, tier(2), sameSchool)
-    .get((req, res) => {
-        Student.findOne({
-            where: { id: req.params.student_id },
-            include: [{
-                model: School,
-                where: { id: req.params.school_id }
-            }]
-        }).then(
-            student => {
-                if (student) {
-                    res.send(student);
-                } else {
-                    res.status(404).send({"error": "not found"});
-                }
-            },
-            logServerError.bind(null, res)
-        );
-    })
-    .put((req, res) => {
-        const student = res.body,
-            schoolId = req.params.school_id,
-            studentId = req.params.student_id;
-        if (student.id !== void 0 && student.id != studentId) {
-            return res.status(400).send({error: "bad request"});
-        }
-        delete student.id;
-        Student.update(
-            student,
-            {
-                where: { id: studentId },
-                include: [{
-                    model: School,
-                    where: { id: schoolId }
-                }]
-            }
-        ).then(
-            arr => {
-                const count = arr[0], rows = arr[1];
-                if (count == 0) {
-                    return req.status(404).send({"error": "not found"});
-                } else {
-                    return req.status(200).send(rows[0]);
-                }
-            },
-            logServerError.bind(null, res)
-        );
-    })
-    .delete((req, res) => {
-        Student.destroy({
-            where: { id: req.params.student_id},
-            include: [{
-                model: School,
-                where: { id: req.params.school_id }
-            }],
-            limit: 1
-        }).then(
-            number => {
-                if (number) {
-                    return res.status(204).end();
-                } else {
-                    return res.status(404).end();
-                }
-            },
-            logServerError.bind(null, res)
-        );
-    });
-
-    router.route("/users").all(verifyAuthentication, tier(1));
-
-}
-
-function tier(n) {
-    return function(req, res, next) {
-        if (req.user.tier > n) {
-            return res.status(401).send({ error: "unauthorized"});
-        } else {
-            return next();
-        }
-    };
-}
-
-function logServerError(res, error) {
-    console.log(error);
-    res.status(500).send({"error": "server error"});
-}
-
-function sameSchool(req, res, next) {
-    if (req.user.tier <= 1) {
-        return next();
-    }
-    req.user.getSchool().then(school => {
-        if (school && school.id === req.params.school_id) {
-            return next();
-        } else {
-            return res.status(401).send({
-                error:
-                    "unauthorized to view school data for school, id:"
-                    + "{req.params.school_id}"
-            });
-        }
-    });
-}
-
-function authorize(req, res) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Basic ")) {
-        return send422();
-    }
-    const parsed = Buffer.from(authHeader.slice(6), "base64").toString();
-    const ix = parsed.indexOf(":"),
-        username = parsed.slice(0, ix),
-        password = parsed.slice(ix + 1);
-    User.findOne({ username }).then(result => {
-        if (result == null || !result.correctPassword(password)){
-            return send422();
-        }
-        const sessionId = crypto.randomBytes(16).toString("base64");
-        result.update({sessionId}).then(
-            () => {
-                res.cookie(
-                    "SESSION_ID",
-                    sessionId,
-                    {
-                        secure: config.https, 
-                        maxAge: 1000 * 60 * 60 * 24 * 365 * 10
-                    }
+            existing => {
+                if (existing == null)
+                    return res.status(404).send();
+                existing.update(updates).then(
+                    updated => {
+                        res.send(updated);
+                    },
+                    logServerError.bind(null, res)
                 );
-                res.status(204).send();
             },
-            () => {
-                res.status(500).send({error: "could not assign session ID"});
-            }
+            logServerError.bind(null, res)
+        );
+    })
+    .delete((req, res) => {
+        const id = req.params.id;
+        if (req.user.id == id) {
+            return res.status(400).send({"error": "bad request"});
+        }
+        User.delete({ where: {id}}).then(
+            count => {
+                if (count) {
+                    return res.status(204).send();
+                } else {
+                    return res.status(404).send();
+                }
+            },
+            logServerError.bind(null, res)
         );
     });
-    function send422() {
-        res.status(422).send({ error: "invalid format" });
-    }
+
+    router.route("/students")
+    .all(tier(2))
+    .post((req,res) => {
+        postType(
+            "students",
+            req.schoolId,
+            req.body,
+            res
+        );
+    })
+    .get((req,res) => {
+        queryType(
+            "students",
+            req.schoolId,
+            req.query,
+            res
+        );
+    });
+
+    router.route("/teachers")
+    .all(tier(2))
+    .get((req,res) => {
+        queryType(
+            "teachers",
+            req.schoolId,
+            req.query,
+            res
+        );
+    })
+    .post((req, res) => {
+        postType(
+            "teachers",
+            req.schoolId,
+            req.body,
+            res
+        );
+    });
+
+    router.route("/teachers/:id")
+    .all(tier(2))
+    .get((req,res) => {
+        getTypeById(
+            "teachers",
+            req.schoolId,
+            req.params.id,
+            res
+        );
+    })
+    .patch((req, res) => {
+        patchType(
+            "teachers",
+            req.schoolId,
+            req.params.id,
+            req.body,
+            res
+        );
+    });
+
+    router.route("/students/:id")
+    .all(tier(2))
+    .get((req, res) => {
+        getTypeById(
+            "students",
+            req.schoolId,
+            req.params.id,
+            res
+        );
+    })
+    .patch((req, res) => {
+        patchType(
+            "students",
+            req.schoolId,
+            req.params.id,
+            req.body,
+            res
+        );
+    });
 }

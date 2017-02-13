@@ -1,6 +1,5 @@
 const autoprefixer = require("autoprefixer"),
     path = require("path"),
-    webpack = require("webpack"),
     nodePath = path.resolve(path.join(__dirname, "node_modules")),
     nodePathLength = nodePath.length,
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
@@ -67,7 +66,7 @@ module.exports =  {
         ]
     },
     postcss: () => [autoprefixer],
-    "entry": glob.sync("./src/scripts/*.js").reduce((result, file) => {
+    "entry": glob.sync("./src/scripts/*").reduce((result, file) => {
         result[path.basename(file)] = file;
         return result;
     }, {}),
@@ -77,7 +76,8 @@ module.exports =  {
     },
     node: {
         __filename: false,
-        __dirname: false
+        __dirname: false,
+        process: false
     },
     externals: function(context, request, cb) {
 
@@ -104,11 +104,6 @@ module.exports =  {
         "path": "./scripts"
     },
     "plugins": [
-        new webpack.DefinePlugin({
-            "process.env": {
-                "NODE_ENV": JSON.stringify("production")
-            }
-        }),
         new ExtractTextPlugin("public/build/bundle.css"),
     ],
     "stats": {

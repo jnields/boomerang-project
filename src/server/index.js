@@ -45,7 +45,7 @@ function startServer(app) {
      */
 
     let server;
-    if (config.https) {
+    if (process.env.NODE_ENV === "production") {
         server = https.createServer(
             {
                 cert: fs.readFileSync(config.certFile),

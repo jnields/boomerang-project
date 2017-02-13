@@ -8,5 +8,6 @@ export default orm.define("address", {
     line3: STRING,
     city: STRING,
     state: STRING,
+    zip: { type: STRING, is: /^[0-9]{5}(-[0-9]{4})?$/ },
     country: STRING
 });

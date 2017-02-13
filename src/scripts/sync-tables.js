@@ -1,12 +1,16 @@
 import orm from "../server/helpers/orm";
-import { User } from "../server/models";
-if (User == null)
-    global.process.exit(-1);
+
+//eslint-disable-next-line no-unused-vars
+import * as Models from "../server/models";
+
 orm.sync({force: true}).then(
     () => {
         console.log("SUCCESS");
+        global.process.exit(0);
     },
-    () => {
+    (e) => {
         console.log("ERROR");
+        console.log(e);
+        global.process.exit(1);
     }
 );
