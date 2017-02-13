@@ -116,12 +116,10 @@ function getUserSchool(req, res, next) {
         { queryType: QueryTypes.SELECT }
     ).then(
         results => {
-            req.schoolId = results[0].length ? results[0][0].id : "";
-            res.cookie(
-                "SCHOOL_ID",
-                req.schoolId,
-                cookieOptions
-            );
+            req.schoolId =
+                results[0].length 
+                    ? results[0][0].id
+                    : null;
             next();
         },
         logServerError.bind(null, res)
