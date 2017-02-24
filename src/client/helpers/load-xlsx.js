@@ -1,5 +1,5 @@
+import xlsx from "xlsx";
 export default function(files) {
-    const xlsx = (window || {}).XLSX;
     let i, f, promises = [];
     for (i = 0, f = files[i]; i != files.length; ++i) {
         promises.push(new Promise((resolve, reject) => {
@@ -41,29 +41,62 @@ export default function(files) {
     );
 }
 
-function parseStudent(student) {
-    let grade, name, age, gender;
-    Object.keys(student).forEach(key => {
-        if (/first\s?name/.test(key)){
-            name = student[key] + name;
-        } else if (/last\s?name/.test(key)) {
-            name = name + " " + student[key];
-        } else if (/name/.test(key)) {
-            name = student[key];
+function parseDate(date) {
+    let parsed;
+    switch(Object.prototype.toString.call(date)) {
+    case "[object String]":
+        parsed = Date.parse(date);
+        return isNaN(parsed) ? null : parsed;
+    case "[object Date]":
+        return date;
+    }
+    return null;
+}
+
+function parseBool(raw) {
+    switch(Object.prototype.toString.call(raw)) {
+    case "[object Number]":
+    case "[object Boolean]":
+        return raw ? true : false;
+    case "[object String]":
+        raw = raw.toLowerCase();
+        return /^(y|true|1)$/.test(raw)
+            ? true
+            : /^(n|false|0)$/.test(raw)
+                ? false
+                : null;
+    }
+    return null;
+}
+
+function parseStudent(raw) {
+    const user = {};
+    const result = { user };
+    Object.keys(raw).forEach(key => {
+        const value = raw[key].toLowerCase();
+        key = key.toLowerCase().trim();
+        if (/^(first\s?)?name$/.test(key)){
+            user.firstName = value;
+        } else if (/^(last\s?name|surname)$/.test(key)) {
+            user.lastName = value;
         }
-        if (/(sex|gender)/.test(key)) {
-            gender = student[key];
+        if (/^(sex|gender)$/.test(key)) {
+            user.gender = value;
         }
-        if (/age/.test(key)) {
-            age = parseInt(student[key]);
+        if (/^age$/.test(key)) {
+            user.age = parseInt(value);
         }
-        if (/grade/.test(key)) {
-            grade = student[key];
+        if (/^dob$/.test(key)) {
+            user.dob = parseDate(value);
+        }
+        if (/^grade$/.test(key)) {
+            result.grade = parseInt(key);
+        }
+        if(/^(is)?leader$/.test(key)) {
+            result.isLeader = parseBool(value);
         }
     });
-    return {
-        grade, name, age, gender
-    };
+    return result;
 }
 
 function extractData(workbook) {

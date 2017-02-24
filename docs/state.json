@@ -13,6 +13,11 @@
         "schools": [],
         ""
     },
+    "authorization": {
+        "isAuthorizing": true,
+        "isAuthorized": true,
+        "user": 1,
+    },
     "students": {
 
         "isPosting": false,

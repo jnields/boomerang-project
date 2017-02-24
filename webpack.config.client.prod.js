@@ -13,7 +13,11 @@ module.exports =  {
         ],
         "loaders": [
             {
-                "exclude": /node_modules/,
+                "test": /xlsx/,
+                loaders: ["script"]
+            },
+            {
+                "exclude": /(node_modules|xlsx)/,
                 "test": /\.jsx?$/,
                 "loaders": [
                     "babel?"
@@ -76,6 +80,12 @@ module.exports =  {
     "eslint": {
         "failOnWarning": true,
         "failOnError": true
+    },
+    node: {
+        fs: "empty"
+    },
+    externals: {
+        "./cptable": "var cptable"
     },
     "output": {
         "path": path.join(__dirname, "public", "build"),

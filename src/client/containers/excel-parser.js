@@ -4,8 +4,8 @@ import DragAndDrop from "../components/drag-and-drop";
 
 
 export default connect(
-    state => {
-        return { files: state.files };
+    ({files}) => {
+        return { files };
     },
     dispatch => {
         return {

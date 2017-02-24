@@ -1,15 +1,17 @@
-import { connect } from "react-redux";
 import ItemList from "../components/item-list";
+import { connect } from "react-redux";
 import denormalize from "normalizr";
 import { schema } from "../helpers";
-function mapStateToProps({ entities, students }) {
+
+function mapStateToProps({entities, teachers}) {
     return {
-        type: "students",
+        type: "teachers",
         items: denormalize(
-            students,
-            schema.students,
-            entities.students
-        ),
+            teachers,
+            schema.teachers,
+            entities.teachers
+        )
     };
 }
+
 export default connect(mapStateToProps, null)(ItemList);

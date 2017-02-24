@@ -10,7 +10,6 @@ module.exports =  {
         new ExtractTextPlugin("public/build/bundle.css"),
     ],
     module: {
-        "noParse": /xlsx.core.min.js$/,
         "preLoaders": [
             {
                 test: /\.jsx?$/,
@@ -20,7 +19,11 @@ module.exports =  {
         ],
         "loaders": [
             {
-                "exclude": /node_modules/,
+                "test": /xlsx/,
+                loaders: ["null"]
+            },
+            {
+                "exclude": /(node_modules|xlsx)/,
                 "test": /\.jsx?$/,
                 "loaders": [
                     "babel?"
@@ -78,6 +81,7 @@ module.exports =  {
     node: {
         __filename: false,
         __dirname: false,
+        process: false
     },
     externals: function(context, request, cb) {
         let external = !(/!/.test(request))

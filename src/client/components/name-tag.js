@@ -1,14 +1,10 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import * as actions from "../actions";
+import React from "react";
 
-export default class NameTag extends Component {
-    render(props) {
-        return <dl>
-            <dt>Name:</dt>
-            <dd>{props.firstName} {props.lastName}</dd>
-            <dt>Grade:</dt>
-            <dd>{props.grade}</dd>
-        </dl>;
-    }
+export default function NameTag({firstName, lastName, grade}) {
+    return <dl>
+        <dt>Name:</dt>
+        <dd>{firstName} {lastName}</dd>
+        <dt>Grade:</dt>
+        <dd>{grade}</dd>
+    </dl>;
 }

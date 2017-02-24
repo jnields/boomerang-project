@@ -13,7 +13,6 @@ import { Router } from "express";
 const tenYears = 1000 * 60 * 60 * 24 * 365 * 10,
     cookieOptions = {
         secure: process.env.NODE_ENV === "production",
-        httpOnly: true,
         maxAge: tenYears
     },
     router = Router();
@@ -45,22 +44,23 @@ function authenticate(req, res, next) {
             const sessionId = crypto.randomBytes(16).toString("base64");
             result.authMechanism.update({ sessionId }).then(
                 () => {
-                    success(sessionId);
+                    success(result);
                 },
                 logServerError.bind(null, res)
             );
         } else {
-            success(result.authMechanism.sessionId);
+            success(result);
         }
     });
     function send422() {
         res.status(422).send({ error: "invalid format" });
     }
 
-    function success(sessionId) {
+    function success(user) {
+        res.setHeader("User-Tier", user.tier);
         res.cookie(
             "SESSION_ID",
-            sessionId,
+            user.authMechanism.sessionId,
             cookieOptions
         );
         next();
@@ -195,12 +195,12 @@ function queryType(type, schoolId, query, res) {
     School.findOne({
         where: { id: schoolId },
         include: [{
-            model: Model
+            model: Model,
+            include: [{ model: User }]
         }]
     }).then(
         school => {
             if (school) {
-                console.log(school.toJSON());
                 res.send(school[type] || []);
             } else {
                 res.status(404).send({"error": "not found"});
@@ -219,12 +219,15 @@ function getTypeById(type, schoolId, id, res) {
 
     Model.findOne({
         where: { id },
-        include: [{
-            model: School,
-            where: {
-                id: schoolId
-            }
-        }]
+        include: [
+            {
+                model: School,
+                where: {
+                    id: schoolId
+                }
+            },
+            { model: User }
+        ]
     }).then(
         got => {
             return got
@@ -247,30 +250,28 @@ function patchType(type, schoolId, id, obj, res) {
 
     delete obj.id, obj.schoolId, obj.school;
 
-    const include = [{
-        model: School,
-        where: {
-            id: schoolId
-        }
-    }];
-    if (obj.user) {
-        const userInclude = {
-            model: User
+    const include = [
+        {
+            model: School,
+            where: {
+                id: schoolId
+            }
+        },
+        { model: User }
+    ];
+    if (obj.user && obj.user.password) {
+        const userInclude = include[0];
+        userInclude.include = [{
+            model: AuthMechanism
+        }];
+        const authMechanism = AuthMechanism.build({});
+        authMechanism.setPassword(obj.user.password);
+        delete obj.user.password;
+        obj.user.authMechanism = {
+            salt: authMechanism.salt,
+            hash: authMechanism.hash,
+            sessionId: null
         };
-        if (obj.user.password) {
-            userInclude.include = [{
-                model: AuthMechanism
-            }];
-            const authMechanism = AuthMechanism.build({});
-            authMechanism.setPassword(obj.user.password);
-            delete obj.user.password;
-            obj.user.authMechanism = {
-                salt: authMechanism.salt,
-                hash: authMechanism.hash,
-                sessionId: null
-            };
-        }
-        include.push(userInclude);
     }
 
     Model.findOne({ where: { id }, include }).then(
@@ -376,20 +377,31 @@ function initializeRoutes() {
         res.status(204).send();
     });
 
+    router.route("/login")
+    .get((req, res) => {
+        res.send(req.user);
+    });
+
     router.route("/schools")
     .all(tier(1))
     .get((req,res) => {
         const limit = Math.min(req.query.$pageSize || 10, 1000),
             offset = limit * (req.query.$page || 0),
             $like = req.query.name$like;
+
         let attributes = req.query.$select || void 0;
+
         if (attributes && !Array.isArray(attributes)){
             attributes = [ attributes ];
         }
-        console.log("QUERY: ", req.query);
+
+        const where = $like
+            ? { name: { $like } }
+            : void 0;
+
         School.findAll({
             attributes,
-            where: { name: { $like }},
+            where,
             limit,
             offset
         }).then(

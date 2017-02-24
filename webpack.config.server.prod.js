@@ -16,7 +16,11 @@ module.exports =  {
         ],
         "loaders": [
             {
-                "exclude": /node_modules/,
+                "test": /xlsx/,
+                loaders: ["null"]
+            },
+            {
+                "exclude": /(node_modules|xlsx)/,
                 "test": /\.jsx?$/,
                 "loaders": [
                     "babel?"
@@ -73,7 +77,8 @@ module.exports =  {
     },
     node: {
         __filename: false,
-        __dirname: false
+        __dirname: false,
+        process: false
     },
     externals: function(context, request, cb) {
 

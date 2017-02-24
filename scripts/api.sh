@@ -51,7 +51,7 @@ teacher_id=$(curl -b ./cookies \
     | getId)
 w
 
-echo "ADD SCHOOL STUDENT"
+echo "ADD SCHOOL ITEM"
 student_id=$(curl -b ./cookies \
     -H $json \
     -X POST \
@@ -74,7 +74,7 @@ curl -b ./cookies \
     -k ${api}/schools/${school_id}/teachers/249120491
 w
 
-echo "GET SCHOOL STUDENTS"
+echo "GET SCHOOL ITEMS"
 curl -b ./cookies \
     -X GET \
     -k ${api}/schools/${school_id}/students
@@ -104,7 +104,7 @@ curl -b ./cookies \
     -k ${api}/schools/239500952039/teachers/${teacher_id}
 w
 
-echo "PATCH SCHOOL STUDENT"
+echo "PATCH SCHOOL ITEM"
 curl -b ./cookies \
     -X PATCH \
     -H $json \
@@ -122,7 +122,7 @@ curl -b ./cookies \
     -k ${api}/schools/123948294812/students/${student_id}
 w
 
-echo "DELETE SCHOOL STUDENT"
+echo "DELETE SCHOOL ITEM"
 curl -b ./cookies \
     -X DELETE \
     -k ${api}/schools/${school_id}/students/1240935092

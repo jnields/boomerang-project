@@ -1,6 +1,10 @@
 import { combineReducers } from "redux";
-import students from "./students";
+import items from "./items";
+import authorization from "./authorization";
+import entities from "./entities";
 
 export default combineReducers({
-    students
+    entities,
+    items,
+    authorization
 });

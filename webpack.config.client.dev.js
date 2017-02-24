@@ -6,7 +6,6 @@ const proxyPort = require("./config").proxyPort,
 module.exports =  {
     devtool: "cheap-module-eval-source-map",
     module: {
-        "noParse": /xlsx.core.min.js$/,
         "preLoaders": [
             {
                 test: /\.jsx?$/,
@@ -86,6 +85,12 @@ module.exports =  {
     "eslint": {
         "failOnWarning": false,
         "failOnError": true
+    },
+    node: {
+        fs: "empty"
+    },
+    externals: {
+        "./cptable": "var cptable"
     },
     "output": {
         "path": `${__dirname}/public/build`,
