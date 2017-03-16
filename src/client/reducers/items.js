@@ -1,8 +1,8 @@
 import {
 
     POST_ITEMS,
-    POST_ITEMS_SUCCESS,
-    POST_ITEMS_ERROR,
+    POST_ITEM_SUCCESS,
+    POST_ITEM_ERROR,
 
     GET_ITEMS,
     GET_ITEMS_SUCCESS,
@@ -24,21 +24,30 @@ import {
 const initialState = {
     students: {
         items: [],
+        pendingPatches: {},
+        pendingDeletes: [],
+        pendingPosts: [],
         unsavedItems: [],
-        isPosting: false,
-        isPatching: false,
-        isDeleting: false,
         isGetting: false,
-        error: null
+        getError: null
     },
     teachers: {
         items: [],
+        pendingPatches: {},
+        pendingDeletes: [],
         unsavedItems: [],
-        isPosting: false,
-        isPatching: false,
-        isDeleting: false,
+        pendingPosts: [],
         isGetting: false,
-        error: null
+        getError: null
+    },
+    schools: {
+        items: [],
+        pendingPatches: {},
+        pendingDeletes: [],
+        unsavedItems: [],
+        pendingPosts: [],
+        isGetting: false,
+        getError: null        
     }
 };
 
@@ -46,54 +55,29 @@ export default function(state = initialState, action) {
     const { itemType, result, result: { status } } = action;
     switch (action.type) {
     //POST
-    case POST_ITEMS:{
-        if (itemType === "students") {
-            return {
-                ... state,
-                students: {
-                    ... state.students,
-                    error: null,
-                    posting: true
-                }
-            };
-        } else {
-            return {
-                ... state,
-                teachers: {
-                    ... state.teachers,
-                    error: null,
-                    posting: true
-                }
-            };
-        }
-    }
-    case POST_ITEMS_SUCCESS:{
-        if (itemType === "students") {
-            return {
-                ... state,
-                students: {
-                    ... state.students,
-                    items: [ ... state.students.items, ... result],
-                    unsavedItems: [],
-                    error: null,
-                    posting: false
-                }
-            };
-        } else {
-            return {
-                ... state,
-                teachers: {
-                    ... state.teachers,
-                    items: [ ... state.teachers.items, ... result],
-                    unsavedItems: [],
-                    error: null,
-                    posting: false
-                }
-            };
-        }
-
-    }
-    case POST_ITEMS_ERROR: {
+    case POST_ITEMS:
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                pendingPosts: [ 
+                    ... state[itemType].pendingPosts,
+                    ... action.items
+                ]
+            }
+        };
+    case POST_ITEM_SUCCESS: {
+        const pendingPosts = state[itemType].pendingPosts.slice();
+        pendingPosts.splice(pendingPosts.indexOf(action.item), 1);
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                pendingPosts
+            }
+        };
+    }     
+    case POST_ITEM_ERROR: {
         let error;
         switch(status) {
         case 409:
@@ -102,98 +86,20 @@ export default function(state = initialState, action) {
         default:
             error = "Something went wrong.";
         }
-        if (itemType === "students") {
-            return {
-                ... state,
-                students: {
-                    ... state.students,
-                    posting: false,
-                    error
-                }
-            };
-        } else {
-            return {
-                ... state,
-                teachers: {
-                    ... state.teachers,
-                    posting: false,
-                    error
-                }
-            };
-        }
     }
     //GET
     case GET_ITEMS: {
-        if (itemType === "students") {
-            return {
-                ... state,
-                students: {
-                    ... state.students,
-                    getting: true,
-                    items: [],
-                    error: null
-                }
-            };
-        } else {
-            return {
-                ... state,
-                teachers: {
-                    ... state.teachers,
-                    getting: true,
-                    items: [],
-                    error: null
-                }
-            };
-        }
     }
     case GET_ITEMS_SUCCESS:
-        return {
-            ... state,
-            isGetting: false,
-            getError: null,
-            savedItems: action.response.data
-        };
     case GET_ITEMS_ERROR:
-        return {
-            ... state,
-            isGetting: false,
-            getError: action.error
-        };
     // PUT
-    case PUT_ITEM:
-        return{
-            isPutting: true,
-            putError: null
-        };
-    case PUT_ITEM_ERROR:
-        return {
-            isPutting: false,
-            putError: action.error
-        };
-    case PUT_ITEM_SUCCESS:
-        return {
-            isPutting: false,
-            putError: null
-        };
+    case PATCH_ITEM:
+    case PATCH_ITEM_ERROR:
+    case PATCH_ITEM_SUCCESS:
     // DELETE
     case DELETE_ITEM:
-        return {
-            ... state,
-            isDeleting: true,
-            deleteError: null
-        };
     case DELETE_ITEM_SUCCESS:
-        return {
-            ... state,
-            isDeleting: false,
-            deleteEror: null,
-        };
     case DELETE_ITEM_ERROR:
-        return {
-            ... state,
-            isDeleting : false,
-            deleteError: action.error
-        };
     // SPREADSHEET
     case PARSE_SPREADSHEET:
         return {
@@ -214,6 +120,7 @@ export default function(state = initialState, action) {
             error: action.error,
             unsavedItems: []
         };
+    default:
+        return state;
     }
-    return state;
 }
