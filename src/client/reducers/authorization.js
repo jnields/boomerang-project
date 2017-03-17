@@ -2,28 +2,14 @@ import {
     AUTHORIZE,
     AUTHORIZE_SUCCESS,
     AUTHORIZE_ERROR,
-    XHR_ERROR,
+    FETCH_ERROR,
     LOG_OUT
 } from "../actions/types";
-import { getCookie, deleteCookie } from "../helpers";
+import { remove, load } from "react-cookie";
 
-let user = localStorage.getItem("user"),
-    authorized = getCookie("SESSION_ID") ? true : false;
-
-let ok;
-try {
-    user = JSON.parse(user);
-    if (user && user.tier) ok = true;
-    else ok = false;
-} catch (e) {
-    ok = false;
-}
-
-if (!ok) {
-    user = null;
-    authorized = false;
-    removeAuth();
-}
+let user = load("USER"),
+    authorized = user !== void 0
+        && load("SESSION_ID") !== void 0;
 
 const initialState = {
     authorizing: false,
@@ -32,8 +18,8 @@ const initialState = {
 };
 
 function removeAuth() {
-    localStorage.setItem("user", "");
-    deleteCookie("SESSION_ID");
+    remove("USER");
+    remove("SESSION_ID");
 }
 
 export default function(state = initialState, action) {
@@ -45,7 +31,7 @@ export default function(state = initialState, action) {
             authorizing: false,
             user: null
         };
-    case XHR_ERROR:
+    case FETCH_ERROR:
         if (action.parentType === AUTHORIZE) {
             removeAuth();
             return {
@@ -63,10 +49,6 @@ export default function(state = initialState, action) {
             authorized: false
         };
     case AUTHORIZE_SUCCESS:
-        localStorage.setItem(
-            "user",
-            action.response.json()
-        );
         return {
             authorizing: false,
             user: action.result,

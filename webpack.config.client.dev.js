@@ -17,15 +17,19 @@ module.exports =  {
             {
                 "exclude": /node_modules/,
                 "test": /\.jsx?$/,
-                "loaders": [
-                    "babel?"
-                        + "presets[]=react"
-                        + "&presets[]=stage-1"
-                        + "&presets[]=es2015"
-                        + "&plugins[]=transform-runtime"
-                        + "&plugins[]=transform-strict-mode"
-                        + "&plugins[]=react-hot-loader/babel"
-                ],
+                "loader": "babel",
+                query: {
+                    presets: [
+                        "react",
+                        "stage-1",
+                        "es2015"
+                    ],
+                    plugins: [
+                        "transform-runtime",
+                        "transform-strict-mode",
+                        "react-hot-loader/babel"
+                    ]
+                }
             },
             {
                 "test": /\.s[ac]ss?$/,

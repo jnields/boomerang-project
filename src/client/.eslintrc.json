@@ -1,7 +1,7 @@
 {
     "env": {
         "node": false,
-        "browser": true
+        "browser": false
     },
     "rules": {
         "no-console": "warn",

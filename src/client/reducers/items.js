@@ -47,7 +47,7 @@ const initialState = {
         unsavedItems: [],
         pendingPosts: [],
         isGetting: false,
-        getError: null        
+        getError: null
     }
 };
 
@@ -60,7 +60,7 @@ export default function(state = initialState, action) {
             ... state,
             [itemType]: {
                 ... state[itemType],
-                pendingPosts: [ 
+                pendingPosts: [
                     ... state[itemType].pendingPosts,
                     ... action.items
                 ]
@@ -73,10 +73,11 @@ export default function(state = initialState, action) {
             ... state,
             [itemType]: {
                 ... state[itemType],
-                pendingPosts
+                pendingPosts,
+                items: [ ... state[itemType].items, result]
             }
         };
-    }     
+    }
     case POST_ITEM_ERROR: {
         let error;
         switch(status) {
@@ -86,20 +87,130 @@ export default function(state = initialState, action) {
         default:
             error = "Something went wrong.";
         }
+        const pendingPosts = state[itemType].pendingPosts.slice(),
+            ix = pendingPosts.indexOf(action.item);
+
+        pendingPosts[ix] = { ... pendingPosts[ix], error };
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                pendingPosts
+            }
+        };
     }
     //GET
     case GET_ITEMS: {
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                isGetting: true
+            }
+        };
     }
-    case GET_ITEMS_SUCCESS:
+    case GET_ITEMS_SUCCESS: {
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                isGetting: false,
+                items: action.items
+            }
+        };
+    }
     case GET_ITEMS_ERROR:
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                isGetting: false,
+                items: []
+            }
+        };
     // PUT
     case PATCH_ITEM:
-    case PATCH_ITEM_ERROR:
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                pendingPatches: {
+                    ... state[itemType].pendingPatches,
+                    [action.id]: action.patch
+                }
+            }
+        };
+    case PATCH_ITEM_ERROR: {
+        let error;
+        switch(status) {
+        case 409:
+            error = "Username is not available";
+            break;
+        default:
+            error = "Something went wrong.";
+        }
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                pendingPatches: {
+                    ... state[itemType].pendingPatches,
+                    [action.id]: {
+                        ... action.patch,
+                        error
+                    }
+                }
+            }
+        };
+    }
     case PATCH_ITEM_SUCCESS:
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                pendingPatches: {
+                    ... state[itemType].pendingPatches,
+                    [action.id]: void 0
+                }
+            }
+        };
     // DELETE
     case DELETE_ITEM:
-    case DELETE_ITEM_SUCCESS:
-    case DELETE_ITEM_ERROR:
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                pendingDeletes: [
+                    ... state[itemType].deletes,
+                    action.id
+                ]
+            }
+        };
+    case DELETE_ITEM_SUCCESS: {
+        const pendingDeletes = state[itemType].pendingDeletes.slice(),
+            items = state[itemType].items.slice();
+        pendingDeletes.splice(pendingDeletes.indexOf(action.id),1);
+        items.splice(items.indexOf(action.id), 1);
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                items,
+                pendingDeletes
+            }
+        };
+    }
+    case DELETE_ITEM_ERROR: {
+        const pendingDeletes = state[itemType].pendingDeletes.slice();
+        pendingDeletes.splice(pendingDeletes.indexOf(action.id),1);
+        return {
+            ... state,
+            [itemType]: {
+                ... state[itemType],
+                pendingDeletes
+            }
+        };
+    }
     // SPREADSHEET
     case PARSE_SPREADSHEET:
         return {

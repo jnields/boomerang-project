@@ -57,7 +57,13 @@ function authenticate(req, res, next) {
     }
 
     function success(user) {
-        res.setHeader("User-Tier", user.tier);
+        const copy = { ... user };
+        delete copy.authMechanism;
+        res.cookie(
+            "USER",
+            copy,
+            cookieOptions
+        );
         res.cookie(
             "SESSION_ID",
             user.authMechanism.sessionId,

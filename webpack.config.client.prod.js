@@ -12,9 +12,25 @@ module.exports =  {
             }
         ],
         "loaders": [
+            // {
+            //     "test": /xlsx/,
+            //     loaders: ["script"]
+            // },
             {
-                "test": /xlsx/,
-                loaders: ["script"]
+                "exclude": /(node_modules|xlsx)/,
+                "test": /\.jsx?$/,
+                "loader": "babel",
+                query: {
+                    presets: [
+                        "react",
+                        "stage-1",
+                        "es2015"
+                    ],
+                    plugins: [
+                        "transform-runtime",
+                        "transform-strict-mode"
+                    ]
+                }
             },
             {
                 "exclude": /(node_modules|xlsx)/,

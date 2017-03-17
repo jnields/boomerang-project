@@ -5,8 +5,8 @@ import {
     GET_ITEMS_ERROR,
 
     POST_ITEMS,
-    POST_ITEMS_SUCCESS,
-    POST_ITEMS_ERROR,
+    POST_ITEM_SUCCESS,
+    POST_ITEM_ERROR,
 
     PATCH_ITEM,
     PATCH_ITEM_SUCCESS,
@@ -22,14 +22,17 @@ import getQuery from "../helpers/get-query";
 import xhr from "xhr";
 import { schema } from "../helpers";
 import { normalize } from "normalizr";
+import fetch from "node-fetch";
 
 const credentials = "include",
-    headers = new Headers({
+    headers = {
         "Content-Type": "application/json"
-    });
+    };
 
 function getEntity(type) {
     switch (type) {
+    case "schools":
+        return schema.school;
     case "students":
         return schema.student;
     case "teachers":
@@ -38,24 +41,25 @@ function getEntity(type) {
     throw "Invalid type";
 }
 
-let lastPost = {};
-export const postType = (schoolId, itemType, items, dispatcher) => dispatch => {
+export const postType = (itemType, items, schoolId) => dispatch => {
     const entity = getEntity(itemType);
     dispatch({
         type: POST_ITEMS,
-        schoolId,
         itemType,
         items,
-        dispatcher
+        schoolId
     });
-    lastPost[itemType] = Promise.resolve(lastPost[itemType]).then(() => {
-        return fetch(
-            `/api/schools/${schoolId}/${itemType}`,
+    items.forEach(item => {
+        fetch(
+            "/api/schools"
+                + itemType === "schools"
+                    ? ""
+                    : `/${schoolId}/${itemType}`,
             {
                 method: "POST",
                 headers,
                 credentials,
-                body: items
+                body: item
             }
         ).then(
             response => {
@@ -63,64 +67,69 @@ export const postType = (schoolId, itemType, items, dispatcher) => dispatch => {
                 if (ok) {
                     const normalized = normalize(body, entity);
                     dispatch({
-                        type: POST_ITEMS_SUCCESS,
-                        schoolId,
+                        type: POST_ITEM_SUCCESS,
+                        item,
                         itemType,
+                        schoolId,
                         response,
-                        dispatcher,
                         ... normalized
                     });
                 } else {
                     dispatch({
-                        type: POST_ITEMS_ERROR,
-                        schoolId,
+                        type: POST_ITEM_ERROR,
+                        item,
                         itemType,
-                        items,
-                        dispatcher,
+                        schoolId,
                         response
                     });
                 }
             },
-            dispatch.bind(null, fetchError(POST_ITEMS, dispatcher))
+            dispatch.bind(null, fetchError(POST_ITEMS, item))
         );
     });
 };
 
 let lastGet = { };
-export const getType = (schoolId, itemType, params, dispatcher) => dispatch => {
+export const getType = (itemType, params, schoolId) => dispatch => {
     const entity = getEntity(itemType);
     dispatch({
         type: GET_ITEMS,
-        schoolId,
         itemType,
         params,
-        dispatcher
+        schoolId
     });
     lastGet[itemType] && lastGet[itemType].abort();
     lastGet[itemType] = xhr.get(
-        `/api/schools/${schoolId}/${itemType}${getQuery(params)}`,
+        "/api/schools"
+            + itemType === "schools"
+                ? ""
+                : `/${schoolId}/${itemType}`
+            + getQuery(params),
         (error, response) => {
             lastGet[itemType] = null;
             if (error) {
-                dispatch(fetchError(GET_ITEMS, dispatcher));
+                dispatch(
+                    fetchError(
+                        GET_ITEMS,
+                        { itemType, params, schoolId }
+                    )
+                );
             } else {
                 const { statusCode, body } = response;
                 if (200 <= statusCode && statusCode < 400) {
                     const normalized = normalize(body, entity);
                     dispatch({
                         type: GET_ITEMS_SUCCESS,
-                        schoolId,
                         itemType,
-                        dispatcher,
+                        schoolId,
                         response,
                         ... normalized
                     });
                 } else {
                     dispatch({
                         type: GET_ITEMS_ERROR,
-                        schoolId,
                         itemType,
-                        dispatcher,
+                        schoolId,
                         response
                     });
                 }
@@ -130,15 +139,25 @@ export const getType = (schoolId, itemType, params, dispatcher) => dispatch => {
 };
 
 let lastPatch = {
+    schools: {},
     students: {},
     teachers: {}
 };
-export const patchItem = (schoolId, itemType, id, patch, dispatcher) => dispatch => {
+export const patchItem =
+(itemType, id, patch, schoolId) => dispatch => {
+
     const entity = getEntity(itemType);
-    dispatch({type: PATCH_ITEM, schoolId, itemType, id, patch, dispatcher});
-    lastPatch[itemType][id] = Promise.resolve(lastPatch[itemType][id]).then(() => {
+    dispatch({type: PATCH_ITEM, schoolId, itemType, id, patch});
+
+    lastPatch[itemType][id] =
+    Promise.resolve(lastPatch[itemType][id])
+    .then(() => {
         return fetch(
-            `/api/schools/${schoolId}/${itemType}/${id}`,
+            "/api/schools/"
+                + itemType === "schools"
+                    ? ""
+                    : `${schoolId}/${itemType}/`
+                + id,
             {
                 method: "PATCH",
                 headers,
@@ -154,7 +173,6 @@ export const patchItem = (schoolId, itemType, id, patch, dispatcher) => dispatch
                         type: PATCH_ITEM_SUCCESS,
                         response,
                         itemType,
-                        dispatcher,
                         ... normalized
                     });
                 } else {
@@ -165,57 +183,65 @@ export const patchItem = (schoolId, itemType, id, patch, dispatcher) => dispatch
                         id,
                         patch,
                         response,
-                        dispatcher
                     });
                 }
             },
-            dispatch.bind(null, fetchError(PATCH_ITEM, dispatcher))
+            dispatch.bind(
+                null,
+                fetchError(
+                    PATCH_ITEM,
+                    {itemType, id, patch, schoolId}
+                )
+            )
         );
     });
 };
 
-let lastDelete = {
-    students: {},
-    teachers: {}
-};
-export const deleteItem = (schoolId, itemType, id, dispatcher) => dispatch => {
-    dispatch({ type: DELETE_ITEM, schoolId, itemType, id, dispatcher });
-    lastDelete[itemType][id] = Promise.resolve(lastDelete[itemType][id])
-    .then(() => {
-        return fetch(
-            `/api/schools/${schoolId}/${itemType}/${id}`,
-            {
-                method: "DELETE",
-                credentials,
-                headers
+export const deleteItem =
+(itemType, id, schoolId) =>
+dispatch => {
+    dispatch({ type: DELETE_ITEM, schoolId, itemType, id });
+    fetch(
+        `/api/schools/${schoolId}/${itemType}/${id}`,
+        {
+            method: "DELETE",
+            credentials,
+            headers
+        }
+    ).then(
+        response => {
+            if (response.ok) {
+                const entities = {};
+                entities[itemType] = {};
+                entities[itemType][id] = void 0;
+                dispatch({
+                    type: DELETE_ITEM_SUCCESS,
+                    schoolId,
+                    itemType,
+                    id,
+                    response,
+                    entities
+                });
+            } else {
+                dispatch({
+                    type: DELETE_ITEM_ERROR,
+                    schoolId,
+                    itemType,
+                    id,
+                    response
+                });
             }
-        ).then(
-            response => {
-                if (response.ok) {
-                    const entities = {};
-                    entities[itemType] = {};
-                    entities[itemType][id] = void 0;
-                    dispatch({
-                        type: DELETE_ITEM_SUCCESS,
-                        schoolId,
-                        itemType,
-                        id,
-                        dispatcher,
-                        response,
-                        entities
-                    });
-                } else {
-                    dispatch({
-                        type: DELETE_ITEM_ERROR,
-                        schoolId,
-                        itemType,
-                        id,
-                        dispatcher,
-                        response
-                    });
+        },
+        dispatch.bind(
+            null,
+            fetchError(
+                DELETE_ITEM,
+                {
+                    itemType,
+                    id,
+                    schoolId
                 }
-            },
-            dispatch.bind(null, fetchError(DELETE_ITEM, dispatcher))
-        );
-    });
+            )
+        )
+    );
 };

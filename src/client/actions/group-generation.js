@@ -1,3 +1,4 @@
+import { GENERATE_GROUPS } from "./types";
 // equal gender distribution
 export function generateGroups(students) {
     const leaders = {
@@ -49,5 +50,5 @@ export function generateGroups(students) {
         groups[i].students.push(gender.pop());
     }
 
-    return groups;
+    return {type: GENERATE_GROUPS, groups};
 }

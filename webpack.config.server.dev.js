@@ -25,14 +25,18 @@ module.exports =  {
             {
                 "exclude": /(node_modules|xlsx)/,
                 "test": /\.jsx?$/,
-                "loaders": [
-                    "babel?"
-                        + "presets[]=react"
-                        + "&presets[]=stage-1"
-                        + "&presets[]=es2015"
-                        + "&plugins[]=transform-runtime"
-                        + "&plugins[]=transform-strict-mode"
-                ],
+                "loader": "babel",
+                query: {
+                    presets: [
+                        "react",
+                        "stage-1",
+                        "es2015"
+                    ],
+                    plugins: [
+                        "transform-runtime",
+//                        "transform-strict-mode"
+                    ]
+                }
             },
             {
                 "test": /\.(s[ac]|c)ss$/,

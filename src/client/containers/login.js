@@ -3,8 +3,6 @@ import Login from "../components/login";
 import { authorize } from "../actions";
 
 export default connect(
-    state => {
-        
-    },
+    null,
     { authorize }
 )(Login);

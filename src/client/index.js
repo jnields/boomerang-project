@@ -9,5 +9,6 @@ render(
     <Provider store={createStore()}>
         <Router routes={routes} history={browserHistory} />
     </Provider>,
+    /*eslint no-undef: 0*/
     document.getElementById("react-root")
 );

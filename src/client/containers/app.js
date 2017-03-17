@@ -2,8 +2,6 @@ import React, { Component, PropTypes } from "react";
 import { connect } from "react-redux";
 import styles from "../sass/app";
 import bs from "../sass/bootstrap";
-import ExcelParser from "../containers/excel-parser";
-import StudentList from "../containers/student-list";
 import { Link } from "react-router";
 import { logOut } from "../actions";
 
@@ -26,11 +24,10 @@ class App extends Component {
             bs.container
         ].join(" ");
         return <div className={classes}>
-            <ExcelParser />
-            <StudentList />
             <Link class={styles.logOut}
                 onClick={this.props.logOut}
                 to="/login"/>
+            {this.props.children}
         </div>;
     }
 }
