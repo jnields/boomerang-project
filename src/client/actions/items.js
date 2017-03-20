@@ -17,12 +17,11 @@ import {
     DELETE_ITEM_ERROR
 
 } from "./types";
-import fetchError from "./fetch-error";
+import xhrError from "./xhr-error";
 import getQuery from "../helpers/get-query";
 import xhr from "xhr";
 import { schema } from "../helpers";
 import { normalize } from "normalizr";
-import fetch from "node-fetch";
 
 const credentials = "include",
     headers = {
@@ -41,7 +40,7 @@ function getEntity(type) {
     throw "Invalid type";
 }
 
-export const postType = (itemType, items, schoolId) => dispatch => {
+export const postItem = (itemType, items, schoolId) => dispatch => {
     const entity = getEntity(itemType);
     dispatch({
         type: POST_ITEMS,
@@ -50,23 +49,34 @@ export const postType = (itemType, items, schoolId) => dispatch => {
         schoolId
     });
     items.forEach(item => {
-        fetch(
+        xhr.post(
             "/api/schools"
                 + itemType === "schools"
                     ? ""
                     : `/${schoolId}/${itemType}`,
             {
-                method: "POST",
                 headers,
                 credentials,
                 body: item
-            }
-        ).then(
-            response => {
-                const { ok, body } = response;
-                if (ok) {
+            },
+            (error, response) => {
+                let body;
+                try {
+                    if (response && response.body)
+                        body = JSON.parse(response.body);
+                }
+                catch (e) { error = e; }
+                if (error) 
+                    return dispatch(
+                        xhrError(
+                            POST_ITEMS, 
+                            { item, itemType, schoolId }
+                        )
+                    );
+                    
+                if (response.status < 400) {
                     const normalized = normalize(body, entity);
-                    dispatch({
+                    return dispatch({
                         type: POST_ITEM_SUCCESS,
                         item,
                         itemType,
@@ -75,7 +85,7 @@ export const postType = (itemType, items, schoolId) => dispatch => {
                         ... normalized
                     });
                 } else {
-                    dispatch({
+                    return dispatch({
                         type: POST_ITEM_ERROR,
                         item,
                         itemType,
@@ -83,14 +93,13 @@ export const postType = (itemType, items, schoolId) => dispatch => {
                         response
                     });
                 }
-            },
-            dispatch.bind(null, fetchError(POST_ITEMS, item))
+            }
         );
     });
 };
 
 let lastGet = { };
-export const getType = (itemType, params, schoolId) => dispatch => {
+export const getItems = (itemType, params, schoolId) => dispatch => {
     const entity = getEntity(itemType);
     dispatch({
         type: GET_ITEMS,
@@ -107,16 +116,22 @@ export const getType = (itemType, params, schoolId) => dispatch => {
             + getQuery(params),
         (error, response) => {
             lastGet[itemType] = null;
+            let body;
+            try {
+                if (response && response.body)
+                    body = JSON.parse(response.body);
+            }
+            catch (e) { error = e; }
             if (error) {
                 dispatch(
-                    fetchError(
+                    xhrError(
                         GET_ITEMS,
                         { itemType, params, schoolId }
                     )
                 );
             } else {
-                const { statusCode, body } = response;
-                if (200 <= statusCode && statusCode < 400) {
+                const { statusCode } = response;
+                if (statusCode < 400) {
                     const normalized = normalize(body, entity);
                     dispatch({
                         type: GET_ITEMS_SUCCESS,
@@ -152,7 +167,7 @@ export const patchItem =
     lastPatch[itemType][id] =
     Promise.resolve(lastPatch[itemType][id])
     .then(() => {
-        return fetch(
+        return xhr.patch(
             "/api/schools/"
                 + itemType === "schools"
                     ? ""
@@ -165,18 +180,34 @@ export const patchItem =
                 body: patch
             }
         ).then(
-            response => {
-                const { ok, body } = response;
-                if (ok) {
+            (error, response) => {
+                let body;
+                try {
+                    if (response && response.body)
+                        body = JSON.parse(response.body);
+                }
+                catch (e) { error = e; }
+
+                if (error) {
+                    return dispatch(
+                        xhrError(
+                            PATCH_ITEM, 
+                            { patch, itemType, id, schoolId}
+                        )
+                    );
+                }
+
+                const { statusCode } = response;
+                if (statusCode < 400) {
                     const normalized = normalize(body, entity);
-                    dispatch({
+                    return dispatch({
                         type: PATCH_ITEM_SUCCESS,
                         response,
                         itemType,
                         ... normalized
                     });
                 } else {
-                    dispatch({
+                    return dispatch({
                         type: PATCH_ITEM_ERROR,
                         schoolId,
                         itemType,
@@ -185,15 +216,8 @@ export const patchItem =
                         response,
                     });
                 }
-            },
-            dispatch.bind(
-                null,
-                fetchError(
-                    PATCH_ITEM,
-                    {itemType, id, patch, schoolId}
-                )
-            )
-        );
+            }
+        );        
     });
 };
 
@@ -201,16 +225,30 @@ export const deleteItem =
 (itemType, id, schoolId) =>
 dispatch => {
     dispatch({ type: DELETE_ITEM, schoolId, itemType, id });
-    fetch(
-        `/api/schools/${schoolId}/${itemType}/${id}`,
+    xhr.delete(
+        "/api/schools/"
+            + itemType === "schools"
+                ? ""
+                : `${schoolId}/${itemType}/`
+            + id,
         {
             method: "DELETE",
             credentials,
             headers
         }
     ).then(
-        response => {
-            if (response.ok) {
+        (error, response) => {
+            if (error) {
+                return dispatch(xhrError(
+                    DELETE_ITEM,
+                    {
+                        itemType,
+                        id,
+                        schoolId
+                    }
+                ));                
+            }
+            if (response.statusCode < 400) {
                 const entities = {};
                 entities[itemType] = {};
                 entities[itemType][id] = void 0;
@@ -231,17 +269,6 @@ dispatch => {
                     response
                 });
             }
-        },
-        dispatch.bind(
-            null,
-            fetchError(
-                DELETE_ITEM,
-                {
-                    itemType,
-                    id,
-                    schoolId
-                }
-            )
-        )
+        }
     );
 };

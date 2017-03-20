@@ -2,23 +2,28 @@ import {
     AUTHORIZE,
     AUTHORIZE_SUCCESS,
     AUTHORIZE_ERROR,
-    FETCH_ERROR,
+    XHR_ERROR,
     LOG_OUT
 } from "../actions/types";
 import { remove, load } from "react-cookie";
 
 let user = load("USER"),
-    authorized = user !== void 0
-        && load("SESSION_ID") !== void 0;
+    authorized = (
+        user !== void 0
+        && load("SESSION_ID") !== void 0
+    ),
+    schoolId = load("SCHOOL_ID");
 
 const initialState = {
     authorizing: false,
     user,
-    authorized
+    authorized,
+    schoolId
 };
 
 function removeAuth() {
     remove("USER");
+    remove("SCHOOL_ID");
     remove("SESSION_ID");
 }
 
@@ -29,15 +34,17 @@ export default function(state = initialState, action) {
         return {
             authorized: false,
             authorizing: false,
-            user: null
+            schoolId: void 0,
+            user: void 0
         };
-    case FETCH_ERROR:
+    case XHR_ERROR:
         if (action.parentType === AUTHORIZE) {
             removeAuth();
             return {
                 authorizing: false,
                 authorized: false,
-                user: null
+                user: void 0,
+                schoolId: void 0
             };
         }
         break;
@@ -45,13 +52,15 @@ export default function(state = initialState, action) {
         removeAuth();
         return {
             authorizing: true,
-            user: null,
-            authorized: false
+            user: void 0,
+            authorized: false,
+            schoolId: void 0
         };
     case AUTHORIZE_SUCCESS:
         return {
             authorizing: false,
             user: action.result,
+            schoolId: action.schoolId,
             authorized: true
         };
     case AUTHORIZE_ERROR: {

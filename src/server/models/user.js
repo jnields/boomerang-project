@@ -21,8 +21,7 @@ export default orm.define(
         },
         username: {
             type: STRING,
-            unique: true,
-            allowNull: false
+            unique: true
         }
     }
 );

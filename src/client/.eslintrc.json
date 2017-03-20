@@ -1,10 +1,9 @@
 {
     "env": {
         "node": false,
-        "browser": false
+        "browser": true
     },
     "rules": {
-        "no-console": "warn",
-        "react/prop-types": "off"
+        "no-console": "warn"
     }
 }

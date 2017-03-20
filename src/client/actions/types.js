@@ -1,5 +1,5 @@
 export const
-    FETCH_ERROR = "FETCH_ERROR",
+    XHR_ERROR = "XHR_ERROR",
     LOG_OUT = "LOG_OUT",
     SELECT_SCHOOL = "SELECT_SCHOOL",
 

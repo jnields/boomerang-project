@@ -1,58 +1,109 @@
 import React, { PropTypes } from "react";
-import bs from "../sass/bootstrap";
+//import bs from "../sass/bootstrap";
 
-const printIcon = [
-    bs.glyphicon,
-    bs.glyphiconPrint
-].join(" ");
 ItemList.propTypes = {
-    print: PropTypes.func.isRequired,
+    
+    print: PropTypes.func,
+    itemType: PropTypes.string.isRequired,
+
     items: PropTypes.arrayOf(PropTypes.object).isRequired,
-    type: PropTypes.string.isRequired
+    onItemSelect: PropTypes.func,
+
+    unsavedItems: PropTypes.arrayOf(PropTypes.object).isRequired,
+
+    properties: PropTypes.arrayOf(PropTypes.object).isRequired,
+
+    isPosting: PropTypes.func.isRequired,
+    isPatching: PropTypes.func.isRequired,
+    isDeleting: PropTypes.func.isRequired,
+    isGetting: PropTypes.bool.isRequired,
+    isParsing: PropTypes.bool.isRequired,
+
+    parseFiles: PropTypes.func.isRequired,
+    
+    saveChanges: PropTypes.func.isRequired,
+    saveUnsavedItems: PropTypes.func.isRequired,
+
+    parseError: PropTypes.string,
+    getError: PropTypes.string
+
 };
-export default function ItemList({ items, type, print }) {
-    const isStudent = type === "students";
-    const studentHeaders = isStudent
-        ? [
-            <td>Grade</td>,
-            <td>Leader</td>
-        ]
-        : null;
+export default function ItemList(props) {
+    const { items, properties } = props;
     return <div>
         <table>
             <thead>
                 <tr>
-                    <td>First Name</td>
-                    <td>Last Name</td>
-                    <td>Username</td>
-                    <td>email</td>
-                    <td>DOB</td>
-                    <td>Gender</td>
-                    <td>Age</td>
-                    { studentHeaders }
+                    <td>&nbsp;</td>
+                    {properties.map((property,ix) => {
+                        return <th key={ix}>{property.header}</th>;
+                    })}
                 </tr>
             </thead>
             <tbody>
-                {items.map((item, ix) => {
-                    const studentItems = isStudent
-                        ? [
-                            <td>{item.grade}</td>,
-                            <td>{item.isLeader}</td>
-                        ]
-                        : null;
-                    return <tr key={ix}>
-                        <td>{item.user.firstName}</td>
-                        <td>{item.user.lastName}</td>
-                        <td>{item.user.username}</td>
-                        <td>{item.user.email}</td>
-                        <td>{item.user.dob}</td>
-                        <td>{item.user.gender}</td>
-                        <td>{item.user.age}</td>
-                        {studentItems}
-                    </tr>;
+                {items.map((item,ix) => {
+                    return <tr key={ix}>{getCells(item, properties)}</tr>;
                 })}
             </tbody>
         </table>
-        <span className={printIcon} onClick={print}></span>
     </div>;
+}
+
+function getCells(item, properties) {
+    return [
+        <td>
+            
+        </td>,
+        ... properties.map(
+            (property,ix) => <td key={ix}>{getCellContent(item,property)}</td>
+        )
+    ];    
+}
+function getCellContent(item, property) {
+    switch(property.type) {
+    case "number":
+        return <input 
+            type="number" 
+            value={property.getValue(item)}
+            onChange={e => {
+                property.onChange(item, e.target.value);
+            }}
+            required={property.required}
+            min={property.min}
+            max={property.max}/>;
+    case "select":
+        return <select 
+                onChange={e => {
+                    property.onChange(item, e.target.value);
+                }}
+                value={property.getValue(item)}
+                required={property.required}>
+            {property.required ? null : <option value=""></option>}
+            {property.options.map(
+                (option,ix) => <option
+                        key={ix}
+                        value={option.value}
+                        disabled={option.disabled}>
+                    {option.display}
+                </option>
+            )}
+        </select>;
+    case "text":
+        return <input type="text"            
+            value={property.getValue(item)}
+            onChange={e => {
+                property.onChange(item, e.target.value);
+            }}
+            required={property.required}
+            maxLen={property.maxLen}/>;
+    case "date":
+        return <input type="date"
+            onChange={e => {
+                property.onChange(item, e.target.value);
+            }}
+            value={property.getValue(item)}
+            min={property.min}
+            max={property.max}/>;
+    
+    }
 }

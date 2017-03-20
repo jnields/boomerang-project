@@ -17,7 +17,7 @@ if (process.env.NODE_ENV === "production") {
         "db": {
             "database": "boomerang",
             "username": "root",
-            "password": "Vin2Crtm66"
+            "password": "MXM-YJl-iOh-BDW"
         },
         "certFile": null,
         "keyFile": null

@@ -5,11 +5,11 @@ import {
 } from "./types";
 
 import loadXlsx from "../helpers/load-xlsx";
-export const parseSpreadsheet = (files, type) => dispatch => {
+export const parseSpreadsheet = (type, files) => dispatch => {
     dispatch({
         type: PARSE_SPREADSHEET,
-        files,
-        target: type
+        target: type,
+        files
     });
     loadXlsx(files).then(
         results => {

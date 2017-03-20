@@ -30,7 +30,9 @@ function authenticate(req, res, next) {
         password = parsed.slice(ix + 1);
     User.findOne({
         where: { username },
-        include: [{ model: AuthMechanism }]
+        include: [
+            { model: AuthMechanism }
+        ]
     }).then(result => {
         if (result == null
                 || result.authMechanism == null
@@ -57,16 +59,16 @@ function authenticate(req, res, next) {
     }
 
     function success(user) {
-        const copy = { ... user };
-        delete copy.authMechanism;
-        res.cookie(
-            "USER",
-            copy,
-            cookieOptions
-        );
         res.cookie(
             "SESSION_ID",
             user.authMechanism.sessionId,
+            cookieOptions
+        );
+        user = user.toJSON();
+        delete user.authMechanism;        
+        res.cookie(
+            "USER",
+            JSON.stringify(user),
             cookieOptions
         );
         next();
@@ -130,6 +132,11 @@ function getUserSchool(req, res, next) {
         },
         logServerError.bind(null, res)
     );
+}
+
+function json(req, res, next) {
+    res.type("json");
+    next();
 }
 
 function postType(type, schoolId, obj, res) {
@@ -377,7 +384,7 @@ function getModel(type, res) {
 
 function initializeRoutes() {
 
-    router.use(authenticate, getUserSchool);
+    router.use(authenticate, getUserSchool, json);
 
     router.head("/", (req,res) => {
         res.status(204).send();
@@ -385,6 +392,11 @@ function initializeRoutes() {
 
     router.route("/login")
     .get((req, res) => {
+        res.cookie(
+            "SCHOOL",
+            req.schoolId,
+            cookieOptions
+        );
         res.send(req.user);
     });
 

@@ -19,40 +19,64 @@ import {
     PARSE_SPREADSHEET,
     PARSE_SPREADSHEET_SUCCESS,
     PARSE_SPREADSHEET_ERROR
+    
 } from "../actions/types";
+
+// add action for update pendingPatches... 
+// update unsavedPatches to 
+// push update without saving.
 
 const initialState = {
     students: {
         items: [],
+        unsavedPatches: {},
+        unsavedItems: [],
+        unsavedDeletes: {},
+
         pendingPatches: {},
         pendingDeletes: [],
         pendingPosts: [],
-        unsavedItems: [],
+
         isGetting: false,
-        getError: null
+        getError: null,
+        isParsing: false,
+        spreadsheetError: null
     },
     teachers: {
         items: [],
+        unsavedPatches: {},
+        unsavedItems: [],
+        unsavedDeletes: {},
+
         pendingPatches: {},
         pendingDeletes: [],
-        unsavedItems: [],
         pendingPosts: [],
         isGetting: false,
-        getError: null
+        getError: null,
+        isParsing: false,
+        spreadsheetError: null
     },
     schools: {
         items: [],
+        unsavedPatches: {},
+        unsavedItems: [],
+        unsavedDeletes: {},
+    
         pendingPatches: {},
         pendingDeletes: [],
-        unsavedItems: [],
         pendingPosts: [],
+    
         isGetting: false,
-        getError: null
+        getError: null,
+
+        isParsing: false,    
+        spreadsheetError: null        
+        
     }
 };
 
 export default function(state = initialState, action) {
-    const { itemType, result, result: { status } } = action;
+    const { itemType, result, response } = action;
     switch (action.type) {
     //POST
     case POST_ITEMS:
@@ -80,7 +104,7 @@ export default function(state = initialState, action) {
     }
     case POST_ITEM_ERROR: {
         let error;
-        switch(status) {
+        switch(response.status) {
         case 409:
             error = "Username is not available";
             break;
@@ -105,7 +129,8 @@ export default function(state = initialState, action) {
             ... state,
             [itemType]: {
                 ... state[itemType],
-                isGetting: true
+                isGetting: true,
+                items: []
             }
         };
     }
@@ -115,7 +140,7 @@ export default function(state = initialState, action) {
             [itemType]: {
                 ... state[itemType],
                 isGetting: false,
-                items: action.items
+                items: action.result
             }
         };
     }
@@ -142,7 +167,7 @@ export default function(state = initialState, action) {
         };
     case PATCH_ITEM_ERROR: {
         let error;
-        switch(status) {
+        switch(response.status) {
         case 409:
             error = "Username is not available";
             break;
@@ -215,21 +240,32 @@ export default function(state = initialState, action) {
     case PARSE_SPREADSHEET:
         return {
             ... state,
-            error: null
+            [itemType]: {
+                ... state[itemType],
+                parsingSpreadsheet: true,
+                spreadsheetError: null
+            }
         };
     case PARSE_SPREADSHEET_SUCCESS:
         return {
             ... state,
-            error: null,
-            unsavedItems: action.students
+            [itemType]: {
+                ... state[itemType],
+                parsingSpreadsheet: false,
+                unsavedItems: [
+                    ... state[itemType].unsavedItems,
+                    action.items
+                ]
+            },
         };
     case PARSE_SPREADSHEET_ERROR:
         return {
             ... state,
-            isFetching: false,
-            isSaving: false,
-            error: action.error,
-            unsavedItems: []
+            [itemType]: {
+                ... state[itemType],
+                parsingSpreadsheet: false,
+                spreadsheetError: action.error
+            }
         };
     default:
         return state;

@@ -4,9 +4,11 @@ import {
     AUTHORIZE_ERROR,
     LOG_OUT
 } from "./types";
-import fetchError from "./fetch-error";
+import xhrError from "./xhr-error";
 import { normalize } from "normalizr";
 import { schema } from "../helpers";
+import xhr from "xhr";
+import { load } from "react-cookie";
 
 export const logOut = () => {
     return {
@@ -14,32 +16,39 @@ export const logOut = () => {
     };
 };
 
-export const authorize = (username, password) => dispatch => {
+export const authorize = ({username, password}) => dispatch => {
     dispatch({
         type: AUTHORIZE,
         username, password
-    });
-    fetch(
+    });        
+    xhr.get(
         "/api/login",
         {
             headers: {
-                Authorization: "Basic" + btoa(`${username}:${password}`)
+                Authorization: "Basic " + btoa(`${username}:${password}`),
+                "Content-Type": "application/json"
             }
-        }
-    ).then(
-        response => {
-            if (response.ok) {
-                const normalized = normalize(response.body, schema.user);
-                dispatch({
+        },
+        (error, response) => {
+            let body;
+            try {
+                if (response && response.body)
+                    body = JSON.parse(response.body);
+            }
+            catch (e) { error = e; }
+            if (error) {
+                return dispatch(xhrError(AUTHORIZE, error));
+            }
+            if (response.statusCode < 400) {
+                const normalized = normalize(body, schema.user);
+                return dispatch({
                     type: AUTHORIZE_SUCCESS,
                     response,
+                    schoolId: load("SCHOOL_ID"),
                     ... normalized
                 });
             }
-            else {
-                dispatch({ type: AUTHORIZE_ERROR, response });
-            }
-        },
-        dispatch.bind(null, fetchError(AUTHORIZE))
+            return dispatch({ type: AUTHORIZE_ERROR, response });            
+        }
     );
 };

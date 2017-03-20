@@ -4,7 +4,15 @@ export default class Login extends Component {
 
     static get propTypes() {
         return {
-            authorize: PropTypes.func.isRequired
+            authorize: PropTypes.func.isRequired,
+            authorized: PropTypes.bool.isRequired,
+            authorizing: PropTypes.bool.isRequired
+        };
+    }
+
+    static get contextTypes() {
+        return {
+            router: PropTypes.object.isRequired
         };
     }
 
@@ -14,8 +22,14 @@ export default class Login extends Component {
             username: "",
             password: ""
         };
+    }    
+    
+    componentWillReceiveProps(nextProps) {
+        if (!this.props.authorized && nextProps.authorized) {
+            this.context.router.push("/");
+        }
     }
-
+    
     handleSubmit(e) {
         e.preventDefault();
         const { username, password } = this.state;
@@ -38,6 +52,7 @@ export default class Login extends Component {
                         this.setState({password: value});
                     }}/>
             </label>
+            <button type="submit">Submit</button>
         </form>;
     }
 }
