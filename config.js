@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === "production") {
             "password": "MXM-YJl-iOh-BDW"
         },
         "certFile": "/etc/letsencrypt/live/nields.io/fullchain.pem",
-        "keyFile": "/etc/letsencrypt/live/nields.iop/privkey.pem"
+        "keyFile": "/etc/letsencrypt/live/nields.io/privkey.pem"
     };
 } else {
     module.exports = {
