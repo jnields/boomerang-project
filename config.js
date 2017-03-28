@@ -1,14 +1,15 @@
+"use strict";
 if (process.env.NODE_ENV === "production") {
     module.exports = {
         "proxyPort": null,
-        "port": 3000,
+        "port": 8080,
         "db": {
             "database": "boomerang",
             "username": "boomerang",
             "password": "MXM-YJl-iOh-BDW"
         },
-        "certFile": "/etc/ssl/cert.pem",
-        "keyFile": "/etc/ssl/key.pem"
+        "certFile": "/etc/letsencrypt/live/nields.io/fullchain.pem",
+        "keyFile": "/etc/letsencrypt/live/nields.iop/privkey.pem"
     };
 } else {
     module.exports = {

@@ -1,3 +1,4 @@
+"use strict";
 const autoprefixer = require("autoprefixer"),
     path = require("path"),
     nodePath = path.resolve(path.join(__dirname, "node_modules")),

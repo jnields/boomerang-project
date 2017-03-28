@@ -1,3 +1,4 @@
+"use strict";
 const autoprefixer = require("autoprefixer"),
     path = require("path"),
     webpack = require("webpack"),

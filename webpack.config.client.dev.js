@@ -1,3 +1,4 @@
+"use strict";
 const proxyPort = require("./config").proxyPort,
     autoprefixer = require("autoprefixer"),
     webpack = require("webpack"),
