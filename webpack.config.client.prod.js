@@ -86,7 +86,8 @@ module.exports =  {
         "failOnError": true
     },
     node: {
-        fs: "empty"
+        fs: "empty",
+        Buffer: false
     },
     externals: {
         "./cptable": "var cptable"
