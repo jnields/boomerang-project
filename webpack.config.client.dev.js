@@ -38,7 +38,6 @@ module.exports =  {
             {
                 "test": /\.s[ac]ss$/,
                 "loaders": [
-                    "style",
                     "css/locals"
                         + "?modules"
                         + "&camelCase",
