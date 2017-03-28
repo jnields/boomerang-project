@@ -14,8 +14,8 @@ import { proxyPort } from "../../config";
 
 const app = express();
 module.exports = Promise.resolve(routes)
-    .then(setupApp)
-    .then(() => app);
+    .then(setupApp, err => {throw err;})
+    .then(() => app, err => {throw err;});
 
 function setupApp(resolvedRoutes) {
     if (app.get("env") === "development") {
@@ -35,8 +35,6 @@ function setupApp(resolvedRoutes) {
             }
         ).listen(proxyPort, "localhost");
     }
-
-    // app.use(ntlm());
 
     // view engine setup
     app.set("views", path.join(__dirname, "src", "server", "views"));

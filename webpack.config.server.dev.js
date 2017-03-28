@@ -3,7 +3,6 @@ const autoprefixer = require("autoprefixer"),
     nodePath = path.resolve(path.join(__dirname, "node_modules")),
     nodePathLength = nodePath.length,
     ExtractTextPlugin = require("extract-text-webpack-plugin");
-
 module.exports =  {
     devtool: "source-map",
     plugins: [
