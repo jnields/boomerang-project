@@ -15,12 +15,8 @@ module.exports =  {
             }
         ],
         "loaders": [
-            // {
-            //     "test": /xlsx/,
-            //     loaders: ["script"]
-            // },
             {
-                "exclude": /(node_modules|xlsx)/,
+                "exclude": /(node_modules)/,
                 "test": /\.jsx?$/,
                 "loader": "babel",
                 query: {
@@ -34,18 +30,6 @@ module.exports =  {
                         "transform-strict-mode"
                     ]
                 }
-            },
-            {
-                "exclude": /(node_modules|xlsx)/,
-                "test": /\.jsx?$/,
-                "loaders": [
-                    "babel?"
-                        + "presets[]=react"
-                        + "&presets[]=stage-1"
-                        + "&presets[]=es2015"
-                        + "&plugins[]=transform-runtime"
-                        + "&plugins[]=transform-strict-mode"
-                ],
             },
             {
                 "test": /\.s[ac]ss?$/,
@@ -108,6 +92,7 @@ module.exports =  {
     },
     "output": {
         "path": path.join(__dirname, "public", "build"),
+        "publicPath": "/public/build/",
         "filename": "bundle.js"
     },
     "plugins": [

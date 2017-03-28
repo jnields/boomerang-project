@@ -85,7 +85,6 @@ export default function(state = initialState, action) {
                 }
             };
         case "ERROR":
-            console.log("setting error");
             return {
                 ... state,
                 [itemType]: {
