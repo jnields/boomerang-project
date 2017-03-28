@@ -7,7 +7,8 @@ export default connect(
         return {
             user: state.authorization.user,
             authorized: state.authorization.authorized,
-            authorizing: state.authorization.authorizing
+            authorizing: state.authorization.authorizing,
+            invalidAttempt: state.authorization.invalidAttempt
         };
     },
     { authorize }

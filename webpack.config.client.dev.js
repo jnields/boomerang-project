@@ -36,10 +36,10 @@ module.exports =  {
                 }
             },
             {
-                "test": /\.s[ac]ss?$/,
+                "test": /\.s[ac]ss$/,
                 "loaders": [
                     "style",
-                    "css"
+                    "css/locals"
                         + "?modules"
                         + "&camelCase",
                     "postcss",

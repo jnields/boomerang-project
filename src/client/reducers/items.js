@@ -520,7 +520,7 @@ export default function(state = initialState, action) {
     }
 
     case PARSE_SPREADSHEET_ERROR: {
-        const parseError = action.error.startsWith("Unsupported file")
+        const parseError = action.error.message.startsWith("Unsupported file")
             ? "Unsupported file type"
             : "Unable to parse file";
         return {

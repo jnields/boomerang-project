@@ -22,6 +22,7 @@ if (user !== void 0)
 const initialState = {
     authorizing: false,
     user,
+    invalidAttempt: false,
     authorized,
     schoolId
 };
@@ -38,6 +39,7 @@ export default function(state = initialState, action) {
         return {
             authorized: false,
             authorizing: false,
+            invalidAttempt: false,
             schoolId: void 0,
             user: void 0
         };
@@ -48,6 +50,7 @@ export default function(state = initialState, action) {
         return {
             authorized: false,
             authorizing: false,
+            invalidAttempt: false,
             schoolId: void 0,
             user: void 0
         };
@@ -57,6 +60,7 @@ export default function(state = initialState, action) {
             return {
                 authorizing: false,
                 authorized: false,
+                invalidAttempt: false,
                 user: void 0,
                 schoolId: void 0
             };
@@ -68,13 +72,15 @@ export default function(state = initialState, action) {
             authorizing: true,
             user: void 0,
             authorized: false,
+            invalidAttempt: false,
             schoolId: void 0
         };
     case AUTHORIZE_SUCCESS:
         return {
             authorizing: false,
-            user: action.result,
+            invalidAttempt: false,
             schoolId: action.schoolId,
+            user: action.result,
             authorized: true
         };
     case AUTHORIZE_ERROR: {
@@ -91,6 +97,7 @@ export default function(state = initialState, action) {
         return {
             authorizing: false,
             user: null,
+            invalidAttempt: true,
             authorized: false,
             error
         };

@@ -196,21 +196,41 @@ export default class Home extends Component {
                     Assign Groups
                 </button>
             }
-            <button onClick={() => {printNameTags(
-                    denormalize(
-                        students.items,
-                        [schemas.student],
-                        entities
-                    ),
-                    school
-                );}}
-                className={[bs.btn, bs.btnSm, bs.btnDefault, styles.mt10].join(" ")}>
-                <span className={[bs.glyphicon, bs.glyphiconPrint, styles.mr5].join(" ")}>
-                </span>
-                Print Nametags
-            </button>
+            {this.getPrintButton() }
         </div>;
     }
+
+    getPrintButton() {
+        const {
+            entities,
+            items: {
+                schools: {
+                    selectedItem
+                },
+                students,
+            }
+        } = this.props;
+        if (students.items.length == 0) return null;
+        const school = denormalize(
+            selectedItem,
+            schemas.school,
+            entities
+        );
+        return <button onClick={() => {printNameTags(
+                denormalize(
+                    students.items,
+                    [schemas.student],
+                    entities
+                ),
+                school
+            );}}
+            className={[bs.btn, bs.btnSm, bs.btnDefault, styles.mt10].join(" ")}>
+            <span className={[bs.glyphicon, bs.glyphiconPrint, styles.mr5].join(" ")}>
+            </span>
+            Print Nametags
+        </button>;
+    }
+
     render() {
         const {
             entities,

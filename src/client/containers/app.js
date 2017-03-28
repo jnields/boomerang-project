@@ -2,14 +2,12 @@ import React, { Component, PropTypes } from "react";
 import { connect } from "react-redux";
 import styles from "../sass/app";
 import bs from "../sass/bootstrap";
-import { Link } from "react-router";
-import { logOut } from "../actions/authorization";
+import NavBar from "../containers/nav-bar";
 
 class App extends Component {
 
     static get propTypes() {
         return {
-            logOut: PropTypes.func.isRequired,
             authorized: PropTypes.bool.isRequired,
             children: PropTypes.node
         };
@@ -19,6 +17,12 @@ class App extends Component {
         return {
             router: PropTypes.object.isRequired
         };
+    }
+
+    componentWillReceiveProps() {
+        // if (!nextProps.authorized) {
+        //     this.context.router.push("/login");
+        // }
     }
 
     componentDidMount() {
@@ -33,9 +37,7 @@ class App extends Component {
             bs.container
         ].join(" ");
         return <div className={classes}>
-            <Link className={styles.logOut}
-                onClick={this.props.logOut}
-                to="/login">Log Out</Link>
+            <NavBar />
             {this.props.children}
         </div>;
     }
@@ -47,5 +49,5 @@ export default connect(
             authorized: state.authorization.authorized
         };
     },
-    { logOut }
+    null
 )(App);
