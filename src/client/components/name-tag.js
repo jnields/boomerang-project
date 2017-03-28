@@ -1,16 +1,35 @@
 import React, { PropTypes } from "react";
 
-const { string, number } = PropTypes;
+const { shape, string, number } = PropTypes;
 NameTag.propTypes = {
-    firstName: string.isRequired,
-    lastName: string.isRequired,
-    grade: number
+    student: shape({
+        user: shape({
+            firstName: string,
+            lastName: string
+        }),
+        grade: number
+    }).isRequired,
+    school: shape({
+        name: string
+    }).isRequired
 };
-export default function NameTag({firstName, lastName, grade}) {
+export default function NameTag(props) {
+    const {
+        school: {
+            name
+        },
+        student: {
+            grade,
+            user
+        }
+    } = props;
+    const { firstName, lastName } = user || {};
     return <dl>
         <dt>Name:</dt>
         <dd>{firstName} {lastName}</dd>
         <dt>Grade:</dt>
         <dd>{grade}</dd>
+        <dt>School:</dt>
+        <dd>{name}</dd>
     </dl>;
 }

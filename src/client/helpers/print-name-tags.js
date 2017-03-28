@@ -1,10 +1,10 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { renderToString } from "react-dom/server";
 import NameTag from "../components/name-tag";
 
-export function PrintTags(students) {
-    const print = window.open("", "PRINT", "height=400,width=600");
-    print.document.write(ReactDOM.renderToString(getTags(students)));
+export default function PrintTags(students,school) {
+    const print = window.open("", "PRINT");
+    print.document.write(renderToString(getTags(students, school)));
     print.document.close(); // necessary for IE >= 10
     print.focus(); // necessary for IE >= 10*/
     print.print();
@@ -12,11 +12,17 @@ export function PrintTags(students) {
     return true;
 }
 
-function getTags(students) {
+function getTags(students, school) {
     return <html>
-        <head></head>
+        <head>
+            <style>
+            </style>
+        </head>
         <body>
-            {students.map(student => <NameTag student={student} />)}
+            {students.map(student => <NameTag
+                key={student.id}
+                student={student}
+                school={school} />)}
         </body>
     </html>;
 }

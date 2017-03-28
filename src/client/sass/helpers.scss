@@ -1,0 +1,48 @@
+.pointer{
+    cursor: pointer;
+}
+
+
+.scroll-box {
+    overflow: auto;
+
+    $bgc: white;            // background color
+    $cto: transparent;      // cover to color
+    $sto: 40%;              // shadow percentage $sc
+    $sc: rgba(0,0,0,0.1);   // shadow color
+    $ss: 14px;              // shadow size
+    $cs: 40px;              // cover size
+    $cfs: percentage($ss/$cs + 0.01);
+
+    background:
+        /* shadow cover - attached locally , stick to edges of box locally*/
+        linear-gradient(to bottom, $bgc $cfs, $cto) left top,
+        linear-gradient(to top, $bgc $cfs, $cto) right bottom,
+        linear-gradient(to right, $bgc $cfs, $cto) left top,
+        linear-gradient(to left, $bgc $cfs, $cto) right bottom,
+
+        /* shadows - attached scroll - position is fixed to box borders */
+        radial-gradient(farthest-side at 50% 0, $sc $sto, transparent) left top,
+        radial-gradient(farthest-side at 50% 100%, $sc $sto, transparent) right bottom,
+        radial-gradient(farthest-side at 0 50%, $sc $sto, transparent) left top,
+        radial-gradient(farthest-side at 100% 50%, $sc $sto, transparent) right bottom
+    ;
+    background-repeat: no-repeat;
+    background-color: $bgc;
+    background-size:
+        /* shadow cover */
+        100% $cs, 100% $cs,
+        $cs 100%, $cs 100%,
+        /* shadows */
+        100% $ss, 100% $ss,
+        $ss 100%, $ss 100%
+    ;
+
+    /* Opera doesn't support this in the shorthand */
+    background-attachment:
+        local, local,
+        local, local,
+        scroll, scroll,
+        scroll, scroll
+    ;
+}

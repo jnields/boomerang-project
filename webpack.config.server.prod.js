@@ -7,6 +7,9 @@ const autoprefixer = require("autoprefixer"),
 
 module.exports =  {
     module: {
+        "noParse": [
+            /node_modules\/xlsx\/jszip.js$/
+        ],
         "preLoaders": [
             {
                 test: /\.jsx?$/,
@@ -52,7 +55,7 @@ module.exports =  {
                 loader: "json",
             },
             {
-                test: /\.(eot|svg|ttf|woff|woff2)$/,
+                test: /\.(eot|svg|ttf|woff|woff2)(\?.*)?$/,
                 loader: "file"
                     + "?publicPath=/public/build/"
                     + "&outputPath=./public/build/"

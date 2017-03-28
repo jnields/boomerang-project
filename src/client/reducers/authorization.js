@@ -6,13 +6,18 @@ import {
     LOG_OUT
 } from "../actions/types";
 import { remove, load } from "react-cookie";
-
+import { normalize } from "normalizr";
+import * as schemas from "../helpers/schema";
 let user = load("USER"),
+    sessionId = load("SID", true),
     authorized = (
         user !== void 0
-        && load("SESSION_ID") !== void 0
+        && sessionId !== void 0
     ),
-    schoolId = load("SCHOOL_ID");
+    schoolId = parseInt(load("SCHOOL_ID"));
+
+if (user !== void 0)
+    user = normalize(user, schemas.user).result;
 
 const initialState = {
     authorizing: false,
@@ -22,12 +27,21 @@ const initialState = {
 };
 
 function removeAuth() {
-    remove("USER");
+    remove("SID");
     remove("SCHOOL_ID");
-    remove("SESSION_ID");
+    remove("USER");
 }
 
 export default function(state = initialState, action) {
+    if (action.response && action.response.statusCode === 401) {
+        removeAuth();
+        return {
+            authorized: false,
+            authorizing: false,
+            schoolId: void 0,
+            user: void 0
+        };
+    }
     switch (action.type) {
     case LOG_OUT:
         removeAuth();

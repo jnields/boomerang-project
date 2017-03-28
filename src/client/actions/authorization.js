@@ -20,7 +20,7 @@ export const authorize = ({username, password}) => dispatch => {
     dispatch({
         type: AUTHORIZE,
         username, password
-    });        
+    });
     xhr.get(
         "/api/login",
         {
@@ -44,11 +44,11 @@ export const authorize = ({username, password}) => dispatch => {
                 return dispatch({
                     type: AUTHORIZE_SUCCESS,
                     response,
-                    schoolId: load("SCHOOL_ID"),
+                    schoolId: parseInt(load("SCHOOL_ID")),
                     ... normalized
                 });
             }
-            return dispatch({ type: AUTHORIZE_ERROR, response });            
+            return dispatch({ type: AUTHORIZE_ERROR, response });
         }
     );
 };

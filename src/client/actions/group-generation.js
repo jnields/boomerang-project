@@ -1,6 +1,9 @@
 import { GENERATE_GROUPS } from "./types";
+
+
 // equal gender distribution
 export function generateGroups(students) {
+
     const leaders = {
             M: [],
             F: [],
@@ -49,6 +52,17 @@ export function generateGroups(students) {
         i = i === groupCount ? 0 : i;
         groups[i].students.push(gender.pop());
     }
-
-    return {type: GENERATE_GROUPS, groups};
+    const patches = groups.reduce(
+        (accumulated, group,ix) => {
+            [
+                ... group.students,
+                ... group.leaders
+            ].forEach(student => {
+                accumulated[student.id] = { group: ix + 1 };
+            });
+            return accumulated;
+        },
+        {}
+    );
+    return {type: GENERATE_GROUPS, patches };
 }

@@ -6,6 +6,9 @@ const proxyPort = require("./config").proxyPort,
 module.exports =  {
     devtool: "cheap-module-eval-source-map",
     module: {
+        "noParse": [
+            /node_modules\/xlsx\/jszip.js$/
+        ],
         "preLoaders": [
             {
                 test: /\.jsx?$/,
@@ -59,7 +62,7 @@ module.exports =  {
                 loader: "json",
             },
             {
-                test: /\.(eot|svg|ttf|woff|woff2)$/,
+                test: /\.(eot|svg|ttf|woff|woff2)(\?.*)?$/,
                 loader: "file"
                     + "?publicPath=/public/build/"
                     + "&outputPath=./public/build/"

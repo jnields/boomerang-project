@@ -10,6 +10,9 @@ module.exports =  {
         new ExtractTextPlugin("public/build/bundle.css"),
     ],
     module: {
+        "noParse": [
+            /node_modules\/xlsx\/jszip.js$/
+        ],
         "preLoaders": [
             {
                 test: /\.jsx?$/,
@@ -55,7 +58,7 @@ module.exports =  {
                 loader: "json",
             },
             {
-                test: /\.(eot|svg|ttf|woff|woff2)$/,
+                test: /\.(eot|svg|ttf|woff|woff2)(\?.*)?$/,
                 loader: "file"
                     + "?publicPath=/public/build/"
                     + "&outputPath=./public/build/"

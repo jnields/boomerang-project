@@ -1,0 +1,88 @@
+@import "./helpers";
+.default {
+    th:nth-child(1) {
+        width: 40px;
+    }
+    .help-bubble {
+        position: fixed;
+        opacity: 0.8;
+    }
+    .mr-5 {
+        margin-right: 5px;
+    }
+    .cancel-ok {
+        margin-top: 10px;
+    }
+
+    span.trash {
+        top: 9px;
+        left: 7px;
+        cursor: pointer;
+    }
+
+    label.file-button {
+        cursor: pointer;
+    }
+
+    input {
+        background: transparent;
+        &[type='text'] {
+            min-width: 140px;
+        }
+        &[type='number'] {
+            min-width: 60px;
+        }
+    }
+
+    input[type='file'] {
+        position: absolute;
+        width: 0;
+        height: 0;
+        &:active, &:focus {
+            outline: none;
+            border: none;
+        }
+    }
+
+    input[readonly], select[disabled] {
+        outline: none;
+        border: 1px solid transparent;
+        box-shadow: none;
+        background: transparent;
+    }
+    .selected-item {
+        background-color: #eee;
+    }
+    .table-hover{
+        tr {
+            cursor: default;
+        }
+        tr.selectable:hover {
+            cursor: pointer;
+            background-color: #eee;
+            &>td input[readonly],
+            &>td select[disabled] {
+                cursor: pointer;
+            }
+        }
+    }
+    .scroll-box {
+        @extend .scroll-box;
+    }
+}
+
+.vh50 {
+    @extend .default;
+    .scroll-box{
+        width: 100%;
+        max-height: 50vh;
+    }
+}
+
+.vh90 {
+    @extend .default;
+    .scroll-box {
+        width: 100%;
+        max-height: 90vh;
+    }
+}

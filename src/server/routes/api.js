@@ -13,7 +13,8 @@ import { Router } from "express";
 const tenYears = 1000 * 60 * 60 * 24 * 365 * 10,
     cookieOptions = {
         secure: process.env.NODE_ENV === "production",
-        maxAge: tenYears
+        maxAge: tenYears,
+        httpOnly: false
     },
     router = Router();
 
@@ -60,12 +61,13 @@ function authenticate(req, res, next) {
 
     function success(user) {
         res.cookie(
-            "SESSION_ID",
+            "SID",
             user.authMechanism.sessionId,
             cookieOptions
         );
         user = user.toJSON();
-        delete user.authMechanism;        
+        user = JSON.parse(JSON.stringify(user));
+        delete user.authMechanism;
         res.cookie(
             "USER",
             JSON.stringify(user),
@@ -76,7 +78,7 @@ function authenticate(req, res, next) {
 }
 
 function verifySessionId(req, res, next) {
-    let sessionId = req.cookies.SESSION_ID;
+    let sessionId = req.cookies.SID;
     if (sessionId && sessionId.length) {
         User.findOne({
             include: [{
@@ -156,16 +158,10 @@ function postType(type, schoolId, obj, res) {
     );
     function process(school) {
         if (obj == null || obj.id != null || obj.user == null) {
-            return res.stats(400).send({"error": "bad request"});
+            return res.status(400).send({"error": "bad request"});
         }
         const password = obj.user.password;
         delete obj.user.password;
-        if (password == null || obj.user.username == null) {
-            return res.status(400).send({"error": "bad request"});
-        }
-        obj.user.authMechanism = {
-            type: "BASIC"
-        };
         switch(Model){
         case Teacher:
             obj.user.tier = "2";
@@ -174,17 +170,34 @@ function postType(type, schoolId, obj, res) {
             obj.user.tier = "3";
             break;
         }
-        obj = Model.build(obj, {
-            include: [
+        if (password == null || obj.user.username == null) {
+            obj = Model.build(
+                obj,
                 {
-                    association: Model.User,
                     include: [{
-                        association: User.AuthMechanism
+                        association: Model.User
                     }]
                 }
-            ]
-        });
-        obj.user.authMechanism.setPassword(password);
+            );
+        } else {
+            obj.user.authMechanism = {
+                type: "BASIC"
+            };
+            obj = Model.build(
+                obj,
+                {
+                    include: [
+                        {
+                            association: Model.User,
+                            include: [{
+                                association: User.AuthMechanism
+                            }]
+                        }
+                    ]
+                }
+            );
+            obj.user.authMechanism.setPassword(password);
+        }
         obj.setSchool(school, { save: false });
         return obj.save().then(
             saved => {
@@ -197,7 +210,6 @@ function postType(type, schoolId, obj, res) {
             logServerError.bind(null,res)
         );
     }
-
 }
 
 function queryType(type, schoolId, query, res) {
@@ -260,7 +272,6 @@ function patchType(type, schoolId, id, obj, res) {
     if (obj.id !== undefined && id != obj.id) {
         return res.status(400).send({"error": "id mismatch"});
     }
-
     delete obj.id, obj.schoolId, obj.school;
 
     const include = [
@@ -272,8 +283,9 @@ function patchType(type, schoolId, id, obj, res) {
         },
         { model: User }
     ];
+
     if (obj.user && obj.user.password) {
-        const userInclude = include[0];
+        const userInclude = include[1];
         userInclude.include = [{
             model: AuthMechanism
         }];
@@ -289,10 +301,13 @@ function patchType(type, schoolId, id, obj, res) {
 
     Model.findOne({ where: { id }, include }).then(
         existing => {
-            if (!existing)
+            if (existing == null)
                 return res.status(404).send();
             const promises = [];
             if (obj.user) {
+                existing.user = existing.user || User.build({
+                    tier: type === "teachers" ? "2" : "3"
+                });
                 if (obj.user.authMechanism) {
                     promises.push(
                         existing.user.authMechanism.update(
@@ -304,18 +319,21 @@ function patchType(type, schoolId, id, obj, res) {
                 promises.push(
                     existing.user.update(obj.user)
                 );
-                delete obj.user;
             }
-            existing.update(obj).then(
-                self => {
-                    Promise.all(promises).then(()=>{
-                        self = self.toJSON();
-                        if (self.user)
-                            delete self.user.authMechanism;
-                        res.send(self);
-                    });
+            Promise.all(promises).then(
+                () => {
+                    obj.user = existing.user;
+                    existing.update(obj).then(
+                        self => {
+                            self = self.toJSON();
+                            if (self.user)
+                                delete self.user.authMechanism;
+                            res.send(self);
+                        },
+                        logServerError.bind(null, res)
+                    );
                 },
-                logServerError.bind(null, res)
+                logServerError.bind(null,res)
             );
         }
     );
@@ -393,8 +411,8 @@ function initializeRoutes() {
     router.route("/login")
     .get((req, res) => {
         res.cookie(
-            "SCHOOL",
-            req.schoolId,
+            "SCHOOL_ID",
+            JSON.stringify(req.schoolId),
             cookieOptions
         );
         res.send(req.user);
@@ -403,8 +421,8 @@ function initializeRoutes() {
     router.route("/schools")
     .all(tier(1))
     .get((req,res) => {
-        const limit = Math.min(req.query.$pageSize || 10, 1000),
-            offset = limit * (req.query.$page || 0),
+        const limit = req.query.$limit,
+            offset = limit * req.query.$offset,
             $like = req.query.name$like;
 
         let attributes = req.query.$select || void 0;
@@ -417,12 +435,14 @@ function initializeRoutes() {
             ? { name: { $like } }
             : void 0;
 
-        School.findAll({
-            attributes,
-            where,
-            limit,
-            offset
-        }).then(
+        const query = {};
+        if(attributes) query.attributes = attributes;
+        if(where) query.where = where;
+        if(limit) query.limit = limit;
+        if(offset) query.offset = offset;
+
+        School.findAll(query)
+        .then(
             schools => {
                 res.send(schools);
             },
@@ -468,16 +488,21 @@ function initializeRoutes() {
             return res.status(400).send({"error": "ID mismatch"});
         }
         delete school.id;
-        School.update(school, {where: { id: req.params.school_id }}).then(
-            arr => {
-                const count = arr[0];
-                if (count == 0) {
-                    return res.status(404).send({"error": "not found"});
+        School.findOne({ where: {id: req.params.school_id}})
+        .then(
+            existing => {
+                if (existing) {
+                    existing.update(school).then(
+                        self => res.status(200).send(self),
+                        logServerError.bind(null,res)
+                    );
                 } else {
-                    return res.status(204).send();
+                    return res.status(404).send({"error": "not found"});
                 }
-            }
+            },
+            logServerError.bind(null, res)
         );
+
     })
     .delete((req, res) => {
         const id = req.params.school_id;

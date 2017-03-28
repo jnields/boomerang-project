@@ -21,7 +21,21 @@ export default orm.define(
         },
         username: {
             type: STRING,
-            unique: true
+            unique: true,
+            allowNull: true
         }
     }
+    // {
+    //     indexes: [
+    //         {
+    //             unique: true,
+    //             fields: ["username"],
+    //             where: {
+    //                 username: {
+    //                     $ne: null
+    //                 }
+    //             }
+    //         }
+    //     ]
+    // }
 );

@@ -26,7 +26,7 @@ class App extends Component {
             this.context.router.push("/login");
         }
     }
-    
+
     render() {
         const classes = [
             styles.app,
@@ -35,7 +35,7 @@ class App extends Component {
         return <div className={classes}>
             <Link className={styles.logOut}
                 onClick={this.props.logOut}
-                to="/login"/>
+                to="/login">Log Out</Link>
             {this.props.children}
         </div>;
     }
@@ -46,6 +46,6 @@ export default connect(
         return {
             authorized: state.authorization.authorized
         };
-    }, 
+    },
     { logOut }
 )(App);

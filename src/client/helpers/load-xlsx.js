@@ -1,20 +1,27 @@
 import xlsx from "xlsx";
-export default function(files) {
+export default function(properties, files) {
     let i, f, promises = [];
-    for (i = 0, f = files[i]; i != files.length; ++i) {
-        promises.push(new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
+    for (i = 0; i != files.length; ++i) {
+        f = files[i];
+        promises.push((file => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = e.target.result,
+                            workbook = xlsx.read(data, {type: "binary"});
+                        resolve(extractData(workbook));
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
                 try {
-                    const data = e.target.result,
-                        workbook = xlsx.read(data, {type: "binary"});
-                    resolve(extractData(workbook));
+                    reader.readAsBinaryString(file);
                 } catch (err) {
                     reject(err);
                 }
-            };
-            reader.readAsBinaryString(f);
-        }));
+            });
+        })(f));
     }
     return Promise.all(promises).then(
         values => {
@@ -23,6 +30,17 @@ export default function(files) {
                 const props = {};
                 arr.forEach((row, ix) => {
                     if (ix) {
+                        if(ix === 1) {
+                            if (!Object.keys(props).some(
+                                key =>
+                                    properties.some(
+                                        prop=>  prop.regex.test(props[key])
+                                    )
+                                )
+                            ) {
+                                throw new Error("invalid");
+                            }
+                        }
                         const rowObj = {};
                         row.forEach((cell, ix2) => {
                             rowObj[props[ix2]] = cell;
@@ -35,66 +53,37 @@ export default function(files) {
                     }
                 });
             });
-            return result.map(parseStudent);
+            return result.map(obj => {
+                return mapObject(obj, properties);
+            });
         },
-        error => error
+        error => {
+            throw error;
+        }
     );
 }
 
-function parseDate(date) {
-    let parsed;
-    switch(Object.prototype.toString.call(date)) {
-    case "[object String]":
-        parsed = Date.parse(date);
-        return isNaN(parsed) ? null : parsed;
-    case "[object Date]":
-        return date;
-    }
-    return null;
-}
 
-function parseBool(raw) {
-    switch(Object.prototype.toString.call(raw)) {
-    case "[object Number]":
-    case "[object Boolean]":
-        return raw ? true : false;
-    case "[object String]":
-        raw = raw.toLowerCase();
-        return /^(y|true|1)$/.test(raw)
-            ? true
-            : /^(n|false|0)$/.test(raw)
-                ? false
-                : null;
-    }
-    return null;
-}
-
-function parseStudent(raw) {
-    const user = {};
-    const result = { user };
+function mapObject(raw, properties) {
+    let result = {};
     Object.keys(raw).forEach(key => {
-        const value = raw[key].toLowerCase();
+        let value = raw[key];
         key = key.toLowerCase().trim();
-        if (/^(first\s?)?name$/.test(key)){
-            user.firstName = value;
-        } else if (/^(last\s?name|surname)$/.test(key)) {
-            user.lastName = value;
-        }
-        if (/^(sex|gender)$/.test(key)) {
-            user.gender = value;
-        }
-        if (/^age$/.test(key)) {
-            user.age = parseInt(value);
-        }
-        if (/^dob$/.test(key)) {
-            user.dob = parseDate(value);
-        }
-        if (/^grade$/.test(key)) {
-            result.grade = parseInt(key);
-        }
-        if(/^(is)?leader$/.test(key)) {
-            result.isLeader = parseBool(value);
-        }
+        properties.forEach(property => {
+            if (property.regex.test(key)) {
+                switch(property.dataType) {
+                case "bool":
+                    value = parseBool(value);
+                    break;
+                case "date":
+                    value = parseDate(value);
+                    break;
+                case "number":
+                    value = parseFloat(value);
+                }
+                property.setValue(result, value);
+            }
+        });
     });
     return result;
 }
@@ -124,6 +113,34 @@ function extractData(workbook) {
         });
     });
     return result;
+}
+
+function parseBool(raw) {
+    switch(Object.prototype.toString.call(raw)) {
+    case "[object Number]":
+    case "[object Boolean]":
+        return raw ? true : false;
+    case "[object String]":
+        raw = raw.toLowerCase();
+        return /^(y|true|1)$/.test(raw)
+            ? true
+            : /^(n|false|0)$/.test(raw)
+                ? false
+                : null;
+    }
+    return null;
+}
+
+function parseDate(date) {
+    let parsed;
+    switch(Object.prototype.toString.call(date)) {
+    case "[object String]":
+        parsed = Date.parse(date);
+        return isNaN(parsed) ? null : parsed;
+    case "[object Date]":
+        return date;
+    }
+    return null;
 }
 
 const A = "A".charCodeAt(0);
