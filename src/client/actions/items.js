@@ -45,28 +45,48 @@ export const saveChanges =
 dispatch => {
     const ps = [];
     dispatch({type: SAVE_CHANGES, itemType: type, status: "STARTED"});
+    let error = false;
     unsavedItems = Object.keys(unsavedItems)
         .map(key=>unsavedItems[key]);
-    ps.push(postItems(type, unsavedItems, schoolId)(dispatch));
+    ps.push(
+        postItems(type, unsavedItems, schoolId)(dispatch)
+        .catch(() => {
+            error = true;
+        })
+    );
     Object.keys(unsavedDeletes).forEach(key => {
         const doDelete = parseInt(key) > 0 && unsavedDeletes[key];
         if (!doDelete) return;
-        ps.push(deleteItem(type, key, schoolId)(dispatch));
+        ps.push(
+            deleteItem(type, key, schoolId)(dispatch)
+            .catch(() => {
+                error = true;
+            })
+        );
     });
+
     Object.keys(unsavedPatches).forEach(key=> {
         const patch = unsavedPatches[key];
         if (!patch) return;
-        ps.push(patchItem(type, key, patch, schoolId)(dispatch));
+        ps.push(
+            patchItem(type, key, patch, schoolId)(dispatch)
+            .catch(() => {
+                error = true;
+            })
+        );
     });
-    Promise.all(ps).then(
+    return Promise.all(ps).then(
         () => {
-            dispatch({type: SAVE_CHANGES, itemType: type, status: "COMPLETE"});
-        },
-        () => {
-            dispatch({
+            if (error)
+                return dispatch({
+                    type: SAVE_CHANGES,
+                    itemType: type,
+                    status: "ERROR"
+                });
+            return dispatch({
                 type: SAVE_CHANGES,
                 itemType: type,
-                status: "ERROR"
+                status: "COMPLETE"
             });
         }
     );
