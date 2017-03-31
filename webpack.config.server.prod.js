@@ -112,14 +112,6 @@ module.exports =  {
         "libraryTarget": "commonjs"
     },
     "plugins": [
-        new webpack.DefinePlugin({
-            "process.env": {
-                "NODE_ENV": JSON.stringify("production")
-            }
-        }),
         new ExtractTextPlugin("public/build/bundle.css"),
-    ],
-    "stats": {
-
-    }
+    ]
 };
