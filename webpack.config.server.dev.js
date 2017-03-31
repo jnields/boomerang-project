@@ -43,15 +43,7 @@ module.exports =  {
             },
             {
                 "test": /\.(s[ac]|c)ss$/,
-                "loader": ExtractTextPlugin.extract(
-                    "css-loader"
-                        + "?modules"
-                        + "&camelCase"
-                    + "!postcss-loader"
-                    + "!sass-loader"
-                        + "?outputStyle=compressed"
-                        + "&precision=8"
-                )
+                "loader": "null"
             },
             {
                 test: /\.json$/,

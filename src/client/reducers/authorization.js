@@ -8,28 +8,43 @@ import {
 import { remove, load } from "react-cookie";
 import { normalize } from "normalizr";
 import * as schemas from "../helpers/schema";
-let user = load("USER"),
-    sessionId = load("SID", true),
-    authorized = (
-        user !== void 0
-        && sessionId !== void 0
-    ),
-    schoolId = parseInt(load("SCHOOL_ID"));
+let user = load("USER", true),
+    school = load("SCHOOL", true);
+try {
+    user = JSON.parse(user);
+    if (typeof(user) !== "object") user = null;
+} catch(e) {
+    user = null;
+}
+try {
+    school = JSON.parse(school);
+    if (typeof(school) !== "object") school = null;
+} catch(e) {
+    school = null;
+}
 
-if (user !== void 0)
+let sessionId = load("SID", true),
+    authorized = (
+        user != null
+        && sessionId !== void 0
+    );
+
+if (user != null)
     user = normalize(user, schemas.user).result;
+if (school != null)
+    school = normalize(school, schemas.school).result;
 
 const initialState = {
     authorizing: false,
     user,
     invalidAttempt: false,
     authorized,
-    schoolId
+    school
 };
 
 function removeAuth() {
     remove("SID");
-    remove("SCHOOL_ID");
+    remove("SCHOOL");
     remove("USER");
 }
 
@@ -40,7 +55,7 @@ export default function(state = initialState, action) {
             authorized: false,
             authorizing: false,
             invalidAttempt: false,
-            schoolId: void 0,
+            school: void 0,
             user: void 0
         };
     }
@@ -51,7 +66,7 @@ export default function(state = initialState, action) {
             authorized: false,
             authorizing: false,
             invalidAttempt: false,
-            schoolId: void 0,
+            school: void 0,
             user: void 0
         };
     case XHR_ERROR:
@@ -62,7 +77,7 @@ export default function(state = initialState, action) {
                 authorized: false,
                 invalidAttempt: false,
                 user: void 0,
-                schoolId: void 0
+                school: void 0
             };
         }
         break;
@@ -73,14 +88,14 @@ export default function(state = initialState, action) {
             user: void 0,
             authorized: false,
             invalidAttempt: false,
-            schoolId: void 0
+            school: void 0
         };
     case AUTHORIZE_SUCCESS:
         return {
             authorizing: false,
             invalidAttempt: false,
-            schoolId: action.schoolId,
-            user: action.result,
+            school: action.school,
+            user: action.user,
             authorized: true
         };
     case AUTHORIZE_ERROR: {

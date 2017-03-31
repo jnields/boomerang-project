@@ -10,7 +10,7 @@
     .mr-5 {
         margin-right: 5px;
     }
-    .cancel-ok {
+    .mt-10 {
         margin-top: 10px;
     }
 
@@ -71,7 +71,7 @@
     }
 }
 
-.vh50 {
+.vh-50 {
     @extend .default;
     .scroll-box{
         width: 100%;
@@ -79,7 +79,7 @@
     }
 }
 
-.vh90 {
+.vh-90 {
     @extend .default;
     .scroll-box {
         width: 100%;

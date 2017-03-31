@@ -1,26 +1,21 @@
 "use strict";
-if (process.env.NODE_ENV === "production") {
-    module.exports = {
-        "proxyPort": null,
-        "port": 8080,
-        "db": {
-            "database": "boomerang",
-            "username": "boomerang",
-            "password": "MXM-YJl-iOh-BDW"
-        },
-        "certFile": "/etc/letsencrypt/live/nields.io/fullchain.pem",
-        "keyFile": "/etc/letsencrypt/live/nields.io/privkey.pem"
-    };
-} else {
-    module.exports = {
-        "proxyPort": 35412,
-        "port": 3000,
-        "db": {
-            "database": "boomerang",
-            "username": "root",
-            "password": "MXM-YJl-iOh-BDW"
-        },
-        "certFile": null,
-        "keyFile": null
-    };
-}
+
+const certFile = process.env.CERT_FILE,
+    keyFile = process.env.KEY_FILE,
+    database = process.env.BOOMERANG_DATABASE,
+    username = process.env.BOOMERANG_USER,
+    password = process.env.BOOMERANG_PASSWORD,
+    port = process.env.PORT || 3000,
+    proxyPort = 35412;
+
+module.exports = {
+    proxyPort,
+    port,
+    db: {
+        database,
+        username,
+        password
+    },
+    certFile,
+    keyFile
+};

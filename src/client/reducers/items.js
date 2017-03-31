@@ -165,6 +165,7 @@ export default function(state = initialState, action) {
                 anyChanges: false,
                 editing: false,
                 groupsAssigned: false,
+                saveError: null,
                 unsavedItems: {},
                 unsavedPatches: {},
                 unsavedDeletes: {},
@@ -440,7 +441,7 @@ export default function(state = initialState, action) {
             [itemType]: {
                 ... state[itemType],
                 pendingDeletes: {
-                    ... state[itemType].deletes,
+                    ... state[itemType].pendingDeletes,
                     [action.id]: true
                 },
                 errors: {
@@ -461,6 +462,10 @@ export default function(state = initialState, action) {
                 pendingDeletes: {
                     ... state[itemType].pendingDeletes,
                     [action.id]: false
+                },
+                unsavedDeletes: {
+                    ... state[itemType].unsavedDeletes,
+                    [action.id]: false
                 }
             }
         };
@@ -477,7 +482,7 @@ export default function(state = initialState, action) {
                 ... state[itemType],
                 pendingDeletes: {
                     ... state[itemType].pendingDeletes,
-                    [action.id]: action.error
+                    [action.id]: false
                 },
                 errors: {
                     ... state[itemType].errors,

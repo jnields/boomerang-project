@@ -22,9 +22,10 @@ export default class Home extends Component {
         } = PropTypes;
         return {
             user: object,
-            schoolId: number,
+            school: number,
             getSchools: func.isRequired,
             selectSchool: func.isRequired,
+            getTeachersAndStudents: func.isRequired,
 
             submitPatch: func.isRequired,
             submitDelete: func.isRequired,
@@ -36,8 +37,6 @@ export default class Home extends Component {
             parseFiles: func.isRequired,
             saveChanges: func.isRequired,
             revertChanges: func.isRequired,
-
-            schemas: object.isRequired,
 
             entities: object.isRequired,
 
@@ -67,7 +66,16 @@ export default class Home extends Component {
     }
 
     componentDidMount() {
-        this.props.getSchools();
+        const {
+            getTeachersAndStudents,
+            getSchools,
+            school
+        } = this.props;
+        if (school) {
+            getTeachersAndStudents(school);
+        } else {
+            getSchools();
+        }
     }
 
     getItems(obj) {
@@ -76,12 +84,69 @@ export default class Home extends Component {
         });
     }
 
+    getSchools() {
+        const {
+            entities,
+            items: {
+                schools
+            },
+            itemProperties,
+            selectSchool,
+            submitPatch,
+            submitDelete,
+            addUnsavedItems,
+
+            parseFiles,
+            saveChanges,
+            revertChanges,
+            //saveUnsavedItems,
+
+            school,
+            toggleEdit
+        } = this.props;
+        if (school) return null;
+        return <div className={bs.colMd3}>
+            <h2>
+                Schools
+                <span className={[infoIcon].join(" ")}
+                    onClick={() => {
+                        toggleEdit("schools");
+                    }}>
+                </span>
+            </h2>
+            <ItemList
+                className={vh90}
+                itemType="schools"
+                items={schools}
+                schema={schemas.school}
+                entities={entities}
+                submitDelete={submitDelete.bind(null, "schools")}
+                onItemSelect={selectSchool}
+                properties={itemProperties.schools}
+                addUnsavedItems={addUnsavedItems.bind(null, "schools")}
+                submitPatch={submitPatch.bind(null, "schools")}
+                saveChanges={
+                    ({unsavedItems, unsavedPatches, unsavedDeletes}) => {
+                        saveChanges(
+                            "schools",
+                            unsavedItems,
+                            unsavedPatches,
+                            unsavedDeletes
+                        );
+                    }
+                }
+                parseFiles={parseFiles.bind(null, "schools", itemProperties.schools)}
+                revertChanges={revertChanges.bind(null,"schools")}
+            />
+        </div>;
+    }
+
     getTeachersAndStudents() {
         const {
             entities,
             items: {
                 schools: {
-                    selectedItem
+                    selectedItem = void 0
                 },
                 teachers,
                 students,
@@ -94,27 +159,27 @@ export default class Home extends Component {
             submitDelete,
             addUnsavedItems,
 
-            schemas: {
-                teacher,
-                student
-            },
-
             parseFiles,
             saveChanges,
             revertChanges,
             toggleEdit,
-            assignGroups
+            assignGroups,
+            school
         } = this.props;
-        const schoolId = selectedItem,
-            school = denormalize(
-                selectedItem,
-                schemas.school,
-                entities
-            );
 
-        return <div className={bs.colMd9}>
+        if (selectedItem == null && school == null)
+            return null;
+
+        const fullSchool = denormalize(
+            school || selectedItem,
+            schemas.school,
+            entities
+        ) || {};
+        const className = school ? bs.colMd12 : bs.colMd9;
+
+        return <div className={className}>
             <h2>
-                Teachers at {school.name}
+                Teachers at {fullSchool.name}
                 <span className={[infoIcon].join(" ")}
                     onClick={() => {
                         toggleEdit("teachers");
@@ -124,7 +189,7 @@ export default class Home extends Component {
                 <ItemList
                     className={vh50}
                     items={teachers}
-                    schema={teacher}
+                    schema={schemas.teacher}
                     entities={entities}
                     properties={itemProperties.teachers}
                     submitDelete={submitDelete.bind(null, "teachers")}
@@ -139,14 +204,14 @@ export default class Home extends Component {
                                 unsavedItems,
                                 unsavedPatches,
                                 unsavedDeletes,
-                                schoolId
+                                selectedItem || void 0
                             );
                         }
                     }
                 />
             <div className={bs.clearfix}></div>
             <h2>
-                Students at {school.name}
+                Students at {fullSchool.name}
                 <span className={[infoIcon].join(" ")}
                     onClick={() => {
                         toggleEdit("students");
@@ -159,7 +224,7 @@ export default class Home extends Component {
                     itemType="students"
                     items={students}
                     entities={entities}
-                    schema={student}
+                    schema={schemas.student}
                     properties={itemProperties.students}
                     submitDelete={submitDelete.bind(null, "students")}
                     submitPatch={submitPatch.bind(null, "students")}
@@ -173,7 +238,7 @@ export default class Home extends Component {
                                 unsavedItems,
                                 unsavedPatches,
                                 unsavedDeletes,
-                                schoolId
+                                selectedItem || void 0
                             );
                         }
                     }
@@ -232,66 +297,10 @@ export default class Home extends Component {
     }
 
     render() {
-        const {
-            entities,
-            items: {
-                schools
-            },
-            schemas: {
-                school
-            },
-            itemProperties,
-            selectSchool,
-            submitPatch,
-            submitDelete,
-            addUnsavedItems,
-
-            parseFiles,
-            saveChanges,
-            revertChanges,
-            //saveUnsavedItems,
-
-
-            toggleEdit
-        } = this.props;
-
         return <div className={styles.default}>
             <div className={bs.row}>
-                <div className={bs.colMd3}>
-                    <h2>
-                        Schools
-                        <span className={[infoIcon].join(" ")}
-                            onClick={() => {
-                                toggleEdit("schools");
-                            }}>
-                        </span>
-                    </h2>
-                        <ItemList
-                            className={vh90}
-                            itemType="schools"
-                            items={schools}
-                            schema={school}
-                            entities={entities}
-                            submitDelete={submitDelete.bind(null, "schools")}
-                            onItemSelect={selectSchool}
-                            properties={itemProperties.schools}
-                            addUnsavedItems={addUnsavedItems.bind(null, "schools")}
-                            submitPatch={submitPatch.bind(null, "schools")}
-                            saveChanges={
-                                ({unsavedItems, unsavedPatches, unsavedDeletes}) => {
-                                    saveChanges(
-                                        "schools",
-                                        unsavedItems,
-                                        unsavedPatches,
-                                        unsavedDeletes
-                                    );
-                                }
-                            }
-                            parseFiles={parseFiles.bind(null, "schools", itemProperties.schools)}
-                            revertChanges={revertChanges.bind(null,"schools")}
-                        />
-                </div>
-                {schools.selectedItem  == null ? null : this.getTeachersAndStudents()}
+                { this.getSchools() }
+                { this.getTeachersAndStudents() }
             </div>
         </div>;
     }

@@ -13,7 +13,7 @@ export default connect(
                 schemas.user,
                 state.entities
             ),
-            schoolId: state.authorization.schoolId,
+            school: state.authorization.school,
 
             items: state.items,
 

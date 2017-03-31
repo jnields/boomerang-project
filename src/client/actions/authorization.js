@@ -40,13 +40,40 @@ export const authorize = ({username, password}) => dispatch => {
                 return dispatch(xhrError(AUTHORIZE, error));
             }
             if (response.statusCode < 400) {
-                const normalized = normalize(body, schema.user);
-                return dispatch({
-                    type: AUTHORIZE_SUCCESS,
-                    response,
-                    schoolId: parseInt(load("SCHOOL_ID")),
-                    ... normalized
-                });
+                const normalizedUser = normalize(body, schema.user);
+
+                let school = load("SCHOOL", true);
+                try {
+                    school = JSON.parse(school);
+                    if (typeof(school) !== "object") school = null;
+                } catch(e) {
+                    school = null;
+                }
+                if (school == null) {
+                    return dispatch({
+                        type: AUTHORIZE_SUCCESS,
+                        response,
+                        user: normalizedUser.result,
+                        school: null,
+                        entities: {
+                            users: normalizedUser.entities.users,
+                        }
+                    });
+                }
+                else {
+                    const normalizedSchool = normalize(school, schema.school);
+                    return dispatch({
+                        type: AUTHORIZE_SUCCESS,
+                        response,
+                        user: normalizedUser.result,
+                        school: normalizedSchool.result,
+                        entities: {
+                            users: normalizedUser.entities.users,
+                            schools: normalizedSchool.entities.schools
+                        }
+                    });
+                }
+
             }
             return dispatch({ type: AUTHORIZE_ERROR, response });
         }

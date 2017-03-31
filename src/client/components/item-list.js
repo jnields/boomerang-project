@@ -22,6 +22,7 @@ export default class ItemList extends Component {
         return {
 
             print: func,
+            className: string,
             onItemSelect: func,
             revertChanges: func.isRequired,
             addUnsavedItems: func.isRequired,
@@ -50,7 +51,7 @@ export default class ItemList extends Component {
                 }).isRequired,
                 pendingPosts: object.isRequired,
                 isParsing: bool.isRequired,
-                parseError: object,
+                parseError: string,
                 getError: string,
                 saving: bool.isRequired,
                 saveError: string
@@ -128,16 +129,16 @@ export default class ItemList extends Component {
                 bs.textDanger,
                 styles.trash
             ].join(" ");
-        if (editing || showTrash) {
-            return <span className={trash} onClick={submitDelete.bind(null, item.id)}>
-            </span>;
-        } else if (pending) {
+        if (pending) {
             const spinner = [
                 fa.fa,
                 fa.faSpinner,
                 fa.faSpin
             ].join(" ");
             return <span className={spinner}></span>;
+        } else if (editing || showTrash) {
+            return <span className={trash} onClick={submitDelete.bind(null, item.id)}>
+            </span>;
         } else {
             return "\u00A0";
         }
@@ -389,7 +390,7 @@ export default class ItemList extends Component {
             revertChanges
         } = this.props;
         if (!editing && !anyChanges) return null;
-        return <div className={styles.cancelOk}>
+        return <div className={styles.mt10}>
             <button className={[
                 bs.btn,
                 bs.btnSm,
@@ -439,10 +440,11 @@ export default class ItemList extends Component {
         if(parseError == null) return null;
         const classes = [
             bs.alert,
-            bs.alertDanger
+            bs.alertDanger,
+            styles.mt10
         ];
         return <div className={classes.join(" ")}>
-            {parseError.message}
+            {parseError}
         </div>;
     }
 
@@ -457,13 +459,14 @@ export default class ItemList extends Component {
             addUnsavedItems,
             onItemSelect,
             parseFiles,
+            className
         } = this.props;
         let files;
         const tableClass = (onItemSelect
             ? [bs.table, styles.tableHover]
             : [bs.table]).join(" ");
 
-        return <div className={styles.default}>
+        return <div className={className || styles.default}>
             <div className={styles.scrollBox}>
                 <table className={tableClass}>
                     <thead>
@@ -497,7 +500,7 @@ export default class ItemList extends Component {
                     </tbody>
                 </table>
             </div>
-            <div className={styles.cancelOk}>
+            <div className={styles.mt10}>
                 <label className={[
                     styles.fileButton,
                     bs.btn,

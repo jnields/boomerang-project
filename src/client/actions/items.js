@@ -72,6 +72,13 @@ dispatch => {
     );
 };
 
+export const getTeachersAndStudents = () => dispatch => {
+    return Promise.all([
+        getItems("teachers", {})(dispatch),
+        getItems("students", {})(dispatch)
+    ]);
+};
+
 export const getSchools = () => dispatch => {
     return getItems("schools", {})(dispatch);
 };
@@ -168,12 +175,9 @@ export const postItems = (itemType, items, schoolId) => dispatch => {
         delete item.id;
         promises.push(new Promise((resolve, reject) => {
             xhr.post(
-                "/api/schools"
-                    + (
-                        itemType === "schools"
-                            ? ""
-                            : `/${schoolId}/${itemType}`
-                    ),
+                "/api/" +
+                    (schoolId === void 0 ? "" : `schools/${schoolId}/`) +
+                    itemType,
                 {
                     headers,
                     credentials,
@@ -234,13 +238,10 @@ export const getItems = (itemType, params, schoolId) => dispatch => {
     return new Promise((resolve, reject) => {
         lastGet[itemType] && lastGet[itemType].abort();
         lastGet[itemType] = xhr.get(
-            "/api/schools"
-                + (
-                    itemType === "schools"
-                        ? ""
-                        : `/${schoolId}/${itemType}`
-                )
-                + getQuery(params),
+            "/api/" +
+                (schoolId === void 0 ? "" : `schools/${schoolId}/`) +
+                itemType +
+                getQuery(params),
             (error, response) => {
                 lastGet[itemType] = null;
                 let body;
@@ -290,22 +291,21 @@ export const patchItem =
 (itemType, id, patch, schoolId) => dispatch => {
 
     const entity = getEntity(itemType);
+
     dispatch({type: PATCH_ITEM, schoolId, itemType, id, patch});
 
     return lastPatch[itemType][id] =
     Promise.resolve(lastPatch[itemType][id])
     .then(() => getPromise(), () => getPromise());
 
+
     function getPromise() {
         return new Promise((resolve, reject) => {
             xhr.patch(
-                "/api/schools/"
-                    + (
-                        itemType === "schools"
-                            ? ""
-                            : `${schoolId}/${itemType}/`
-                    )
-                    + id,
+                "/api/" +
+                    (schoolId === void 0 ? "" : `schools/${schoolId}/`) +
+                    itemType + "/" +
+                    id,
                 {
                     method: "PATCH",
                     headers,
@@ -362,13 +362,10 @@ dispatch => {
     dispatch({ type: DELETE_ITEM, schoolId, itemType, id });
     return new Promise((resolve, reject) => {
         xhr.del(
-            "/api/schools/"
-                + (
-                    itemType === "schools"
-                        ? ""
-                        : `${schoolId}/${itemType}/`
-                )
-                + id,
+            "/api/" +
+                (schoolId === void 0 ? "" : `schools/${schoolId}/`) +
+                itemType + "/" +
+                id,
             {
                 method: "DELETE",
                 credentials,
