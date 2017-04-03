@@ -7,75 +7,107 @@ const proxyPort = require("./config").proxyPort,
 module.exports =  {
     devtool: "cheap-module-eval-source-map",
     module: {
-        "noParse": [
-            /node_modules\/xlsx\/jszip.js$/
-        ],
-        "preLoaders": [
+        "rules": [
+            // enforce linting before build
             {
+                enforce: "pre",
                 test: /\.jsx?$/,
-                loader: "eslint",
-                exclude: /node_modules/
-            }
-        ],
-        "loaders": [
-            {
-                "exclude": /node_modules/,
-                "test": /\.jsx?$/,
-                "loader": "babel",
-                query: {
-                    presets: [
-                        "react",
-                        "stage-1",
-                        "es2015"
-                    ],
-                    plugins: [
-                        "transform-runtime",
-                        "transform-strict-mode",
-                        "react-hot-loader/babel"
-                    ]
+                include: path.resolve(__dirname, "src", "client"),
+                exclude: path.resolve(__dirname, "node_modules"),
+                use: {
+                    loader: "eslint-loader",
+                    options: {
+                        failOnWarning: false,
+                        failOnError: true
+                    }
                 }
             },
+            // worker-loader for items in worker directory
             {
-                "test": /\.s[ac]ss$/,
-                "loaders": [
-                    "style",
-                    "css"
+                test: /\.jsx?$/,
+                include: path.resolve(__dirname, "src", "client", "workers"),
+                use: [
+                    {
+                        loader: "worker-loader",
+                        options: {
+                            inline: true
+                        }
+                    },
+                    {
+                        loader: "babel-loader",
+                        options: {
+                            presets: [
+                                "react",
+                                "stage-1",
+                                "es2015"
+                            ],
+                            plugins: [
+                                "transform-runtime",
+                                "transform-strict-mode",
+                                "react-hot-loader/babel"
+                            ]
+                        }
+                    }
+                ]
+            },
+            // babel compiler for js files
+            {
+                test: /\.jsx?$/,
+                include: path.resolve(__dirname, "src", "client"),
+                exclude: [
+                    path.resolve(__dirname, "node_modules"),
+                    path.resolve(__dirname, "src", "client", "workers")
+                ],
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: [
+                            "react",
+                            "stage-1",
+                            "es2015"
+                        ],
+                        plugins: [
+                            "transform-runtime",
+                            "transform-strict-mode",
+                            "react-hot-loader/babel"
+                        ]
+                    }
+                }
+            },
+            // sass/css files
+            {
+                "test": /\.(s[ac]|c)ss$/,
+                "use": [
+                    "style-loader",
+                    "css-loader"
                         + "?modules"
                         + "&camelCase",
-                    "postcss",
-                    "sass"
+                    "postcss-loader",
+                    "sass-loader"
                         + "?outputStyle=compressed"
                         + "&precision=8"
                 ]
             },
-            {
-                "test": /\.css$/,
-                "loaders": [
-                    "style",
-                    "css"
-                        + "?modules"
-                        + "&camelCase",
-                    "postcss"
-                ]
-            },
+            // json files
             {
                 test: /\.json$/,
-                loader: "json",
+                use: "json-loader"
             },
+            // fonts
             {
                 test: /\.(eot|svg|ttf|woff|woff2)(\?.*)?$/,
-                loader: "file"
-                    + "?publicPath=/public/build/"
-                    + "&outputPath=./public/build/"
-                    + "&name=[hash].[ext]"
-                    + "&emitFile=true"
+                use: {
+                    loader: "file-loader",
+                    options: {
+                        name: "[hash].[ext]",
+                        emitFile: true
+                    }
+                }
             }
         ]
     },
     resolve: {
-        "root": path.join(__dirname, "node_modules"),
         "extensions": [
-            "",
             ".js",
             ".jsx",
             ".sass",
@@ -84,29 +116,26 @@ module.exports =  {
             ".json"
         ]
     },
-    postcss: () => [autoprefixer],
     "entry": [
         `webpack-dev-server/client?http://localhost:${proxyPort}`,
         "webpack/hot/only-dev-server",
-        "./src/client"
+        path.resolve(__dirname, "src", "client")
     ],
-    "eslint": {
-        "failOnWarning": false,
-        "failOnError": true
-    },
     node: {
         fs: "empty",
         Buffer: false
     },
-    externals: {
-        "./cptable": "var cptable"
-    },
     "output": {
-        "path": `${__dirname}/public/build`,
+        "path": path.resolve(__dirname, "public", "build"),
         "publicPath": `http://localhost:${proxyPort}/hot-reload-server/`,
         "filename": "bundle.js"
     },
     "plugins": [
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.LoaderOptionsPlugin({
+            options: {
+                postcss: [autoprefixer()]
+            }
+        })
     ]
 };

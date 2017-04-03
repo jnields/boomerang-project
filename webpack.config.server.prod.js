@@ -1,74 +1,93 @@
 "use strict";
 const autoprefixer = require("autoprefixer"),
     path = require("path"),
-    webpack = require("webpack"),
     nodePath = path.resolve(path.join(__dirname, "node_modules")),
     nodePathLength = nodePath.length,
+    webpack = require("webpack"),
     ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports =  {
     module: {
-        "noParse": [
-            /node_modules\/xlsx\/jszip.js$/
-        ],
-        "preLoaders": [
+        "rules": [
+            // enforce linting before build
             {
+                enforce: "pre",
                 test: /\.jsx?$/,
-                loader: "eslint",
-                exclude: /node_modules/
-            }
-        ],
-        "loaders": [
-            {
-                "test": /xlsx/,
-                loaders: ["null"]
-            },
-            {
-                "exclude": /(node_modules|xlsx)/,
-                "test": /\.jsx?$/,
-                "loader": "babel",
-                query: {
-                    presets: [
-                        "react",
-                        "stage-1",
-                        "es2015"
-                    ],
-                    plugins: [
-                        "transform-runtime",
-                        "transform-strict-mode"
-                    ]
+                include: path.resolve(__dirname, "src", "client"),
+                exclude: path.resolve(__dirname, "node_modules"),
+                use: {
+                    loader: "eslint-loader",
+                    options: {
+                        failOnWarning: false,
+                        failOnError: true
+                    }
                 }
             },
+            // workers: do not load
+            {
+                "test": /\.jsx?$/,
+                "include": path.resolve(__dirname, "src", "client", "workers"),
+                "use": "null-loader"
+            },
+            // babel compiler for js files
+            {
+                test: /\.jsx?$/,
+                include: path.resolve(__dirname, "src"),
+                exclude: [
+                    path.resolve(__dirname, "node_modules"),
+                    path.resolve(__dirname, "src", "client", "workers")
+                ],
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: [
+                            "react",
+                            "stage-1",
+                            "es2015"
+                        ],
+                        plugins: [
+                            "transform-runtime",
+                            "transform-strict-mode",
+                        ]
+                    }
+                }
+            },
+            // sass/css files - extract text
             {
                 "test": /\.(s[ac]|c)ss$/,
-                "loader": ExtractTextPlugin.extract(
-                    "css-loader"
-                        + "?modules"
-                        + "&camelCase"
-                    + "!postcss-loader"
-                    + "!sass-loader"
-                        + "?outputStyle=compressed"
-                        + "&precision=8"
-                )
+                "use": ExtractTextPlugin.extract({
+                    use: [
+                        "css-loader"
+                            + "?modules"
+                            + "&camelCase",
+                        "postcss-loader",
+                        "sass-loader"
+                            + "?outputStyle=compressed"
+                            + "&precision=8"
+                    ]
+
+                })
             },
+            // json files
             {
                 test: /\.json$/,
-                loader: "json",
+                use: "json-loader"
             },
+            // fonts - emit file - client build does not resolve
             {
                 test: /\.(eot|svg|ttf|woff|woff2)(\?.*)?$/,
-                loader: "file"
-                    + "?publicPath=/public/build/"
-                    + "&outputPath=./public/build/"
-                    + "&name=[hash].[ext]"
-                    + "&emitFile=false"
+                use: {
+                    loader: "file-loader",
+                    options: {
+                        name: "[hash].[ext]",
+                        emitFile: true
+                    }
+                }
             }
         ]
     },
     resolve: {
-        "root": path.join(__dirname, "node_modules"),
         "extensions": [
-            "",
             ".js",
             ".jsx",
             ".sass",
@@ -77,19 +96,13 @@ module.exports =  {
             ".json"
         ]
     },
-    postcss: () => [autoprefixer],
-    "entry": "./src/server",
-    "eslint": {
-        "failOnWarning": true,
-        "failOnError": true
-    },
+    "entry": path.resolve(__dirname, "src", "server"),
     node: {
         __filename: false,
         __dirname: false,
         process: false
     },
     externals: function(context, request, cb) {
-
         let external = !(/!/.test(request))
             && (/[^\.\/\\]/.test(request[0]));
         if (!external) {
@@ -108,10 +121,21 @@ module.exports =  {
         }
     },
     "output": {
-        "filename": "server-bundle.js",
-        "libraryTarget": "commonjs"
+        path: path.resolve(__dirname, "public", "build"),
+        publicPath: "/public/build/",
+        filename: "../../server-bundle.js",
+        libraryTarget: "commonjs"
     },
     "plugins": [
-        new ExtractTextPlugin("public/build/bundle.css"),
+        // new webpack.optimize.UglifyJsPlugin({compress:{warnings: false}}),
+        new ExtractTextPlugin({
+            filename: "bundle.css",
+            allChunks: true
+        }),
+        new webpack.LoaderOptionsPlugin({
+            options: {
+                postcss: [autoprefixer()]
+            }
+        })
     ]
 };

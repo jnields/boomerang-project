@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import favicon from "serve-favicon";
 import logger from "morgan";
+import compression from "compression";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import routes from "./routes";
@@ -18,6 +19,8 @@ module.exports = Promise.resolve(routes)
     .then(() => app, err => {throw err;});
 
 function setupApp(resolvedRoutes) {
+    app.use(compression());
+
     if (app.get("env") === "development") {
         app.use(
             "/hot-reload-server",
