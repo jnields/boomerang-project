@@ -8,6 +8,7 @@ const autoprefixer = require("autoprefixer"),
 
 module.exports =  {
     devtool: "source-map",
+    context: __dirname,
     plugins: [
         new ExtractTextPlugin("public/build/bundle.css"),
         new webpack.LoaderOptionsPlugin({
@@ -52,11 +53,10 @@ module.exports =  {
                         presets: [
                             "react",
                             "stage-1",
-                            "es2015"
-                        ],
-                        plugins: [
-                            "transform-runtime",
-                            "transform-strict-mode",
+                            [
+                                "env",
+                                { modules: false }
+                            ]
                         ]
                     }
                 }

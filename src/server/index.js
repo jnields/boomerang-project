@@ -8,21 +8,21 @@ import http from "http";
 import https from "https";
 import config from "../../config";
 import fs from "fs";
-// import cluster from "cluster";
-// import os from "os";
+import cluster from "cluster";
+import os from "os";
 
-// const cpus = os.cpus().length;
+const cpus = os.cpus().length;
 
 
 Promise.resolve(appPromise).then(
     app => {
-        // if(cluster.isMaster && app.get("env") === "production") {
-        //     for (let i = 0; i < cpus; i++) {
-        //         cluster.fork();
-        //     }
-        // } else {
-        startServer(app);
-        // }
+        if(cluster.isMaster && app.get("env") === "production") {
+            for (let i = 0; i < cpus; i++) {
+                cluster.fork();
+            }
+        } else {
+            startServer(app);
+        }
     },
     err => {
         console.log(err);

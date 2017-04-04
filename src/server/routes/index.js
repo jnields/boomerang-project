@@ -2,10 +2,13 @@ import { Router } from "express";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import { match, RouterContext } from "react-router";
-import routes from "../../client/routes";
 import { Provider } from "react-redux";
-import createStore from "../../client/helpers/create-store";
+import { createStore } from "redux";
+
 import api from "./api";
+import routes from "../../client/routes";
+import reducers from "../../client/reducers";
+
 const env = process.env.NODE_ENV || "development";
 
 module.exports = Promise.resolve(api).then(resolvedApi => {
@@ -22,17 +25,32 @@ function getPageRouter() {
     router.get("*", function(req, res) {
         match({ routes, location: req.url }, (err, redirect, props) => {
             if (err) {
-                res.status(500).send(err.message);
+                return res.status(500).send(err.message);
             } else if (redirect) {
-                res.redirect(redirect.pathname + redirect.search);
+                return res.redirect(redirect.pathname + redirect.search);
             } else if (!props) {
-                res.render("404");
+                return res.render("404");
             }
+
+            const initialState = {
+                    authorization: {
+                        authorizing: false,
+                        authorized: req.user != null,
+                        user: req.user,
+                        school: req.school
+                    }
+                },
+                store = createStore(reducers,initialState);
+            store.dispatch({type:"__INIT_STATE__"});
 
             const options = {
                 title: "Express",
-                lang: "en"
+                lang: "en",
+                initialState: JSON
+                    .stringify(initialState)
+                    .replace(/</g, "\\u003c")
             };
+
 
             if (env === "development") {
                 options.bundlePath = "/hot-reload-server/bundle.js";
@@ -40,7 +58,7 @@ function getPageRouter() {
             } else {
                 options.bundlePath = "/public/build/bundle.js";
                 options.markup = renderToString(
-                    <Provider store={createStore()}>
+                    <Provider store={store}>
                         <RouterContext {...props}/>
                     </Provider>
                 );

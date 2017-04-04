@@ -6,7 +6,7 @@ import {
 } from "./types";
 import xhrError from "./xhr-error";
 import { normalize } from "normalizr";
-import { schema } from "../helpers";
+import schema from "../helpers/schema";
 import xhr from "xhr";
 import { load } from "react-cookie";
 
@@ -24,18 +24,13 @@ export const authorize = ({username, password}) => dispatch => {
     xhr.get(
         "/api/login",
         {
+            json: true,
             headers: {
                 Authorization: "Basic " + btoa(`${username}:${password}`),
-                "Content-Type": "application/json"
             }
         },
         (error, response) => {
-            let body;
-            try {
-                if (response && response.body)
-                    body = JSON.parse(response.body);
-            }
-            catch (e) { error = e; }
+            const { body } = (response || {});
             if (error) {
                 return dispatch(xhrError(AUTHORIZE, error));
             }

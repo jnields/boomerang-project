@@ -6,6 +6,7 @@ const proxyPort = require("./config").proxyPort,
 
 module.exports =  {
     devtool: "cheap-module-eval-source-map",
+    context: __dirname,
     module: {
         "rules": [
             // enforce linting before build
@@ -39,16 +40,23 @@ module.exports =  {
                             presets: [
                                 "react",
                                 "stage-1",
-                                "es2015"
+                                "es2015",
+                                [
+                                    "env",
+                                    { modules: false }
+                                ]
                             ],
                             plugins: [
-                                "transform-runtime",
-                                "transform-strict-mode",
                                 "react-hot-loader/babel"
                             ]
                         }
                     }
                 ]
+            },
+            // do not leak server code to client
+            {
+                include: path.resolve(__dirname, "src", "server"),
+                use: "null-loader"
             },
             // babel compiler for js files
             {
@@ -56,6 +64,8 @@ module.exports =  {
                 include: path.resolve(__dirname, "src", "client"),
                 exclude: [
                     path.resolve(__dirname, "node_modules"),
+                    // do not leak server code to client
+                    path.resolve(__dirname, "src", "server"),
                     path.resolve(__dirname, "src", "client", "workers")
                 ],
                 use: {
@@ -64,11 +74,12 @@ module.exports =  {
                         presets: [
                             "react",
                             "stage-1",
-                            "es2015"
+                            [
+                                "env",
+                                { modules: false }
+                            ]
                         ],
                         plugins: [
-                            "transform-runtime",
-                            "transform-strict-mode",
                             "react-hot-loader/babel"
                         ]
                     }
@@ -78,14 +89,29 @@ module.exports =  {
             {
                 "test": /\.(s[ac]|c)ss$/,
                 "use": [
-                    "style-loader",
-                    "css-loader"
-                        + "?modules"
-                        + "&camelCase",
-                    "postcss-loader",
-                    "sass-loader"
-                        + "?outputStyle=compressed"
-                        + "&precision=8"
+                    {
+                        loader: "style-loader"
+                    },
+                    {
+                        loader: "css-loader",
+                        options: {
+                            modules: "",
+                            camelCase: ""
+                        }
+                    },
+                    {
+                        loader: "postcss-loader",
+                        options: {
+                            plugins: () => [autoprefixer]
+                        }
+                    },
+                    {
+                        loader: "sass-loader",
+                        options: {
+                            outputStyle: "compressed",
+                            precision: 8
+                        }
+                    }
                 ]
             },
             // json files
@@ -132,10 +158,10 @@ module.exports =  {
     },
     "plugins": [
         new webpack.HotModuleReplacementPlugin(),
-        new webpack.LoaderOptionsPlugin({
-            options: {
-                postcss: [autoprefixer()]
-            }
-        })
+        // new webpack.LoaderOptionsPlugin({
+        //     options: {
+        //         postcss: [autoprefixer()]
+        //     }
+        // })
     ]
 };

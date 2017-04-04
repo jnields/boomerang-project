@@ -4,6 +4,7 @@ const autoprefixer = require("autoprefixer"),
     path = require("path");
 
 module.exports =  {
+    context: __dirname,
     module: {
         "rules": [
             // enforce linting before build
@@ -38,15 +39,19 @@ module.exports =  {
                             presets: [
                                 "react",
                                 "stage-1",
-                                "es2015"
-                            ],
-                            plugins: [
-                                "transform-runtime",
-                                "transform-strict-mode"
+                                [
+                                    "env",
+                                    { modules: false }
+                                ]
                             ]
                         }
                     }
                 ]
+            },
+            // null loader for server files
+            {
+                include: path.resolve(__dirname, "src", "server"),
+                use: "null-loader"
             },
             // babel compiler for js files
             {
@@ -54,6 +59,7 @@ module.exports =  {
                 "include": path.resolve(__dirname, "src", "client"),
                 "exclude": [
                     path.resolve(__dirname, "node_modules"),
+                    path.resolve(__dirname, "src", "server"),
                     path.resolve(__dirname, "src", "client", "workers")
                 ],
                 use: [
@@ -63,12 +69,10 @@ module.exports =  {
                             presets: [
                                 "react",
                                 "stage-1",
-                                "es2015"
-                            ],
-                            plugins: [
-                                "transform-runtime",
-                                "transform-strict-mode",
-                                "react-hot-loader/babel"
+                                [
+                                    "env",
+                                    { modules: false }
+                                ]
                             ]
                         }
                     }
@@ -81,16 +85,13 @@ module.exports =  {
                     "css-loader/locals"
                         + "?modules"
                         + "&camelCase",
-                    "postcss-loader",
                     "sass-loader"
-                        + "?outputStyle=compressed"
-                        + "&precision=8"
                 ]
             },
             // json files
             {
                 test: /\.json$/,
-                use: ["json-loader"],
+                use: "json-loader"
             },
             // fonts - do not emit files - server emits in css bundle
             {

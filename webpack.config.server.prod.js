@@ -7,6 +7,7 @@ const autoprefixer = require("autoprefixer"),
     ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports =  {
+    context: __dirname,
     module: {
         "rules": [
             // enforce linting before build
@@ -43,11 +44,10 @@ module.exports =  {
                         presets: [
                             "react",
                             "stage-1",
-                            "es2015"
-                        ],
-                        plugins: [
-                            "transform-runtime",
-                            "transform-strict-mode",
+                            [
+                                "env",
+                                { modules: false }
+                            ]
                         ]
                     }
                 }
@@ -57,15 +57,27 @@ module.exports =  {
                 "test": /\.(s[ac]|c)ss$/,
                 "use": ExtractTextPlugin.extract({
                     use: [
-                        "css-loader"
-                            + "?modules"
-                            + "&camelCase",
-                        "postcss-loader",
-                        "sass-loader"
-                            + "?outputStyle=compressed"
-                            + "&precision=8"
+                        {
+                            loader: "css-loader",
+                            options: {
+                                modules: true,
+                                camelCase: true
+                            }
+                        },
+                        {
+                            loader: "postcss-loader",
+                            options: {
+                                plugins: () => [autoprefixer()]
+                            }
+                        },
+                        {
+                            loader: "sass-loader",
+                            options: {
+                                outputStyle: "compressed",
+                                precision: 8
+                            }
+                        }
                     ]
-
                 })
             },
             // json files

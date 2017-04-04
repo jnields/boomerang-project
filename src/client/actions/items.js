@@ -32,7 +32,7 @@ import {
 import xhrError from "./xhr-error";
 import getQuery from "../helpers/get-query";
 import xhr from "xhr";
-import { schema } from "../helpers";
+import schema from "../helpers/schema";
 import { normalize } from "normalizr";
 
 const credentials = "include",

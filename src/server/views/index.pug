@@ -6,6 +6,8 @@ html(lang=lang)
         meta(charset="UTF-8")
         meta(http-equiv="refresh", content="43200")
         link(type="text/css" rel="stylesheet" href="/public/build/bundle.css")
+        script.
+            window.__INITIAL_STATE__ = !{initialState};
     body
         div(id="react-root")!=markup
         script(src=bundlePath)
