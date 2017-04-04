@@ -6,7 +6,6 @@ import appPromise from "./app";
 import debug from "debug";
 import http from "http";
 import https from "https";
-import config from "../../config";
 import fs from "fs";
 import cluster from "cluster";
 import os from "os";
@@ -37,7 +36,7 @@ function startServer(app) {
      * Get port from config and store in Express.
      */
 
-    let port = normalizePort(config.port || "3000");
+    let port = normalizePort(process.env.PORT || "3000");
     app.set("port", port);
 
     /**
@@ -48,8 +47,8 @@ function startServer(app) {
     if (process.env.NODE_ENV === "production") {
         server = https.createServer(
             {
-                cert: fs.readFileSync(config.certFile),
-                key: fs.readFileSync(config.keyFile)
+                cert: fs.readFileSync(process.env.CERT_FILE),
+                key: fs.readFileSync(process.env.KEY_FILE)
             },
             app
         );

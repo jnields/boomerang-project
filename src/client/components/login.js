@@ -1,7 +1,7 @@
 import React, { PropTypes, Component } from "react";
 import bs from "../sass/bootstrap";
 import styles from "../sass/login";
-import createGuid from "../helpers/create-guid";
+
 
 export default class Login extends Component {
 
@@ -24,8 +24,19 @@ export default class Login extends Component {
         super(props);
         this.state = {
             username: "",
-            password: ""
+            password: "",
+            unId: null,
+            pwId: null
         };
+    }
+
+    componentDidMount() {
+        const createGuid = require("../helpers/create-guid").default;
+        /* eslint {"react/no-did-mount-set-state": 0}*/
+        this.setState({
+            unId: createGuid(),
+            pwId: createGuid()
+        });
     }
 
     componentWillReceiveProps(nextProps) {
@@ -49,8 +60,7 @@ export default class Login extends Component {
     }
 
     render() {
-        const unId = createGuid(),
-            pwId = createGuid();
+        const { unId, pwId } = this.state;
 
         return <div className={styles.default}>
             <h2>Please Log in to Contine</h2>

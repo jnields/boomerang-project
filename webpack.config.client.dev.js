@@ -1,5 +1,5 @@
 "use strict";
-const proxyPort = require("./config").proxyPort,
+const proxyPort = process.env.PROXY_PORT || 35612,
     autoprefixer = require("autoprefixer"),
     webpack = require("webpack"),
     path = require("path");
@@ -40,7 +40,6 @@ module.exports =  {
                             presets: [
                                 "react",
                                 "stage-1",
-                                "es2015",
                                 [
                                     "env",
                                     { modules: false }
@@ -95,14 +94,16 @@ module.exports =  {
                     {
                         loader: "css-loader",
                         options: {
-                            modules: "",
-                            camelCase: ""
+                            modules: true,
+                            camelCase: true
                         }
                     },
                     {
                         loader: "postcss-loader",
                         options: {
-                            plugins: () => [autoprefixer]
+                            plugins: function() {
+                                return [autoprefixer()];
+                            }
                         }
                     },
                     {
@@ -143,7 +144,7 @@ module.exports =  {
         ]
     },
     "entry": [
-        `webpack-dev-server/client?http://localhost:${proxyPort}`,
+        "webpack-dev-server/client?http://localhost:" + proxyPort,
         "webpack/hot/only-dev-server",
         path.resolve(__dirname, "src", "client")
     ],
@@ -153,15 +154,10 @@ module.exports =  {
     },
     "output": {
         "path": path.resolve(__dirname, "public", "build"),
-        "publicPath": `http://localhost:${proxyPort}/hot-reload-server/`,
+        "publicPath": "http://localhost:" + proxyPort + "/hot-reload-server/",
         "filename": "bundle.js"
     },
     "plugins": [
         new webpack.HotModuleReplacementPlugin(),
-        // new webpack.LoaderOptionsPlugin({
-        //     options: {
-        //         postcss: [autoprefixer()]
-        //     }
-        // })
     ]
 };

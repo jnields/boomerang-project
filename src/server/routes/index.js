@@ -11,7 +11,7 @@ import reducers from "../../client/reducers";
 
 const env = process.env.NODE_ENV || "development";
 
-module.exports = Promise.resolve(api).then(resolvedApi => {
+export default Promise.resolve(api).then(resolvedApi => {
     return {
         "/api": resolvedApi,
         "/": getPageRouter()
@@ -36,6 +36,7 @@ function getPageRouter() {
                     authorization: {
                         authorizing: false,
                         authorized: req.user != null,
+                        invalidAttempt: false,
                         user: req.user,
                         school: req.school
                     }

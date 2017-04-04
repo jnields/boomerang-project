@@ -1,8 +1,10 @@
 import Sequelize from "sequelize";
-import config from "../../../config";
-
+const database = process.env.BOOMERANG_DATABASE,
+    username = process.env.BOOMERANG_USER,
+    password = process.env.BOOMERANG_PASSWORD;
+    
 export default new Sequelize(
-    config.db.database,
-    config.db.username,
-    config.db.password
+    database,
+    username,
+    password
 );

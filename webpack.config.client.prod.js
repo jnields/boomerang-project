@@ -82,10 +82,28 @@ module.exports =  {
             {
                 "test": /\.(s[ac]|c)ss$/,
                 "use": [
-                    "css-loader/locals"
-                        + "?modules"
-                        + "&camelCase",
-                    "sass-loader"
+                    {
+                        loader: "css-loader/locals",
+                        options: {
+                            camelCase: true,
+                            modules: true
+                        }
+                    },
+                    {
+                        loader: "postcss-loader",
+                        options: {
+                            plugins: function() {
+                                return [autoprefixer()];
+                            }
+                        }
+                    },
+                    {
+                        loader: "sass-loader",
+                        options: {
+                            outputStyle: "compressed",
+                            precision: 8
+                        }
+                    }
                 ]
             },
             // json files
@@ -134,11 +152,6 @@ module.exports =  {
                 "NODE_ENV": JSON.stringify("production")
             }
         }),
-        new webpack.optimize.UglifyJsPlugin({compress:{warnings: false}}),
-        new webpack.LoaderOptionsPlugin({
-            options: {
-                postcss: [autoprefixer()]
-            }
-        })
+        new webpack.optimize.UglifyJsPlugin({compress:{warnings: false}})
     ],
 };

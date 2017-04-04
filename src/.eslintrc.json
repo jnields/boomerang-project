@@ -5,6 +5,10 @@
     "plugins": [
         "react"
     ],
+    "globals": {
+        "require": true,
+        "module": false
+    },
     "parser": "babel-eslint",
     "parserOptions": {
         "sourceType": "module",

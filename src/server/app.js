@@ -11,17 +11,18 @@ import WebpackDevServer from "webpack-dev-server";
 import proxy from "proxy-middleware";
 import url from "url";
 import devConfig from "../../webpack.config.client.dev";
-import { proxyPort } from "../../config";
+
+const proxyPort = process.env.PROXY_PORT || 35612;
 
 const app = express();
-module.exports = Promise.resolve(routes)
+export default Promise.resolve(routes)
     .then(setupApp, err => {throw err;})
     .then(() => app, err => {throw err;});
 
 function setupApp(resolvedRoutes) {
     app.use(compression());
 
-    if (app.get("env") === "development") {
+    if (process.env.NODE_ENV !== "production") {
         app.use(
             "/hot-reload-server",
             proxy(url.parse(`http://localhost:${proxyPort}/hot-reload-server/`))
@@ -40,12 +41,12 @@ function setupApp(resolvedRoutes) {
     }
 
     // view engine setup
-    app.set("views", path.join(__dirname, "src", "server", "views"));
+    app.set("views", path.resolve(__dirname, "src", "server", "views"));
     app.set("view engine", "pug");
 
     app.use(
         favicon(
-            path.join(__dirname, "public", "favicon.ico")
+            path.resolve(__dirname, "public", "favicon.ico")
         )
     );
     app.use(logger("dev"));
@@ -55,7 +56,7 @@ function setupApp(resolvedRoutes) {
     app.use(
         "/public",
         express.static(
-            path.join(__dirname, "public")
+            path.resolve(__dirname, "public")
         )
     );
 

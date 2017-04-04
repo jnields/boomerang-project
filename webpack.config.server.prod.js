@@ -3,13 +3,20 @@ const autoprefixer = require("autoprefixer"),
     path = require("path"),
     nodePath = path.resolve(path.join(__dirname, "node_modules")),
     nodePathLength = nodePath.length,
+    builtins = require("repl")._builtinLibs.reduce(
+        (result, builtin) => {
+            result[builtin] = true;
+            return result;
+        },
+        {}
+    ),
     webpack = require("webpack"),
     ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports =  {
     context: __dirname,
     module: {
-        "rules": [
+        rules: [
             // enforce linting before build
             {
                 enforce: "pre",
@@ -26,9 +33,9 @@ module.exports =  {
             },
             // workers: do not load
             {
-                "test": /\.jsx?$/,
-                "include": path.resolve(__dirname, "src", "client", "workers"),
-                "use": "null-loader"
+                test: /\.jsx?$/,
+                include: path.resolve(__dirname, "src", "client", "workers"),
+                use: "null-loader"
             },
             // babel compiler for js files
             {
@@ -42,20 +49,25 @@ module.exports =  {
                     loader: "babel-loader",
                     options: {
                         presets: [
-                            "react",
-                            "stage-1",
                             [
                                 "env",
-                                { modules: false }
-                            ]
+                                {
+                                    modules: false,
+                                    targets: {
+                                        uglify: true
+                                    }
+                                }
+                            ],
+                            "react",
+                            "stage-1"
                         ]
                     }
                 }
             },
             // sass/css files - extract text
             {
-                "test": /\.(s[ac]|c)ss$/,
-                "use": ExtractTextPlugin.extract({
+                test: /\.(s[ac]|c)ss$/,
+                use: ExtractTextPlugin.extract({
                     use: [
                         {
                             loader: "css-loader",
@@ -67,7 +79,9 @@ module.exports =  {
                         {
                             loader: "postcss-loader",
                             options: {
-                                plugins: () => [autoprefixer()]
+                                plugins: function() {
+                                    return [autoprefixer()];
+                                }
                             }
                         },
                         {
@@ -99,7 +113,7 @@ module.exports =  {
         ]
     },
     resolve: {
-        "extensions": [
+        extensions: [
             ".js",
             ".jsx",
             ".sass",
@@ -108,15 +122,16 @@ module.exports =  {
             ".json"
         ]
     },
-    "entry": path.resolve(__dirname, "src", "server"),
+    entry: path.resolve(__dirname, "src", "server"),
     node: {
         __filename: false,
         __dirname: false,
         process: false
     },
     externals: function(context, request, cb) {
-        let external = !(/!/.test(request))
-            && (/[^\.\/\\]/.test(request[0]));
+        let external = builtins[request]
+            || /(^[^\\\/\.]|(?:\!))/.test(request); // starts with /\. or has !
+
         if (!external) {
             const fullPath = path.resolve(
                 path.join(context,request)
@@ -127,27 +142,24 @@ module.exports =  {
             }
         }
         if (external) {
-            cb(null, request);
+            cb(null, "require(" + JSON.stringify(request) + ")");
         } else {
             cb();
         }
     },
-    "output": {
+    output: {
         path: path.resolve(__dirname, "public", "build"),
         publicPath: "/public/build/",
-        filename: "../../server-bundle.js",
-        libraryTarget: "commonjs"
+        filename: "../../server-bundle.js"
     },
-    "plugins": [
+    plugins: [
         // new webpack.optimize.UglifyJsPlugin({compress:{warnings: false}}),
+        new webpack.DefinePlugin({
+            "process.env": JSON.stringify(process.env)
+        }),
         new ExtractTextPlugin({
             filename: "bundle.css",
             allChunks: true
-        }),
-        new webpack.LoaderOptionsPlugin({
-            options: {
-                postcss: [autoprefixer()]
-            }
         })
     ]
 };

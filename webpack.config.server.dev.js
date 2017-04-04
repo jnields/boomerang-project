@@ -1,21 +1,21 @@
 "use strict";
-const autoprefixer = require("autoprefixer"),
-    path = require("path"),
-    nodePath = path.resolve(path.join(__dirname, "node_modules")),
+const path = require("path"),
+    nodePath = path.resolve(__dirname, "node_modules"),
     nodePathLength = nodePath.length,
-    ExtractTextPlugin = require("extract-text-webpack-plugin"),
-    webpack = require("webpack");
+    builtins = require("repl")._builtinLibs.reduce(
+        (result, builtin) => {
+            result[builtin] = true;
+            return result;
+        },
+        {}
+    ),
+    ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports =  {
     devtool: "source-map",
     context: __dirname,
     plugins: [
-        new ExtractTextPlugin("public/build/bundle.css"),
-        new webpack.LoaderOptionsPlugin({
-            options: {
-                postcss: [autoprefixer()]
-            }
-        })
+        new ExtractTextPlugin("public/build/bundle.css")
     ],
     module: {
         "rules": [
@@ -51,12 +51,12 @@ module.exports =  {
                     loader: "babel-loader",
                     options: {
                         presets: [
-                            "react",
-                            "stage-1",
                             [
                                 "env",
                                 { modules: false }
-                            ]
+                            ],
+                            "react",
+                            "stage-1"
                         ]
                     }
                 }
@@ -101,8 +101,9 @@ module.exports =  {
         process: false
     },
     externals: function(context, request, cb) {
-        let external = !(/!/.test(request))
-            && (/[^\.\/\\]/.test(request[0]));
+        let external = builtins[request]
+            || /(^[^\\\/\.]|(?:\!))/.test(request); // starts with /\. or has !
+
         if (!external) {
             const fullPath = path.resolve(
                 path.join(context,request)
@@ -113,13 +114,12 @@ module.exports =  {
             }
         }
         if (external) {
-            cb(null, request);
+            cb(null, "require(" + JSON.stringify(request) + ")");
         } else {
             cb();
         }
     },
     "output": {
-        "filename": "server-bundle.js",
-        "libraryTarget": "commonjs"
+        "filename": "server-bundle.js"
     }
 };

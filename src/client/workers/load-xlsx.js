@@ -1,5 +1,6 @@
 import xlsx from "xlsx";
-export default function(properties, files) {
+
+onmessage = ({data: {properties, files}}) => {
     let i, f, promises = [];
     for (i = 0; i != files.length; ++i) {
         f = files[i];
@@ -23,7 +24,7 @@ export default function(properties, files) {
             });
         })(f));
     }
-    return Promise.all(promises).then(
+    Promise.all(promises).then(
         values => {
             const result = [];
             values.forEach(arr => {
@@ -53,18 +54,21 @@ export default function(properties, files) {
                     }
                 });
             });
-            return result.map(obj => {
-                return mapObject(obj, properties);
+            postMessage({
+                results: result.map(obj => mapObject(properties, obj)),
+                status: "SUCCESS"
             });
         },
         error => {
-            throw error;
+            postMessage({
+                error,
+                status: "ERROR"
+            });
         }
     );
-}
+};
 
-
-function mapObject(raw, properties) {
+function mapObject(properties, raw) {
     let result = {};
     Object.keys(raw).forEach(key => {
         let value = raw[key];

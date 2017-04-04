@@ -3,6 +3,9 @@
         "node": false,
         "browser": true
     },
+    "globals": {
+        "require": true
+    },
     "rules": {
         "no-console": "warn"
     }

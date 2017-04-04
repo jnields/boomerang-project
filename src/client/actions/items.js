@@ -429,7 +429,7 @@ dispatch => {
 };
 
 
-import loadXlsx from "../helpers/load-xlsx";
+import LoadXlsxWorker from "../workers/load-xlsx";
 
 export const parseFiles = (itemType, properties, files) => dispatch => {
     dispatch({
@@ -437,20 +437,26 @@ export const parseFiles = (itemType, properties, files) => dispatch => {
         itemType,
         files
     });
-    return loadXlsx(properties, files).then(
-        items => {
-            dispatch({
-                type: PARSE_SPREADSHEET_SUCCESS,
-                itemType,
-                items
-            });
-        },
-        error => {
-            dispatch({
-                type: PARSE_SPREADSHEET_ERROR,
-                itemType,
-                error
-            });
-        }
-    );
+    return new Promise((resolve, reject) => {
+        const worker = new LoadXlsxWorker();
+        worker.onmessage = ({data:{status, results, error}}) => {
+            switch(status) {
+            case "SUCCESS":
+                return resolve(dispatch({
+                    type: PARSE_SPREADSHEET_SUCCESS,
+                    itemType,
+                    items: results
+                }));
+            case "ERROR":
+                return reject(dispatch({
+                    type: PARSE_SPREADSHEET_ERROR,
+                    itemType,
+                    error
+                }));
+            default:
+                throw new Error("");
+            }
+        };
+        worker.postMessage({files, properties}, [files]);
+    });
 };
