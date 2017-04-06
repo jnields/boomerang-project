@@ -6,17 +6,10 @@ import {
     Teacher,
     AuthMechanism
 } from "../models";
-import { QueryTypes } from "sequelize";
-import crypto from "crypto";
 import { Router } from "express";
+import logServerError from "../helpers/log-server-error";
 
-const tenYears = 1000 * 60 * 60 * 24 * 365 * 10,
-    cookieOptions = {
-        secure: process.env.NODE_ENV === "production",
-        maxAge: tenYears,
-        httpOnly: false
-    },
-    router = Router();
+const router = Router();
 
 export default orm.sync().then(initializeRoutes).then(() => router);
 
@@ -33,129 +26,6 @@ function startTransaction(req,res,next) {
             console.log(error);
             res.status(500).send();
         }
-    );
-}
-
-function authenticate(req, res, next) {
-    const authHeader = req.headers.authorization,
-        transaction = req.transaction;
-    if (!authHeader || !authHeader.startsWith("Basic ")) {
-        return verifySessionId(req,res, next);
-    }
-    const parsed = Buffer.from(authHeader.slice(6), "base64").toString();
-    const ix = parsed.indexOf(":"),
-        username = parsed.slice(0, ix),
-        password = parsed.slice(ix + 1);
-    User.findOne({
-        where: { username },
-        include: [
-            { model: AuthMechanism }
-        ],
-        transaction
-    }).then(result => {
-
-        if (result == null
-                || result.authMechanism == null
-                || !result.authMechanism.correctPassword(password)){
-            return send422();
-        }
-
-        req.user = result;
-
-        if (result.authMechanism.sessionId == null) {
-            const sessionId = crypto.randomBytes(16).toString("base64");
-            return result.authMechanism.update({ sessionId, transaction })
-                .then(() => success(result));
-        }
-        return success(result);
-    }).catch(logServerError.bind(null, req, res));
-
-    function send422() {
-        transaction.commit().then(
-            () => res.status(422).send({ error: "invalid format" })
-        );
-    }
-
-    function success(user) {
-        res.cookie(
-            "SID",
-            user.authMechanism.sessionId,
-            cookieOptions
-        );
-        user = user.toJSON();
-        user = JSON.parse(JSON.stringify(user));
-        delete user.authMechanism;
-        res.cookie(
-            "USER",
-            JSON.stringify(user),
-            cookieOptions
-        );
-        return next();
-    }
-}
-
-function verifySessionId(req, res, next) {
-    let sessionId = req.cookies.SID;
-    const transaction = req.transaction;
-    let promise;
-
-    if (sessionId && sessionId.length) {
-        promise = User.findOne({
-            include: [{
-                model: AuthMechanism,
-                where: { sessionId }
-            }],
-            transaction
-        }).then(result => {
-            if (result == null) {
-                return send403();
-            }
-            req.user = result;
-            return next();
-        });
-    } else {
-        promise = send403();
-    }
-
-    promise.catch(logServerError.bind(null, req, res));
-
-    function send403() {
-        return transaction.commit().then(
-            () => res.status(403).send({error: "unauthenticated"})
-        );
-    }
-}
-
-function getUserSchool(req, res, next) {
-    orm.query(
-        `
-        select school.id, school.name
-        from schools school
-        left join students student
-        on student.schoolid = school.id
-        left join users suser
-        on student.id = suser.studentid
-        left join teachers teacher
-        on teacher.schoolid = school.id
-        left join users tuser
-        on tuser.teacherid = teacher.id
-        where (
-            tuser.id = ${req.user.id}
-            or suser.id = ${req.user.id}
-        )
-        limit 1;
-        `,
-        { queryType: QueryTypes.SELECT, transaction: req.transaction }
-    ).then(
-        results => {
-            req.school =
-                results[0].length
-                    ? results[0][0]
-                    : null;
-            req.schoolId = (req.school || {}).id;
-            next();
-        },
-        logServerError.bind(null, req, res)
     );
 }
 
@@ -432,26 +302,6 @@ function tier(n) {
     };
 }
 
-function logServerError(req, res, error) {
-    try {
-        req.transaction.rollback().then(
-            function success(){
-                if (error.name.startsWith("Sequelize")) {
-                    res.status(409).send(error.errors ? error.errors : error);
-                } else {
-                    console.log(error);
-                    res.status(500).send({"error": "server error"});
-                }
-            },
-            function err() {
-                res.status(500).send({"error": "server error"});
-            }
-        );
-    } catch(e) {
-        res.status(500).send({"error": "server error"});
-    }
-}
-
 function getModel(type, res) {
     switch(type) {
     case "students":
@@ -464,23 +314,43 @@ function getModel(type, res) {
     }
 }
 
+function enforceAuthenticated(req, res, next) {
+    req.schoolId = req.school ? req.school.id : null;
+    if (req.user == null)
+        return res.status(401).send({error: "unauthenticated"});
+    else
+        return next();
+}
+
 function initializeRoutes() {
 
-    router.use(startTransaction, authenticate, getUserSchool, json);
+    router.use(enforceAuthenticated, startTransaction, json);
 
     router.head("/", (req,res) => {
         res.status(204).send();
     });
 
-    router.route("/login")
+    router.route("/logout")
     .get((req, res) => {
         res.cookie(
-            "SCHOOL",
-            JSON.stringify(req.school),
-            cookieOptions
+            "SID",
+            "",
+            {
+                secure: process.env.NODE_ENV === "production",
+                maxAge: 0,
+                httpOnly: true
+            }
         );
+        res.status(204).send();
+    });
+
+    router.route("/login")
+    .get((req, res) => {
+        const user = req.user.toJSON();
+        user.school = req.school ? req.school.toJSON() : null;
+        user.schoolId = req.schoolId;
         req.transaction.commit().then(
-            () => res.send(req.user),
+            () => res.send(user),
             logServerError.bind(null, req, res)
         );
     });

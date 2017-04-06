@@ -19,13 +19,7 @@ class App extends Component {
         };
     }
 
-    componentWillReceiveProps() {
-        // if (!nextProps.authorized) {
-        //     this.context.router.push("/login");
-        // }
-    }
-
-    componentDidMount() {
+    componentWillMount() {
         if (!this.props.authorized) {
             this.context.router.push("/login");
         }

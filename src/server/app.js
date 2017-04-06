@@ -11,6 +11,7 @@ import WebpackDevServer from "webpack-dev-server";
 import proxy from "proxy-middleware";
 import url from "url";
 import devConfig from "../../webpack.config.client.dev";
+import authentication from "./helpers/authentication";
 
 const proxyPort = process.env.PROXY_PORT || 35612;
 
@@ -60,6 +61,7 @@ function setupApp(resolvedRoutes) {
         )
     );
 
+    app.use(authentication);
     Object.keys(resolvedRoutes).forEach(key => {
         app.use(key, resolvedRoutes[key]);
     });

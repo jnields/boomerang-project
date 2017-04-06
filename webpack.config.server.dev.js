@@ -8,15 +8,11 @@ const path = require("path"),
             return result;
         },
         {}
-    ),
-    ExtractTextPlugin = require("extract-text-webpack-plugin");
+    );
 
 module.exports =  {
     devtool: "source-map",
     context: __dirname,
-    plugins: [
-        new ExtractTextPlugin("public/build/bundle.css")
-    ],
     module: {
         "rules": [
             // enforce linting before build

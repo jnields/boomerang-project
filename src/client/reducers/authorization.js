@@ -3,86 +3,65 @@ import {
     AUTHORIZE_SUCCESS,
     AUTHORIZE_ERROR,
     XHR_ERROR,
-    LOG_OUT
+    LOG_OUT,
+    LOG_OUT_SUCCESS,
+    LOG_OUT_ERROR
 } from "../actions/types";
-import { remove, load } from "react-cookie";
-import { normalize } from "normalizr";
-import * as schemas from "../helpers/schema";
-let user = load("USER", true),
-    school = load("SCHOOL", true);
-try {
-    user = JSON.parse(user);
-    if (typeof(user) !== "object") user = null;
-} catch(e) {
-    user = null;
-}
-try {
-    school = JSON.parse(school);
-    if (typeof(school) !== "object") school = null;
-} catch(e) {
-    school = null;
-}
 
-let sessionId = load("SID", true),
-    authorized = (
-        user != null
-        && sessionId !== void 0
-    );
-
-if (user != null)
-    user = normalize(user, schemas.user).result;
-if (school != null)
-    school = normalize(school, schemas.school).result;
-
-const initialState = {
-    authorizing: false,
-    user,
-    invalidAttempt: false,
-    authorized,
-    school
-};
-
-function removeAuth() {
-    remove("SID");
-    remove("SCHOOL");
-    remove("USER");
-}
-
-export default function(state = initialState, action) {
+export default function(state, action) {
     if (action.response && action.response.statusCode === 401) {
-        removeAuth();
         return {
             authorized: false,
             authorizing: false,
+            loggingOut: false,
+            logOutFail: false,
             invalidAttempt: false,
-            school: void 0,
-            user: void 0
+            school: null,
+            user: null
         };
     }
     switch (action.type) {
     case LOG_OUT:
-        removeAuth();
+        return {
+            ... state,
+            loggingOut: true,
+            logOutFail: false
+        };
+    case LOG_OUT_ERROR:
+        return {
+            ... state,
+            loggingOut: false,
+            logOutFail: true
+        };
+    case LOG_OUT_SUCCESS:
         return {
             authorized: false,
             authorizing: false,
+            loggingOut: false,
+            logOutFail: false,
             invalidAttempt: false,
-            school: void 0,
-            user: void 0
+            user: null,
+            school: null
         };
     case XHR_ERROR:
-        if (action.parentType === AUTHORIZE) {
-            removeAuth();
+        switch(action.parentType) {
+        case AUTHORIZE:
             return {
+                ... state,
                 authorizing: false,
                 authorized: false,
-                invalidAttempt: false,
-                user: void 0,
-                school: void 0
+                loggingOut: false,
+                invalidAttempt: false
+            };
+        case LOG_OUT:
+            return {
+                ... state,
+                loggingOut: false,
+                logOutFail: true
             };
         }
         break;
     case AUTHORIZE:
-        removeAuth();
         return {
             authorizing: true,
             user: void 0,
@@ -108,7 +87,6 @@ export default function(state = initialState, action) {
             error = "Whoops, something went wrong.";
             break;
         }
-        removeAuth();
         return {
             authorizing: false,
             user: null,

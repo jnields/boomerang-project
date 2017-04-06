@@ -18,11 +18,12 @@ export default Promise.resolve(api).then(resolvedApi => {
     };
 });
 
-
-// no server-side rendering for now - too many difficulties with this
 function getPageRouter() {
     const router = Router();
     router.get("*", function(req, res) {
+        if (req.user == null && !/\/login/i.test(req.originalUrl)) {
+            return res.redirect("/login");
+        }
         match({ routes, location: req.url }, (err, redirect, props) => {
             if (err) {
                 return res.status(500).send(err.message);
@@ -37,6 +38,8 @@ function getPageRouter() {
                         authorizing: false,
                         authorized: req.user != null,
                         invalidAttempt: false,
+                        loggingOut: false,
+                        logOutFail: false,
                         user: req.user,
                         school: req.school
                     }

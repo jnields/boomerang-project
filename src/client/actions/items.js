@@ -457,6 +457,6 @@ export const parseFiles = (itemType, properties, files) => dispatch => {
                 throw new Error("");
             }
         };
-        worker.postMessage({files, properties}, [files]);
+        worker.postMessage({files, properties});
     });
 };
