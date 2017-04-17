@@ -1,99 +1,75 @@
 import {
-    AUTHORIZE,
-    AUTHORIZE_SUCCESS,
-    AUTHORIZE_ERROR,
-    XHR_ERROR,
+    LOG_IN,
     LOG_OUT,
-    LOG_OUT_SUCCESS,
-    LOG_OUT_ERROR
-} from "../actions/types";
+} from '../actions/types';
+import {
+  PENDING,
+  COMPLETE,
+  ERROR,
+} from '../actions/xhr-statuses';
 
-export default function(state, action) {
-    if (action.response && action.response.statusCode === 401) {
-        return {
-            authorized: false,
-            authorizing: false,
-            loggingOut: false,
-            logOutFail: false,
-            invalidAttempt: false,
-            school: null,
-            user: null
-        };
-    }
-    switch (action.type) {
-    case LOG_OUT:
-        return {
-            ... state,
-            loggingOut: true,
-            logOutFail: false
-        };
-    case LOG_OUT_ERROR:
-        return {
-            ... state,
-            loggingOut: false,
-            logOutFail: true
-        };
-    case LOG_OUT_SUCCESS:
-        return {
-            authorized: false,
-            authorizing: false,
-            loggingOut: false,
-            logOutFail: false,
-            invalidAttempt: false,
-            user: null,
-            school: null
-        };
-    case XHR_ERROR:
-        switch(action.parentType) {
-        case AUTHORIZE:
-            return {
-                ... state,
-                authorizing: false,
-                authorized: false,
-                loggingOut: false,
-                invalidAttempt: false
-            };
-        case LOG_OUT:
-            return {
-                ... state,
-                loggingOut: false,
-                logOutFail: true
-            };
+const initialState = {
+  loggingIn: false,
+  logInFailed: false,
+  logInUnsent: false,
+  user: null,
+};
+
+function logIn(state, action) {
+  switch (action.status) {
+    case PENDING:
+      return {
+        ...state,
+        loggingIn: true,
+        logInFailed: false,
+        logInUnsent: false,
+        user: null,
+      };
+    case COMPLETE:
+      switch (action.response.statusCode) {
+        case 200:
+        case 304: {
+          return {
+            ...state,
+            loggingIn: false,
+            logInFailed: false,
+            logInUnsent: false,
+            user: action.result,
+          };
         }
-        break;
-    case AUTHORIZE:
-        return {
-            authorizing: true,
-            user: void 0,
-            authorized: false,
-            invalidAttempt: false,
-            school: void 0
-        };
-    case AUTHORIZE_SUCCESS:
-        return {
-            authorizing: false,
-            invalidAttempt: false,
-            school: action.school,
-            user: action.user,
-            authorized: true
-        };
-    case AUTHORIZE_ERROR: {
-        let error;
-        switch(action.response.status) {
         case 422:
-            error = "Invalid username or password.";
-            break;
         case 500:
-            error = "Whoops, something went wrong.";
-            break;
-        }
-        return {
-            authorizing: false,
+        default:
+          return {
+            ...state,
+            loggingIn: false,
+            logInFailed: true,
+            logInUnsent: false,
             user: null,
-            invalidAttempt: true,
-            authorized: false,
-            error
-        };
-    }}
-    return state;
+          };
+      }
+    case ERROR:
+      return {
+        ...state,
+        loggingIn: false,
+        logInFailed: false,
+        logInUnsent: true,
+        user: null,
+      };
+    default: throw new TypeError('unhandled type');
+  }
+}
+
+export default function (state = initialState, action) {
+  if (action.response && action.response.statusCode === 401) {
+    return initialState;
+  }
+  switch (action.type) {
+    case LOG_IN:
+      return logIn(state, action);
+    case LOG_OUT:
+      return initialState;
+    default: break;
+  }
+  return state;
 }

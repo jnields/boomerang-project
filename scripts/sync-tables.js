@@ -1,461 +1,336 @@
-(function(e, a) { for(let i in a) e[i] = a[i]; }(exports, /******/ (function(modules) { // webpackBootstrap
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
-    /******/ 	let installedModules = {};
-
+    /******/ 	var installedModules = {};
+/******/
 /******/ 	// The require function
     /******/ 	function __webpack_require__(moduleId) {
-
+/******/
 /******/ 		// Check if module is in cache
         /******/ 		if(installedModules[moduleId])
             /******/ 			return installedModules[moduleId].exports;
-
+/******/
 /******/ 		// Create a new module (and put it into the cache)
-        /******/ 		let module = installedModules[moduleId] = {
-            /******/ 			exports: {},
-            /******/ 			id: moduleId,
-            /******/ 			loaded: false
+        /******/ 		var module = installedModules[moduleId] = {
+            /******/ 			i: moduleId,
+            /******/ 			l: false,
+            /******/ 			exports: {}
         /******/ 		};
-
+/******/
 /******/ 		// Execute the module function
         /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
+/******/
 /******/ 		// Flag the module as loaded
-        /******/ 		module.loaded = true;
-
+        /******/ 		module.l = true;
+/******/
 /******/ 		// Return the exports of the module
         /******/ 		return module.exports;
     /******/ 	}
-
-
+/******/
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
     /******/ 	__webpack_require__.m = modules;
-
+/******/
 /******/ 	// expose the module cache
     /******/ 	__webpack_require__.c = installedModules;
-
+/******/
+/******/ 	// identity function for calling harmony imports with the correct context
+    /******/ 	__webpack_require__.i = function(value) { return value; };
+/******/
+/******/ 	// define getter function for harmony exports
+    /******/ 	__webpack_require__.d = function(exports, name, getter) {
+        /******/ 		if(!__webpack_require__.o(exports, name)) {
+            /******/ 			Object.defineProperty(exports, name, {
+                /******/ 				configurable: false,
+                /******/ 				enumerable: true,
+                /******/ 				get: getter
+            /******/ 			});
+        /******/ 		}
+    /******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+    /******/ 	__webpack_require__.n = function(module) {
+        /******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module["default"]; } :
+/******/ 			function getModuleExports() { return module; };
+        /******/ 		__webpack_require__.d(getter, "a", getter);
+        /******/ 		return getter;
+    /******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+    /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
 /******/ 	// __webpack_public_path__
     /******/ 	__webpack_require__.p = "";
-
+/******/
 /******/ 	// Load entry module and return exports
-    /******/ 	return __webpack_require__(0);
+    /******/ 	return __webpack_require__(__webpack_require__.s = 16);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-    /***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-        /* WEBPACK VAR INJECTION */(function(global) {
+    module.exports = require("sequelize");
 
-            let _orm = __webpack_require__(5);
-
-            let _orm2 = _interopRequireDefault(_orm);
-
-            let _models = __webpack_require__(1);
-
-            let Models = _interopRequireWildcard(_models);
-
-            function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { let newObj = {}; if (obj != null) { for (let key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-            function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-            _orm2.default.sync({ force: true }).then(function () {
-	    console.log("SUCCESS");
-	    global.process.exit(0);
-            }, function (e) {
-	    console.log("ERROR");
-	    console.log(e);
-	    global.process.exit(1);
-            });
-
-	//eslint-disable-next-line no-unused-vars
-        /* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())));
-
-    /***/ },
+/***/ }),
 /* 1 */
-    /***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-	
+    "use strict";
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_sequelize__ = __webpack_require__(0);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_sequelize___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_sequelize__);
 
-        Object.defineProperty(exports, "__esModule", {
-	    value: true
-        });
-        exports.AuthMechanism = exports.Teacher = exports.User = exports.Student = exports.School = exports.Address = undefined;
+    var database = process.env.BOOMERANG_DATABASE,
+        username = process.env.BOOMERANG_USER,
+        password = process.env.BOOMERANG_PASSWORD;
 
-        let _defineProperty = __webpack_require__(2);
+    /* harmony default export */ __webpack_exports__["a"] = (new __WEBPACK_IMPORTED_MODULE_0_sequelize___default.a(database, username, password));
 
-        let _defineProperty2 = _interopRequireDefault(_defineProperty);
-
-        let _address = __webpack_require__(3);
-
-        Object.defineProperty(exports, "Address", {
-	    enumerable: true,
-	    get: function get() {
-	        return _interopRequireDefault(_address).default;
-	    }
-        });
-
-        let _school = __webpack_require__(7);
-
-        Object.defineProperty(exports, "School", {
-	    enumerable: true,
-	    get: function get() {
-	        return _interopRequireDefault(_school).default;
-	    }
-        });
-
-        let _student = __webpack_require__(8);
-
-        Object.defineProperty(exports, "Student", {
-	    enumerable: true,
-	    get: function get() {
-	        return _interopRequireDefault(_student).default;
-	    }
-        });
-
-        let _user = __webpack_require__(9);
-
-        Object.defineProperty(exports, "User", {
-	    enumerable: true,
-	    get: function get() {
-	        return _interopRequireDefault(_user).default;
-	    }
-        });
-
-        let _teacher = __webpack_require__(10);
-
-        Object.defineProperty(exports, "Teacher", {
-	    enumerable: true,
-	    get: function get() {
-	        return _interopRequireDefault(_teacher).default;
-	    }
-        });
-
-        let _authMechanism = __webpack_require__(11);
-
-        Object.defineProperty(exports, "AuthMechanism", {
-	    enumerable: true,
-	    get: function get() {
-	        return _interopRequireDefault(_authMechanism).default;
-	    }
-        });
-
-        let _authMechanism2 = _interopRequireDefault(_authMechanism);
-
-        let _school2 = _interopRequireDefault(_school);
-
-        let _student2 = _interopRequireDefault(_student);
-
-        let _user2 = _interopRequireDefault(_user);
-
-        let _teacher2 = _interopRequireDefault(_teacher);
-
-        function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	// const noNull = {
-	//     foreignKey: { allowNull: false }
-	// };
-	// define associations on Model objects, configure as read-only properties
-
-	//import Address from "./address";
-        [
-	//[School, "Addresses", School.hasMany(Address)],
-	[_school2.default, "Teachers", _school2.default.hasMany(_teacher2.default, { onDelete: "CASCADE" })], [_school2.default, "Students", _school2.default.hasMany(_student2.default, { onDelete: "CASCADE" })], [_student2.default, "User", _student2.default.hasOne(_user2.default, { onDelete: "CASCADE" })], [_student2.default, "School", _student2.default.belongsTo(_school2.default)], [_teacher2.default, "User", _teacher2.default.hasOne(_user2.default, { onDelete: "CASCADE" })], [_teacher2.default, "School", _teacher2.default.belongsTo(_school2.default)], [_user2.default, "AuthMechanism", _user2.default.hasOne(_authMechanism2.default, { onDelete: "CASCADE" })]].forEach(function (arr) {
-	    (0, _defineProperty2.default)(arr[0], arr[1], {
-	        value: arr[2],
-	        writable: false
-	    });
-});
-
-    /***/ },
+/***/ }),
 /* 2 */
-    /***/ function(module, exports) {
+/***/ (function(module, exports) {
 
-        module.exports = require("babel-runtime/core-js/object/define-property");
+    module.exports = require("babel-polyfill");
 
-    /***/ },
+/***/ }),
 /* 3 */
-    /***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-	
+    "use strict";
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_sequelize__ = __webpack_require__(0);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_sequelize___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_sequelize__);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helpers_orm__ = __webpack_require__(1);
 
-        Object.defineProperty(exports, "__esModule", {
-	    value: true
-        });
 
-        let _sequelize = __webpack_require__(4);
+    /* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_1__helpers_orm__["a" /* default */].define("address", {
+        line1: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        line2: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        line3: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        city: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        state: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        zip: { type: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"], is: /^[0-9]{5}(-[0-9]{4})?$/ },
+        country: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"]
+    }));
 
-        let _orm = __webpack_require__(5);
-
-        let _orm2 = _interopRequireDefault(_orm);
-
-        function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-        exports.default = _orm2.default.define("address", {
-	    line1: _sequelize.STRING,
-	    line2: _sequelize.STRING,
-	    line3: _sequelize.STRING,
-	    city: _sequelize.STRING,
-	    state: _sequelize.STRING,
-	    zip: { type: _sequelize.STRING, is: /^[0-9]{5}(-[0-9]{4})?$/ },
-	    country: _sequelize.STRING
-        });
-
-    /***/ },
+/***/ }),
 /* 4 */
-    /***/ function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-        module.exports = require("sequelize");
+    "use strict";
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_sequelize__ = __webpack_require__(0);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_sequelize___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_sequelize__);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helpers_orm__ = __webpack_require__(1);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_crypto__ = __webpack_require__(9);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_crypto___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_crypto__);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__helpers_errors__ = __webpack_require__(7);
 
-    /***/ },
+
+
+
+
+    /* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_1__helpers_orm__["a" /* default */].define("authMechanism", {
+        type: {
+            type: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_sequelize__["ENUM"])("BASIC"),
+            allowNull: false
+        },
+        username: {
+            type: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+            unique: true,
+            allowNull: true
+        },
+        salt: {
+            type: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_sequelize__["CHAR"])(24),
+            allowNull: false
+        },
+        hash: {
+            type: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_sequelize__["CHAR"])(88),
+            allowNull: false
+        },
+        sessionId: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_sequelize__["CHAR"])(88)
+    }, {
+        instanceMethods: {
+            correctPassword: function correctPassword(password) {
+                return match(this.salt, this.hash, password);
+            },
+            setPassword: function setPassword(password) {
+                if (password.length < 8) throw new __WEBPACK_IMPORTED_MODULE_3__helpers_errors__["a" /* InsecurePasswordError */]();
+                var sh = saltHashPassword(password);
+                this.salt = sh.salt.toString("base64");
+                this.hash = sh.hash.toString("base64");
+            }
+        }
+    }));
+
+    function sha512(salt, password) {
+        var hash = __WEBPACK_IMPORTED_MODULE_2_crypto___default.a.createHmac("sha512", salt).update(password).digest("base64");
+        return { salt: salt, hash: hash };
+    }
+
+    function saltHashPassword(password) {
+        if (password == null) throw "null password";
+        return sha512(__WEBPACK_IMPORTED_MODULE_2_crypto___default.a.randomBytes(16).toString("base64"), password);
+    }
+
+    function match(salt, hash, password) {
+        if (salt == null || hash == null || password == null) return false;
+        var hash2 = sha512(salt, password).hash;
+        var same = 1;
+        for (var i = 0; i < hash2.length; i++) {
+            same = same & hash[i] === hash2[i];
+        }
+        return same === 1;
+    }
+
+/***/ }),
 /* 5 */
-    /***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-	
+    "use strict";
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__helpers_orm__ = __webpack_require__(1);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_sequelize__ = __webpack_require__(0);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_sequelize___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_sequelize__);
 
-        Object.defineProperty(exports, "__esModule", {
-	    value: true
-        });
 
-        let _sequelize = __webpack_require__(4);
 
-        let _sequelize2 = _interopRequireDefault(_sequelize);
+    /* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_0__helpers_orm__["a" /* default */].define("school", {
+        name: __WEBPACK_IMPORTED_MODULE_1_sequelize__["STRING"]
+    }));
 
-        let _config = __webpack_require__(6);
-
-        let _config2 = _interopRequireDefault(_config);
-
-        function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-        exports.default = new _sequelize2.default(_config2.default.db.database, _config2.default.db.username, _config2.default.db.password);
-
-    /***/ },
+/***/ }),
 /* 6 */
-    /***/ function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-	
+    "use strict";
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_sequelize__ = __webpack_require__(0);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_sequelize___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_sequelize__);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__helpers_orm__ = __webpack_require__(1);
 
-        if (process.env.NODE_ENV === "production") {
-	    module.exports = {
-	        "proxyPort": null,
-	        "port": 3000,
-	        "db": {
-	            "database": "boomerang",
-	            "username": "boomerang",
-	            "password": "MXM-YJl-iOh-BDW"
-	        },
-	        "certFile": "/etc/ssl/cert.pem",
-	        "keyFile": "/etc/ssl/key.pem"
-	    };
-        } else {
-	    module.exports = {
-	        "proxyPort": 35412,
-	        "port": 3000,
-	        "db": {
-	            "database": "boomerang",
-	            "username": "root",
-	            "password": "MXM-YJl-iOh-BDW"
-	        },
-	        "certFile": null,
-	        "keyFile": null
-	    };
+
+
+    /* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_1__helpers_orm__["a" /* default */].define("user", {
+        firstName: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        lastName: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        middleName: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        phone: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        email: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        firstLanguage: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        languageNeeds: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"])(2550),
+        notes: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"])(2550),
+        gender: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_sequelize__["ENUM"])("M", "F"),
+        dob: __WEBPACK_IMPORTED_MODULE_0_sequelize__["DATEONLY"],
+
+        homeRoom: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        teacher: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
+        oriented: __WEBPACK_IMPORTED_MODULE_0_sequelize__["BOOLEAN"],
+
+        type: {
+            type: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_sequelize__["ENUM"])("STUDENT", "LEADER", "TEACHER", "ADMIN"),
+            allowNull: false
         }
+    }));
 
-    /***/ },
+/***/ }),
 /* 7 */
-    /***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-	
+    "use strict";
+    /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return InsecurePasswordError; });
+    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-        Object.defineProperty(exports, "__esModule", {
-	    value: true
-        });
+    function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-        let _orm = __webpack_require__(5);
+    function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-        let _orm2 = _interopRequireDefault(_orm);
+    var InsecurePasswordError = function (_Error) {
+        _inherits(InsecurePasswordError, _Error);
 
-        let _sequelize = __webpack_require__(4);
+        function InsecurePasswordError() {
+            _classCallCheck(this, InsecurePasswordError);
 
-        function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+            return _possibleConstructorReturn(this, (InsecurePasswordError.__proto__ || Object.getPrototypeOf(InsecurePasswordError)).apply(this, arguments));
+        }
 
-        let School = _orm2.default.define("school", {
-	    name: {
-	        type: _sequelize.STRING,
-	        allowNull: false
-	    }
-        });
-        exports.default = School;
+        return InsecurePasswordError;
+    }(Error);
+    InsecurePasswordError.prototype.constructor = InsecurePasswordError;
 
-    /***/ },
+/***/ }),
 /* 8 */
-    /***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-	
+    "use strict";
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__user__ = __webpack_require__(6);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__school__ = __webpack_require__(5);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__address__ = __webpack_require__(3);
+    /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__auth_mechanism__ = __webpack_require__(4);
+/* unused harmony reexport Address */
+/* unused harmony reexport School */
+/* unused harmony reexport User */
+    /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_3__auth_mechanism__["a"]; });
 
-        Object.defineProperty(exports, "__esModule", {
-	    value: true
-        });
 
-        let _orm = __webpack_require__(5);
 
-        let _orm2 = _interopRequireDefault(_orm);
 
-        let _sequelize = __webpack_require__(4);
 
-        function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+    __WEBPACK_IMPORTED_MODULE_0__user__["a" /* default */].belongsTo(__WEBPACK_IMPORTED_MODULE_1__school__["a" /* default */], { onDelete: "CASCADE" });
+    __WEBPACK_IMPORTED_MODULE_0__user__["a" /* default */].belongsTo(__WEBPACK_IMPORTED_MODULE_2__address__["a" /* default */], { onDelete: "SET NULL" });
+    __WEBPACK_IMPORTED_MODULE_3__auth_mechanism__["a" /* default */].belongsTo(__WEBPACK_IMPORTED_MODULE_0__user__["a" /* default */], { onDelete: "CASCADE" });
+    __WEBPACK_IMPORTED_MODULE_2__address__["a" /* default */].hasMany(__WEBPACK_IMPORTED_MODULE_0__user__["a" /* default */], { onDelete: "SET NULL" });
+    __WEBPACK_IMPORTED_MODULE_2__address__["a" /* default */].hasMany(__WEBPACK_IMPORTED_MODULE_1__school__["a" /* default */], { onDelete: "SET NULL" });
+    __WEBPACK_IMPORTED_MODULE_1__school__["a" /* default */].hasMany(__WEBPACK_IMPORTED_MODULE_0__user__["a" /* default */], { onDelete: "CASCADE" });
+    __WEBPACK_IMPORTED_MODULE_1__school__["a" /* default */].belongsTo(__WEBPACK_IMPORTED_MODULE_2__address__["a" /* default */], { onDelete: "SET NULL" });
 
-        let Student = _orm2.default.define("student", {
-	    grade: _sequelize.INTEGER,
-	    isLeader: _sequelize.BOOLEAN
-        }, {
-	    validate: {
-	        tier3: function tier3() {
-	            let ur = this.user || this.getUser();
-	            if (ur.tier !== "3") throw new Error("Student's User is the incorrect tier.");
-	        }
-	    }
-        });
 
-        exports.default = Student;
 
-    /***/ },
+
+
+
+/***/ }),
 /* 9 */
-    /***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-	
+    module.exports = require("crypto");
 
-        Object.defineProperty(exports, "__esModule", {
-	    value: true
-        });
-
-        let _sequelize = __webpack_require__(4);
-
-        let _orm = __webpack_require__(5);
-
-        let _orm2 = _interopRequireDefault(_orm);
-
-        function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-        exports.default = _orm2.default.define("user", {
-	    firstName: _sequelize.STRING,
-	    lastName: _sequelize.STRING,
-	    email: _sequelize.STRING,
-	    dob: _sequelize.DATEONLY,
-	    gender: (0, _sequelize.ENUM)("M", "F"),
-	    age: _sequelize.INTEGER,
-	    tier: {
-	        type: (0, _sequelize.ENUM)("1", "2", "3"),
-	        allowNull: false
-	    },
-	    username: {
-	        type: _sequelize.STRING,
-	        unique: true,
-	        allowNull: false
-	    }
-        });
-
-    /***/ },
-/* 10 */
-    /***/ function(module, exports, __webpack_require__) {
-
-	
-
-        Object.defineProperty(exports, "__esModule", {
-	    value: true
-        });
-
-        let _orm = __webpack_require__(5);
-
-        let _orm2 = _interopRequireDefault(_orm);
-
-        function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-        let Teacher = _orm2.default.define("teacher", {}, {
-	    validate: {
-	        tier2: function tier2() {
-	            let ur = this.user || this.getUser();
-	            if (ur.tier != "2") throw new Error("Teacher's user is the incorrect tier.");
-	        }
-	    }
-        });
-        exports.default = Teacher;
-
-    /***/ },
-/* 11 */
-    /***/ function(module, exports, __webpack_require__) {
-
-	
-
-        Object.defineProperty(exports, "__esModule", {
-	    value: true
-        });
-
-        let _sequelize = __webpack_require__(4);
-
-        let _orm = __webpack_require__(5);
-
-        let _orm2 = _interopRequireDefault(_orm);
-
-        let _crypto = __webpack_require__(12);
-
-        let _crypto2 = _interopRequireDefault(_crypto);
-
-        function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-        exports.default = _orm2.default.define("authMechanism", {
-	    type: {
-	        type: (0, _sequelize.ENUM)("BASIC"),
-	        allowNull: false,
-	        default: "BASIC"
-	    },
-	    salt: {
-	        type: (0, _sequelize.CHAR)(24),
-	        allowNull: false
-	    },
-	    hash: {
-	        type: (0, _sequelize.CHAR)(88),
-	        allowNull: false
-	    },
-	    sessionId: (0, _sequelize.CHAR)(88)
-        }, {
-	    instanceMethods: {
-	        correctPassword: function correctPassword(password) {
-	            return match(this.salt, this.hash, password);
-	        },
-	        setPassword: function setPassword(password) {
-	            let sh = saltHashPassword(password);
-	            this.salt = sh.salt.toString("base64");
-	            this.hash = sh.hash.toString("base64");
-	        }
-	    }
-        });
-
-
-        function sha512(salt, password) {
-	    let hash = _crypto2.default.createHmac("sha512", salt).update(password).digest("base64");
-	    return { salt: salt, hash: hash };
-        }
-
-        function saltHashPassword(password) {
-	    if (password == null) throw "null password";
-	    return sha512(_crypto2.default.randomBytes(16).toString("base64"), password);
-        }
-
-        function match(salt, hash, password) {
-	    if (salt == null || hash == null || password == null) return false;
-	    let hash2 = sha512(salt, password).hash;
-	    let same = 1;
-	    for (var i = 0; i < hash2.length; i++) {
-	        same = same & hash[i] === hash2[i];
-	    }
-	    return same === 1;
-        }
-
-    /***/ },
+/***/ }),
+/* 10 */,
+/* 11 */,
 /* 12 */
-    /***/ function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-        module.exports = require("crypto");
+    "use strict";
+    /* WEBPACK VAR INJECTION */(function(global) {Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+        /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__server_helpers_orm__ = __webpack_require__(1);
+        /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__server_models__ = __webpack_require__(8);
 
-    /***/ }
-/******/ ])));
+
+//eslint-disable-next-line no-unused-vars
+
+
+        __WEBPACK_IMPORTED_MODULE_0__server_helpers_orm__["a" /* default */].sync({ force: true }).then(function () {
+            console.log("SUCCESS");
+            global.process.exit(0);
+        }, function (e) {
+            console.log("ERROR");
+            console.log(e);
+            global.process.exit(1);
+        });
+    /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(13)));
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports) {
+
+    module.exports = require("webpack/buildin/global.js");
+
+/***/ }),
+/* 14 */,
+/* 15 */,
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+    __webpack_require__(2);
+    module.exports = __webpack_require__(12);
+
+
+/***/ })
+/******/ ]);

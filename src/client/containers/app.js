@@ -1,47 +1,39 @@
-import React, { Component, PropTypes } from "react";
-import { connect } from "react-redux";
-import styles from "../sass/app";
-import bs from "../sass/bootstrap";
-import NavBar from "../containers/nav-bar";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { Route, Redirect } from 'react-router-dom';
 
-class App extends Component {
+import styles from '../styles/app';
+import bs from '../styles/bootstrap';
 
-    static get propTypes() {
-        return {
-            authorized: PropTypes.bool.isRequired,
-            children: PropTypes.node
-        };
-    }
+import NavBar from '../containers/nav-bar';
+import LogIn from '../containers/log-in';
+import Home from '../containers/home';
 
-    static get contextTypes() {
-        return {
-            router: PropTypes.object.isRequired
-        };
-    }
-
-    componentWillMount() {
-        if (!this.props.authorized) {
-            this.context.router.push("/login");
-        }
-    }
-
-    render() {
-        const classes = [
-            styles.app,
-            bs.container
-        ].join(" ");
-        return <div className={classes}>
-            <NavBar />
-            {this.props.children}
-        </div>;
-    }
+function App({ user }) {
+  const classes = [
+    styles.app,
+    bs.container,
+  ].join(' ');
+  return (<div className={classes}>
+    <NavBar />
+    <Route exact strict path="/">
+      {user == null ? <Redirect to="/login" /> : <Home /> }
+    </Route>
+    <Route exact strict path="/login" component={LogIn} />
+  </div>);
 }
+App.propTypes = {
+  user: PropTypes.number,
+};
+
+App.defaultProps = {
+  user: null,
+};
 
 export default connect(
-    state => {
-        return {
-            authorized: state.authorization.authorized
-        };
-    },
-    null
+    state => ({
+      user: state.authorization.user,
+    }),
+    null,
 )(App);

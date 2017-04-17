@@ -1,11 +1,11 @@
-import { combineReducers } from "redux";
-import items from "./items";
-import authorization from "./authorization";
-import entities from "./entities";
-import itemProperties from "./item-properties";
+import { combineReducers } from 'redux';
+import { reducer as form } from 'redux-form';
+
+import authorization from './authorization';
+import entities from './entities';
+
 export default combineReducers({
-    entities,
-    items,
-    authorization,
-    itemProperties
+  authorization,
+  entities,
+  form,
 });

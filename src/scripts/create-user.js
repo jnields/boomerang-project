@@ -1,5 +1,7 @@
-import { User } from "../server/models";
-let flag, password;
+import { AuthMechanism } from "../server/models";
+import orm from "../server/helpers/orm";
+let flag, password, username;
+import { UniqueConstraintError } from "sequelize";
 let user = {};
 
 const fields = {
@@ -9,7 +11,7 @@ const fields = {
     "-g": "gender",
     "-a": "age",
     "-dob": "dob",
-    "-t": "tier",
+    "-t": "type",
     "-f": "firstName",
     "-l": "lastName"
 };
@@ -27,28 +29,47 @@ process.argv.forEach((arg, ix) => {
             + "-g [[gender]] "
             + "-a [[age]] "
             + "-dob [[dateOfBirth]] "
-            + "-t  [[accessTier]]" ;
+            + "-t  [[type]]" ;
     } else {
         if (flag === "password") {
             password = arg;
+        } else if (flag ==="username") {
+            username = arg;
         } else {
             user[flag] = arg;
         }
         flag = null;
     }
 });
-user.authMechanism = { type: "BASIC" };
-user = User.build(
-    user,
-    { include: [{ association: User.AuthMechanism }] }
-);
 
-user.authMechanism.setPassword(password);
-user.save().then(() => {
+let transaction;
+async function saveUser() {
+    transaction = await orm.transaction({
+        autocommit: false,
+        isolationLevel: "READ COMMITTED"
+    });
+    let authMechanism = AuthMechanism.build(
+        { type: "BASIC", username }
+    );
+    authMechanism.setPassword(password);
+    authMechanism = await authMechanism.save({ transaction });
+    user.email = username;
+    await authMechanism.createUser(user, {transaction});
+    await transaction.commit();
     console.log("USER CREATED");
     process.exit(0);
-}, error => {
-    console.log("ERROR");
-    console.log(error);
-    process.exit(1);
-});
+}
+
+saveUser().catch(
+    error => {
+        transaction.rollback().then(()=>{
+            if (error instanceof UniqueConstraintError) {
+                console.log("USERNAME TAKEN");
+            } else {
+                console.log(error);
+                process.exit(1);
+            }
+            process.exit(1);
+        });
+    }
+);

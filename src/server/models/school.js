@@ -1,12 +1,12 @@
-import orm from "../helpers/orm";
 import {
-    STRING
-} from "sequelize";
+    STRING,
+} from 'sequelize';
 
-const School = orm.define("school", {
-    name: {
-        type: STRING,
-        allowNull: false
-    }
-});
-export default School;
+import orm from '../helpers/orm';
+
+export default orm.define(
+    'school',
+  {
+    name: STRING,
+  },
+);

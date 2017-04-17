@@ -1,9 +1,8 @@
 node_modules
 .DS_Store
-public/build
-scripts/
-server-bundle.js
-server-bundle.js.map
+public
+scripts
+server-bundle.js*
 
 # Logs
 logs

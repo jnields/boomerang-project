@@ -1,697 +1,693 @@
-import orm from "../helpers/orm";
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import { createTransport } from 'nodemailer';
+import { Router } from 'express';
+import crypto from 'crypto';
+
+import orm from '../helpers/orm';
 import {
-    Student,
     School,
     User,
-    Teacher,
-    AuthMechanism
-} from "../models";
-import { Router } from "express";
-import logServerError from "../helpers/log-server-error";
+    AuthMechanism,
+    Address,
+} from '../models';
+import logServerError from '../helpers/log-server-error';
+import PasswordResetTemplate from '../helpers/password-reset-template';
+
+const MAX_LIMIT = 1000;
+const DEFAULT_LIMIT = 10;
+const mailConfig = {
+  service: 'Gmail',
+  auth: {
+    user: 'example@gmail.com',
+    pass: 'password',
+  },
+};
+const transporter = createTransport(mailConfig);
 
 const router = Router();
 
-export default orm.sync().then(initializeRoutes).then(() => router);
-
-function startTransaction(req,res,next) {
-    orm.transaction({
-        autocommit: false,
-        isolationLevel: "READ COMMITTED"
-    }).then(
-        transaction => {
-            req.transaction = transaction;
-            next();
+function startTransaction(req, res, next) {
+  orm.transaction({
+    autocommit: false,
+    isolationLevel: 'READ COMMITTED',
+  }).then(
+        (transaction) => {
+          req.transaction = transaction;
+          next();
         },
-        error => {
-            console.log(error);
-            res.status(500).send();
-        }
+        (error) => {
+          console.log(error);
+          res.status(500).send();
+        },
     );
 }
 
 function json(req, res, next) {
-    res.type("json");
-    next();
+  res.type('json');
+  next();
 }
 
-function postType(type, req, res) {
-    const schoolId = req.params.school_id || req.schoolId,
-        transaction = req.transaction;
-    let obj = req.body;
-
-    type = type.toLowerCase();
-    const Model = getModel(type, res);
-    if (Model == null)
-        return transaction.commit().then(
-            () => res.stats(404).send({error: "not found"}),
-            logServerError.bind(null, req, res)
-        );
-
-    School.findOne({where:{id: schoolId}, transaction})
-    .then(school => process(school))
-    .catch(logServerError.bind(null, req, res));
-
-    function process(school) {
-        if (school == null) {
-            return transaction.commit().then(
-                () => res.status(404).send({error: "not found"})
-            );
-        }
-
-        if (obj == null || obj.id != null || obj.user == null) {
-            return res.status(400).send({"error": "bad request"});
-        }
-        const password = obj.user.password;
-        delete obj.user.password;
-        switch(Model){
-        case Teacher:
-            obj.user.tier = "2";
-            break;
-        case Student:
-            obj.user.tier = "3";
-            break;
-        }
-        if (password == null || obj.user.username == null) {
-            obj = Model.build(
-                obj,
-                {
-                    include: [{
-                        association: Model.User
-                    }]
-                }
-            );
-        } else {
-            obj.user.authMechanism = {
-                type: "BASIC"
-            };
-            obj = Model.build(
-                obj,
-                {
-                    include: [
-                        {
-                            association: Model.User,
-                            include: [{
-                                association: User.AuthMechanism
-                            }]
-                        }
-                    ]
-                }
-            );
-            obj.user.authMechanism.setPassword(password);
-        }
-        obj.setSchool(school, { save: false });
-        return obj.save({transaction})
-            .then(saved => transaction.commit().then(() => saved))
-            .then(saved => {
-                saved = saved.toJSON();
-                delete saved.user.authMechanism;
-                res.set("Location", `/schools/${schoolId}/${type}/${saved.id}`)
-                    .status(201)
-                    .send(saved);
-            });
-    }
-}
-
-function queryType(type, req, res) {
-    const schoolId = req.params.school_id || req.schoolId,
-        transaction = req.transaction;
-
-    type = type.toLowerCase();
-    const Model = getModel(type, res);
-    if (Model == null)
-        return transaction.commit().then(
-            () => res.stats(404).send({"error": "not found"}),
-            logServerError.bind(null, res)
-        );
-
-    School.findOne({
-        where: { id: schoolId },
-        include: [{
-            model: Model,
-            include: [{ model: User }]
-        }],
-        transaction
-    }).then(school => transaction.commit().then(() => {
-        if (school == null) {
-            res.status(404).send({"error": "not found"});
-        } else {
-            res.send(school[type] || []);
-        }
-    })).catch(logServerError.bind(null, req, res));
-
-}
-
-function getTypeById(type, req, res) {
-    const id = req.params.id,
-        schoolId = req.params.school_id || req.schoolId,
-        transaction = req.transaction;
-
-    type = type.toLowerCase();
-    const Model = getModel(type, res);
-    if (Model == null)
-        return transaction.commit().then(
-            () => res.stats(404).send({"error": "not found"}),
-            logServerError.bind(null, res)
-        );
-
-    Model.findOne({
-        where: { id },
-        include: [
-            {
-                model: School,
-                where: {
-                    id: schoolId
-                }
-            },
-            { model: User }
-        ],
-        transaction
-    })
-    .then(got => transaction.commit().then(() => {
-        return got
-            ? res.send(got)
-            : res.status(404).send({"error": "not found"});
-    }))
-    .catch(logServerError.bind(null, req, res));
-
-}
-
-function patchType(type, req, res) {
-    const id = req.params.id,
-        schoolId = req.params.school_id || req.schoolId,
-        obj = req.body,
-        transaction = req.transaction;
-
-    type = type.toLowerCase();
-    const Model = getModel(type, res);
-    if (Model == null)
-        return transaction.commit().then(
-            () => res.stats(404).send({"error": "not found"}),
-            logServerError.bind(null, res)
-        );
-
-    if (obj.id !== undefined && id != obj.id) {
-        return transaction.commit().then(
-            ()=>res.status(400).send({"error": "id mismatch"}),
-            logServerError.bind(null, req, res)
-        );
-    }
-
-    delete obj.id, obj.schoolId, obj.school;
-
-    const include = [
-        {
-            model: School,
-            where: {
-                id: schoolId
-            }
-        },
-        { model: User }
-    ];
-
-    if (obj.user && obj.user.password) {
-        const userInclude = include[1];
-        userInclude.include = [{
-            model: AuthMechanism
-        }];
-        const authMechanism = AuthMechanism.build({});
-        authMechanism.setPassword(obj.user.password);
-        delete obj.user.password;
-        obj.user.authMechanism = {
-            salt: authMechanism.salt,
-            hash: authMechanism.hash,
-            sessionId: null
-        };
-    }
-
-    Model.findOne({ where: { id }, include, transaction })
-    .then(existing => {
-        if (existing == null)
-            return transaction.commit().then(() => res.status(404).send());
-        const promises = [];
-        if (obj.user) {
-            existing.user = existing.user || User.build({
-                tier: type === "teachers" ? "2" : "3"
-            });
-            if (obj.user.authMechanism) {
-                promises.push(
-                    existing.user.authMechanism.update(
-                        obj.user.authMechanism,
-                        {transaction}
-                    )
-                );
-                delete obj.user.authMechanism;
-            }
-            promises.push(
-                existing.user.update(obj.user, { transaction })
-            );
-        }
-        return Promise.all(promises).then(() => {
-            obj.user = existing.user;
-            return existing.update(obj, {transaction})
-            .then(self => transaction.commit().then(()=>{
-                self = self.toJSON();
-                if (self.user)
-                    delete self.user.authMechanism;
-                return res.send(self);
-            }));
-        });
-    }).catch(logServerError.bind(null, req, res));
-}
-
-function deleteType(type, req, res) {
-    const id = req.params.id,
-        schoolId = req.params.school_id || req.schoolId,
-        transaction = req.transaction;
-
-    type = type.toString();
-    const Model = getModel(type, res);
-    if (Model == null)
-        return transaction.commit().then(
-            () => res.stats(404).send({"error": "not found"}),
-            logServerError.bind(null, res)
-        );
-
-    Model.findOne({
-        where: { id },
-        include: [{
-            model: School,
-            where: { id: schoolId }
-        }],
-        transaction
-    }).then(existing => {
-        if (existing == null) {
-            return transaction.commit().then(() =>res.status(404).end());
-        }
-        return existing.destroy().then(
-            transaction.commit().then(()=>
-                res.status(204).send()
-            )
-        );
-    }).catch(logServerError.bind(null, req, res));
-
-}
-
-function tier(n) {
-    return function(req, res, next) {
-        if (req.user.tier > n) {
-            return res.status(401).send({ error: "unauthorized"});
-        } else {
-            return next();
-        }
-    };
-}
-
-function getModel(type, res) {
-    switch(type) {
-    case "students":
-        return Student;
-    case "teachers":
-        return Teacher;
+function mapUser(user) {
+  switch (user.type) {
+    case 'ADMIN':
+    case 'STUDENT':
+    case 'LEADER':
+    case 'TEACHER':
     default:
-        res.status(404).send({"error": "endpoint not found"});
-        return null;
+      return user.toJSON();
+  }
+}
+
+function hasType(...args) {
+  return (req, res, next) => {
+    if ([].indexOf.call(args, req.user.type) === -1) {
+      return res.status(403).send({ error: 'unauthorized' });
     }
+    return next();
+  };
 }
 
 function enforceAuthenticated(req, res, next) {
-    req.schoolId = req.school ? req.school.id : null;
-    if (req.user == null)
-        return res.status(401).send({error: "unauthenticated"});
-    else
-        return next();
+  if (req.user == null) { return res.status(401).send({ error: 'unauthenticated' }); }
+  return next();
+}
+
+async function logIn(req, res) {
+  const { transaction, body } = req;
+  if (!body || !body.username || !body.password) {
+    await transaction.rollback();
+    return res.status(400).send({ error: 'bad request' });
+  }
+  const { username, password } = body;
+  const result = await AuthMechanism.findOne({
+    transaction,
+    where: { username },
+    include: [{
+      model: User,
+      include: [{
+        model: School,
+      }],
+    }],
+  });
+
+  if (result == null
+            || !result.correctPassword(password)) {
+    await transaction.rollback();
+    return res.status(422).send({ error: 'invalid format' });
+  }
+
+  const sessionId = result.sessionId
+        || crypto.randomBytes(16).toString('base64');
+
+  res.cookie(
+        'SID',
+        sessionId,
+    {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+    },
+    );
+
+  if (result.sessionId !== sessionId) { await result.update({ sessionId, transaction }); }
+
+  await req.transaction.commit();
+  return res.send(mapUser(result.user));
+}
+
+async function resetLogIn(req, res) {
+  const { transaction, body } = req;
+  if (!body || !body.sessionId || !body.password) {
+    await transaction.rollback();
+    return res.status(400).send({ error: 'bad request' });
+  }
+  const { sessionId, password } = body;
+  const authMech = await AuthMechanism.findOne({
+    transaction,
+    where: { sessionId },
+    include: [{
+      model: User,
+      include: [{
+        model: School,
+      }],
+    }],
+  });
+  authMech.setPassword(password);
+  const newSid = crypto.randomBytes(16).toString('base64');
+  authMech.sessionId = newSid;
+  res.cookie(
+    'SID',
+    newSid,
+    {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+    },
+    );
+  await authMech.save({ transaction });
+  await transaction.commit();
+  return res.send(mapUser(authMech.user));
+}
+
+async function requestReset(req, res) {
+  const { transaction, body } = req;
+  const authMech = await AuthMechanism.findOne({
+    where: { username: body.username },
+    include: [{
+      model: User,
+    }],
+  });
+  if (authMech == null) {
+    await transaction.rollback();
+    return res.status(404).send({ error: 'not found' });
+  }
+  const info = await transporter.sendMail({
+    from: mailConfig.auth.user,
+    to: authMech.user.email,
+    subject: 'Boomerang password reset',
+    html: renderToString(
+      <PasswordResetTemplate
+        host={req.headers.host}
+        authMechanism={authMech}
+      />,
+        ),
+  });
+  await transaction.commit();
+  console.log(info);
+  return res.status(204).send();
+}
+
+async function querySchools(req, res) {
+  const limit = Math.min(
+    parseInt(req.query.$limit, 10) || DEFAULT_LIMIT,
+    MAX_LIMIT,
+  );
+  const offset = parseInt(req.query.$offset, 10) || 0;
+  const $like = req.query.name$like;
+  const transaction = req.transaction;
+
+  let attributes = req.query.$select;
+
+  if (attributes && !Array.isArray(attributes)) {
+    attributes = [attributes];
+  }
+
+  const where = $like
+    ? { name: { $like } }
+    : undefined;
+  const query = {
+    transaction,
+    include: [{
+      model: Address,
+    }],
+  };
+  if (attributes) query.attributes = attributes;
+  if (where) query.where = where;
+  if (limit) query.limit = limit;
+  if (offset) query.offset = offset;
+
+  const schools = await School.findAll(query);
+  await transaction.commit();
+  return res.send(schools.map(school => school.toJSON()));
+}
+
+async function getSchool(req, res) {
+  const transaction = req.transaction;
+  const id = req.params.id;
+
+  const school = await School.findOne({
+    where: { id },
+    transaction,
+  });
+  if (school) {
+    await transaction.commit();
+    return res.send(school);
+  }
+  await transaction.rollback();
+  return res.status(404).send({ error: 'not found' });
+}
+
+async function patchInstanceAddress(instance, patch, transaction) {
+  const address = await instance.getAddress();
+  if (patch) {
+    if (address) {
+      await address.update(
+                patch,
+                { transaction },
+            );
+    } else {
+      await instance.createAddress(
+                patch,
+                { transaction },
+            );
+    }
+  } else if (address) {
+    await address.destroy({
+      transaction,
+    });
+  }
+  return instance.reload({
+    transaction,
+    include: [{ model: Address }],
+  });
+}
+
+async function patchSchool(req, res) {
+  const patch = req.body;
+  const id = req.params.id;
+  const transaction = req.transaction;
+
+  if (!patch || (patch.id && `${patch.id}` !== id)) {
+    await transaction.rollback();
+    return res.status(400).send({ error: 'ID mismatch' });
+  }
+  delete patch.id;
+  const existing = await School.findOne({
+    where: { id },
+    include: [{ model: Address }],
+    transaction,
+  });
+  if (!existing) {
+    await transaction.rollback();
+    return res.status(404).send({ error: 'not found' });
+  }
+  const patchAddress = 'address' in patch;
+  const addressPatch = patch.address;
+  delete patch.address;
+
+  let updated = await existing.update(
+        patch,
+        { transaction },
+    );
+  if (patchAddress) {
+    updated = await patchInstanceAddress(
+            updated,
+            addressPatch,
+            transaction,
+        );
+  }
+  await transaction.commit();
+  return res.status(200).send(updated.toJSON());
+}
+
+async function postSchool(req, res) {
+  const school = req.body;
+  const transaction = req.transaction;
+  if (school.id) {
+    await transaction.rollback();
+    return res.status(422)
+            .send({ error: 'explicit value provided for id' });
+  }
+  const saved = await School.create(school, { transaction });
+  if (school.address) {
+    await saved.createAddress(school.address, { transaction });
+  }
+  await transaction.commit();
+  return res.set('Location', `/schools/${saved.id}`)
+        .status(201)
+        .send(saved.toJSON());
+}
+
+async function deleteSchool(req, res) {
+  const id = req.params.id;
+  const transaction = req.transaction;
+  if (id == null) {
+    await transaction.rollback();
+    return res.status(400).send({ error: 'no id specified to delete' });
+  }
+  const destroyed = await School.destroy({ where: { id }, limit: 1, transaction });
+  if (destroyed) {
+    await transaction.commit();
+    return res.status(204).end();
+  }
+  await transaction.rollback();
+  return res.status(404).end();
+}
+
+async function queryUsers(req, res) {
+  const limit = Math.min(
+    parseInt(req.query.$limit, 10) || DEFAULT_LIMIT,
+    MAX_LIMIT,
+  );
+  const offset = parseInt(req.query.$offset, 10) || 0;
+  const transaction = req.transaction;
+  const where = {};
+  if (req.query.type) {
+    if (Array.isArray(req.query.type)) {
+      where.type = {
+        $in: req.query.type,
+      };
+    } else {
+      where.type = req.query.type;
+    }
+  }
+
+  let include;
+  switch (req.user.type) {
+    case 'ADMIN':
+      if (req.query.school && req.query.school.id) {
+        if (Array.isArray(req.query.school.id)) {
+          include = [{
+            model: School,
+            where: {
+              id: {
+                $in: req.query.school.id,
+              },
+            },
+          }];
+        } else {
+          include = [{
+            model: School,
+            where: {
+              id: req.query.school.id,
+            },
+          }];
+        }
+      }
+      break;
+    case 'TEACHER':
+      include = [{
+        model: School,
+        where: {
+          id: req.user.school.id,
+        },
+      }];
+      break;
+    default:
+      throw new Error('type unhandled in case switch');
+  }
+  const results = await User.findAll({
+    where,
+    transaction,
+    limit,
+    offset,
+    include,
+  });
+  await transaction.commit();
+  return res.send(results.map(mapUser));
+}
+
+async function getUser(req, res) {
+  const transaction = req.transaction;
+  const id = req.params.id;
+  const include = [];
+
+  switch (req.user.type) {
+    case 'ADMIN':
+      break;
+    case 'TEACHER':
+      include.push({
+        model: School,
+        where: {
+          id: req.user.school.id,
+        },
+      });
+      break;
+    default:
+      throw new Error('unhandled case in switch statement');
+  }
+  const user = await User.findOne({
+    where: { id },
+    include,
+    transaction,
+  });
+
+  await transaction.commit();
+  if (user) {
+    return res.send(mapUser(user));
+  }
+  return res.status(404).send({ error: 'not found' });
+}
+
+async function postUser(req, res) {
+  const user = req.body;
+  const transaction = req.transaction;
+  const include = [{
+    model: School,
+  }];
+
+  if (user == null || user.id != null) {
+    await transaction.rollback();
+    return res.status(400).send({ error: 'bad request' });
+  }
+
+  switch (req.user.type) {
+    case 'ADMIN':
+      if (['TEACHER', 'LEADER', 'STUDENT'].indexOf(user.type) !== -1
+                && user.school == null
+                && user.schoolId == null) {
+        await transaction.rollback();
+        return res.status(400).send(
+                { error: 'incorrect user type provided' },
+            );
+      }
+
+      break;
+    case 'TEACHER':
+      delete user.school;
+      user.schoolId = req.user.school.id;
+      if (['STUDENT', 'LEADER'].indexOf(user.type) === -1) {
+        await transaction.rollback();
+        return res.status(400).send(
+                { error: 'incorrect user type provided' },
+            );
+      }
+      break;
+    default:
+      throw new Error('unhandled case');
+  }
+  const password = user.password;
+  const created = await User.create(user, { transaction, include });
+  if (created.type !== 'ADMIN'
+            && created.school == null
+            && created.schoolId == null) {
+    throw new Error('school not saved');
+  }
+  if (password) {
+    let authMechanism = AuthMechanism.build({
+      type: 'basic',
+      username: user.email,
+    });
+    authMechanism.setPassword(password);
+    authMechanism = await authMechanism.save({ transaction });
+    await authMechanism.setUser(created, { transaction });
+  }
+  const result = await created.reload({ transaction, include });
+  await transaction.commit();
+  return res.send(result.toJSON());
+}
+
+async function patchUser(req, res) {
+  const updates = req.body;
+  const transaction = req.transaction;
+  const id = req.params.id;
+
+  if (updates == null || (updates.id && `${updates.id}` !== id)) {
+    await transaction.rollback();
+    return res.status(400).send({ error: 'bad request' });
+  }
+
+  if (id === `${req.user.id}`) {
+    delete updates.type;
+  }
+
+  const include = [];
+
+  if (req.user.type === 'TEACHER') {
+    if (['TEACHER', 'STUDENT', 'LEADER'].indexOf(updates.type) === -1) { delete updates.type; }
+    include.push({
+      model: School,
+      where: { id: req.user.school.id },
+    });
+  }
+
+  delete updates.school;
+  delete updates.schoolId;
+
+  const existing = await User.findOne({
+    where: { id: req.params.id },
+    include,
+    transaction,
+  });
+
+  if (existing == null) {
+    await transaction.rollback();
+    return res.status(404).send();
+  }
+  const oldEmail = existing.email;
+  const updated = await existing.update(updates, { transaction });
+
+  if (updates.password) {
+    const noEmail = (
+            (oldEmail == null || 'email' in updates)
+            && updates.email == null
+        );
+    if (noEmail) {
+      await transaction.rollback();
+      return res.status(400).send({
+        error: 'no username assigned',
+      });
+    }
+    let authMech = await AuthMechanism.findOne({
+      where: {
+        type: 'BASIC',
+        username: oldEmail,
+      },
+      transaction,
+    });
+    if (authMech) {
+      authMech.setPassword(updates.password);
+      if (updates.email) { authMech.username = updated.email; }
+      await authMech.save({ transaction });
+    } else {
+      authMech = AuthMechanism.build({
+        type: 'BASIC',
+        username: updated.email,
+      });
+      authMech.setPassword(updates.password);
+      await authMech.save({ transaction });
+      await authMech.setUser(updated, { transaction });
+    }
+  } else if (
+        'password' in updates
+        || ('email' in updates && updates.email == null)
+    ) {
+    await AuthMechanism.destroy({
+      where: {
+        username: oldEmail,
+        type: 'BASIC',
+      },
+            // include isn't supported
+            // for destroy ???
+            // maybe they'll add support one day
+            // otherwise username is guaranteed
+            // to be unique so this should be fine
+            // include:[{
+            //     model: User,
+            //     where: {
+            //         id: updated.id
+            //     }
+            // }],
+      transaction,
+    });
+  } else if (updates.email) {
+    await AuthMechanism.update(
+            { username: updates.email },
+      {
+        where: {
+          username: oldEmail,
+        },
+        transaction,
+      },
+        );
+  }
+
+  await transaction.commit();
+  return res.send(updated);
+}
+
+async function deleteUser(req, res) {
+  const id = req.params.id;
+  const transaction = req.transaction;
+  const include = [];
+
+  if (`${req.user.id}` === id) {
+    await transaction.rollback();
+    return res.status(400).send({ error: 'bad request' });
+  }
+
+  if (req.user.type === 'TEACHER') {
+    include.push({
+      model: School,
+      where: { id: req.user.school.id },
+    });
+  }
+
+  const existing = await User.findOne({
+    where: { id },
+    transaction,
+    include,
+  });
+
+  if (existing) {
+    await existing.destroy();
+    await transaction.commit();
+    return res.status(204).send();
+  }
+  await transaction.rollback();
+  return res.status(404).send();
 }
 
 function initializeRoutes() {
+  router.use(startTransaction, json);
 
-    router.use(enforceAuthenticated, startTransaction, json);
-
-    router.head("/", (req,res) => {
-        res.status(204).send();
+  router.route('/login')
+    .post((req, res) => {
+      logIn(req, res)
+        .catch(err => logServerError(err, req, res));
+    })
+    .put((req, res) => {
+      resetLogIn(req, res)
+        .catch(err => logServerError(err, req, res));
     });
 
-    router.route("/logout")
+  router.route('/recover/request')
+    .post((req, res) => {
+      requestReset(req, res)
+        .catch(err => logServerError(err, req, res));
+    });
+
+  router.route('/schools')
+    .all(enforceAuthenticated, hasType('ADMIN'))
     .get((req, res) => {
-        res.cookie(
-            "SID",
-            "",
-            {
-                secure: process.env.NODE_ENV === "production",
-                maxAge: 0,
-                httpOnly: true
-            }
-        );
-        res.status(204).send();
-    });
-
-    router.route("/login")
-    .get((req, res) => {
-        const user = req.user.toJSON();
-        user.school = req.school ? req.school.toJSON() : null;
-        user.schoolId = req.schoolId;
-        req.transaction.commit().then(
-            () => res.send(user),
-            logServerError.bind(null, req, res)
-        );
-    });
-
-    router.route("/schools")
-    .all(tier(1))
-    .get((req,res) => {
-        const limit = req.query.$limit,
-            offset = limit * req.query.$offset,
-            $like = req.query.name$like;
-
-        let attributes = req.query.$select || void 0;
-
-        if (attributes && !Array.isArray(attributes)){
-            attributes = [ attributes ];
-        }
-
-        const where = $like
-            ? { name: { $like } }
-            : void 0;
-
-        const query = {
-            transaction: req.transaction
-        };
-        if(attributes) query.attributes = attributes;
-        if(where) query.where = where;
-        if(limit) query.limit = limit;
-        if(offset) query.offset = offset;
-
-        School.findAll(query)
-            .then(schools =>
-                req.transaction.commit()
-                    .then(() => res.send(schools))
-            )
-            .catch(logServerError.bind(null, req, res));
+      querySchools(req, res)
+        .catch(err => logServerError(err, req, res));
     })
     .post((req, res) => {
-        const school = req.body,
-            transaction = transaction;
-        if (school.id) {
-            return transaction.commit().then(
-                () => res.status(422)
-                    .send({"error": "explicit value provided for id"})
-            );
-        }
-        return School.create(school, { transaction: req.transaction })
-            .then(
-                saved => req.transaction.commit().then(
-                    () => res
-                        .set("Location", `/schools/${saved.id}`)
-                        .status(201)
-                        .send(saved)
-                )
-            )
-            .catch(logServerError.bind(null, req, res));
+      postSchool(req, res)
+        .catch(err => logServerError(err, req, res));
     });
 
-    router.route("/schools/:school_id")
-    .all(tier(1))
-    .get((req,res) => {
-        const transaction = req.transaction,
-            id = req.params.school_id;
-        School.findOne({
-            where: { id },
-            transaction
-        })
-        .then(school => transaction.commit().then(
-            () => {
-                if (school) {
-                    return res.send(school);
-                }
-                return res.status(404).send({ error: "not found" });
-            }
-        ))
-        .catch(logServerError.bind(null, req, res));
+  router.route('/schools/:id')
+    .all(enforceAuthenticated, hasType('ADMIN'))
+    .get((req, res) => {
+      getSchool(req, res)
+        .catch(err => logServerError(err, req, res));
     })
     .patch((req, res) => {
-        const school = req.body,
-            transaction = req.transaction;
-        if (!school
-                || (school.id != null && school.id != req.params.school_id)) {
-            return transaction.commit().then(
-                () => res.status(400).send({"error": "ID mismatch"}),
-                logServerError.bind(null, req, res)
-            );
-        }
-        delete school.id;
-        School.findOne({
-            where: { id: req.params.school_id },
-            transaction
-        })
-        .then(existing => {
-            if (!existing) {
-                return transaction.commit().then(
-                    () => res.status(404).send({"error": "not found"}),
-                );
-            }
-            return existing.update(school, {transaction})
-            .then(self => transaction.commit().then(
-                () => res.status(200).send(self)
-            ));
-        }).catch(logServerError.bind(null, req, res));
+      patchSchool(req, res)
+        .catch(err => logServerError(err, req, res));
     })
     .delete((req, res) => {
-        const id = req.params.school_id,
-            transaction = req.transaction;
-
-        if (id == null)
-            return res.status(400).send({"error": "no id specified to delete"});
-        School.destroy({ where: {id}, limit: 1, transaction})
-            .then(number => transaction.commit().then(() => {
-                res.status(number === 0 ? 404 : 204).end();
-            }))
-            .catch(logServerError.bind(null, req, res));
+      deleteSchool(req, res)
+        .catch(err => logServerError(err, req, res));
     });
 
-    router.route("/schools/:school_id/:type")
-    .all(tier(1))
-    .get((req,res) => {
-        queryType(
-            req.params.type,
-            req,
-            res
-        );
+  router.route('/users')
+    .all(enforceAuthenticated, hasType('ADMIN', 'TEACHER'))
+    .get((req, res) => {
+      queryUsers(req, res)
+        .catch(err => logServerError(err, req, res));
     })
     .post((req, res) => {
-        postType(
-            req.params.type,
-            req,
-            res
-        );
+      postUser(req, res)
+        .catch(err => logServerError(err, req, res));
     });
 
-    router.route("/schools/:school_id/:type/:id")
-    .all(tier(1))
+  router.route('/users/:id')
+    .all(enforceAuthenticated, hasType('ADMIN', 'TEACHER'))
     .get((req, res) => {
-        getTypeById(
-            req.params.type,
-            req,
-            res
-        );
+      getUser(req, res)
+        .catch(err => logServerError(err, req, res));
     })
     .patch((req, res) => {
-        patchType(
-            req.params.type,
-            req,
-            res
-        );
+      patchUser(req, res)
+        .catch(err => logServerError(err, req, res));
     })
     .delete((req, res) => {
-        deleteType(
-            req.params.type,
-            req,
-            res
-        );
-    });
-
-    router.route("/users")
-    .all(tier(1))
-    .get((req, res) => {
-        const limit = Math.min(req.query.$pageSize || 10, 1000),
-            offset = limit * (req.query.$page || 0),
-            transaction = req.transaction;
-        User.findAll({
-            where: { },
-            transaction,
-            limit,
-            offset
-        })
-        .then(users => transaction.commit().then(() => res.send(users)))
-        .catch(logServerError.bind(null, req, res));
-    })
-    .post((req, res) => {
-        const user = req.body,
-            transaction = req.transaction;
-
-        if (user == null || user.id != null) {
-            return res
-                .status(400)
-                .send({"error": "bad request"});
-        }
-        User.create(user, {transaction})
-        .then(created => transaction.commit().then(() => res.send(created)))
-        .catch(logServerError.bind(null, req, res));
-    });
-
-    router.route("/users/:id")
-    .all(tier(1))
-    .get((req, res) => {
-        const transaction = req.transaction,
-            id = req.params.id;
-        User.findOne({ transaction, where: { id }})
-        .then(user => transaction.commit().then(
-            ()=> {
-                if (user) {
-                    res.send(user);
-                } else {
-                    res.status(404).send({error: "not found"});
-                }
-            }
-        ))
-        .catch(logServerError.bind(null, req, res));
-    })
-    .patch((req, res) => {
-        const updates = req.body,
-            transaction = req.transaction;
-
-        if (updates.id != null && updates.id != req.params.id) {
-            return transaction.commit().then(
-                () => res.status(400).send({"error": "bad request"})
-            );
-        }
-        if (req.params.id == req.user.id) {
-            delete updates.tier;
-        }
-        let include = void 0;
-        if (updates.password) {
-            include = [{
-                model: AuthMechanism
-            }];
-            const authMechanism = AuthMechanism.build({});
-            authMechanism.setPassword(updates.password);
-            updates.authMechanism = {
-                salt: authMechanism.salt,
-                hash: authMechanism.hash,
-                sessionId: null
-            };
-            delete updates.password;
-        }
-        User.findOne({
-            where: { id: req.params.id },
-            include,
-            transaction
-        })
-        .then(existing => {
-            if (existing == null)
-                return transaction
-                    .rollback()
-                    .then(() => res.status(404).send());
-            return existing.update(updates, {transaction})
-                .then(updated => transaction.commit().then(
-                    () => res.send(updated)
-                ));
-        })
-        .catch(logServerError.bind(null, req, res));
-
-    })
-    .delete((req, res) => {
-        const id = req.params.id,
-            transaction = req.transaction;
-        if (req.user.id == id) {
-            return transaction.commit().then(
-                () => res.status(400).send({"error": "bad request"}),
-                logServerError.bind(null, req, res)
-            );
-        }
-        return User.delete({ where: {id}, transaction})
-        .then(count => transaction.commit().then(
-            () => res.status(count ? 204 : 404).send()
-        )).catch(logServerError.bind(null, req, res));
-    });
-
-    router.route("/students")
-    .all(tier(2))
-    .post((req,res) => {
-        postType(
-            "students",
-            req,
-            res
-        );
-    })
-    .get((req,res) => {
-        queryType(
-            "students",
-            req,
-            res
-        );
-    });
-
-    router.route("/teachers")
-    .all(tier(2))
-    .get((req,res) => {
-        queryType(
-            "teachers",
-            req,
-            res
-        );
-    })
-    .post((req, res) => {
-        postType(
-            "teachers",
-            req,
-            res
-        );
-    });
-
-    router.route("/teachers/:id")
-    .all(tier(2))
-    .get((req,res) => {
-        getTypeById(
-            "teachers",
-            req,
-            res
-        );
-    })
-    .patch((req, res) => {
-        patchType(
-            "teachers",
-            req,
-            res
-        );
-    })
-    .delete((req,res) => {
-        deleteType(
-            "teachers",
-            req,
-            res
-        );
-    });
-
-    router.route("/students/:id")
-    .all(tier(2))
-    .get((req, res) => {
-        getTypeById(
-            "students",
-            req,
-            res
-        );
-    })
-    .patch((req, res) => {
-        patchType(
-            "students",
-            req,
-            res
-        );
-    })
-    .delete((req,res) => {
-        deleteType(
-            "students",
-            req,
-            res
-        );
+      deleteUser(req, res)
+        .catch(err => logServerError(err, req, res));
     });
 }
+
+
+export default orm.sync().then(initializeRoutes).then(() => router);

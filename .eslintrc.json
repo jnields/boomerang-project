@@ -1,34 +1,29 @@
 {
     "root": true,
     "env": {
-        "es6": true,
         "node": true
     },
-    "extends": [
-        "eslint:recommended"
-    ],
-    "rules": {
-        "indent": [
-            "warn",
-            4
-        ],
-        "linebreak-style": [
-            "warn",
-            "unix"
-        ],
-        "no-console": "off",
-        "no-unused-vars": "warn",
-        "no-var": "warn",
-        "no-shadow": "error",
-        "no-shadow-restricted-names": "error",
-        "quotes": [
-            "warn",
-            "double"
-        ],
-        "semi": [
-            "error",
-            "always"
-        ],
-        "strict": "error"
+    "parserOptions": {
+        "ecmaVersion": 6
+    },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".json",
+                    ".scss",
+                    ".sass",
+                    ".css"
+                ]
+            }
+        },
+        "import/ignore": [
+            "\\.sass",
+            "\\.scss",
+            "\\.css",
+            "src/client/workers/.*"
+        ]
     }
 }

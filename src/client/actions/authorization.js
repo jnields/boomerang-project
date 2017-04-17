@@ -1,102 +1,41 @@
+import { normalize } from 'normalizr';
 import {
-    AUTHORIZE,
-    AUTHORIZE_SUCCESS,
-    AUTHORIZE_ERROR,
-    LOG_OUT,
-    LOG_OUT_SUCCESS,
-    LOG_OUT_ERROR
-} from "./types";
-import xhrError from "./xhr-error";
-import { normalize } from "normalizr";
-import schema from "../helpers/schema";
-import xhr from "xhr";
+  LOG_IN,
+  LOG_OUT,
+} from './types';
+import {
+  COMPLETE,
+  PENDING,
+  ERROR,
+} from './xhr-statuses';
 
-function encodeUtf8(str) {
-    return btoa(
-        encodeURIComponent(str)
-        .replace(
-            /%([0-9A-F]{2})/g,
-            function(match, code) {
-                return String.fromCharCode("0x" + code);
-            }
-        )
-    );
-}
+import * as schemas from '../helpers/schema';
+import api from '../helpers/api';
 
-export const logOut = () => dispatch => {
-    dispatch({
-        type: LOG_OUT
-    });
-    xhr.get(
-        "/api/logout",
-        { withCredentials: true },
-        (error, response) => {
-            if (error) {
-                return dispatch(xhrError(LOG_OUT, error));
-            }
-            const { statusCode } = (response || {});
-            if (statusCode < 400) {
-                dispatch({type: LOG_OUT_SUCCESS});
-            } else {
-                dispatch({type: LOG_OUT_ERROR});
-            }
-
-        }
-    );
+export const logOut = () => (dispatch) => {
+  dispatch({ type: LOG_OUT });
+  api.auth.logOut();
 };
 
-export const authorize = ({username, password}) => dispatch => {
-    dispatch({
-        type: AUTHORIZE,
-        username, password
-    });
-    xhr.get(
-        "/api/login",
-        {
-            json: true,
-            withCredentials: true,
-            headers: {
-                Authorization: "Basic " + encodeUtf8(`${username}:${password}`),
-            }
-        },
-        (error, response) => {
-            const { body } = (response || {});
-            if (error) {
-                return dispatch(xhrError(AUTHORIZE, error));
-            }
-            if (response.statusCode < 400) {
-
-                const school = body.school;
-                delete body.school;
-                const normalizedUser = normalize(body, schema.user);
-
-                if (school == null) {
-                    return dispatch({
-                        type: AUTHORIZE_SUCCESS,
-                        response,
-                        user: normalizedUser.result,
-                        school: null,
-                        entities: {
-                            users: normalizedUser.entities.users,
-                        }
-                    });
-                }
-                else {
-                    const normalizedSchool = normalize(school, schema.school);
-                    return dispatch({
-                        type: AUTHORIZE_SUCCESS,
-                        response,
-                        user: normalizedUser.result,
-                        school: normalizedSchool.result,
-                        entities: {
-                            users: normalizedUser.entities.users,
-                            schools: normalizedSchool.entities.schools
-                        }
-                    });
-                }
-
-            }
-            return dispatch({ type: AUTHORIZE_ERROR, response });
-        }
-    );
+export const logIn = (username, password) => (dispatch) => {
+  dispatch({
+    type: LOG_IN,
+    status: PENDING,
+    username,
+    password,
+  });
+  api.auth.logIn(username, password).then(
+    (response) => {
+      if (response.statusCode >= 400) {
+        return dispatch({ type: LOG_IN, status: COMPLETE, response });
+      }
+      return dispatch({
+        ...normalize(response.body, schemas.user),
+        type: LOG_IN,
+        status: COMPLETE,
+        response,
+      });
+    },
+    error => dispatch({ type: LOG_IN, error, status: ERROR }),
+  );
 };

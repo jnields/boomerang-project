@@ -1,23 +1,26 @@
-import React from "react";
-import { render } from "react-dom";
-import routes from "./routes";
-import { Router, browserHistory } from "react-router";
-import { Provider } from "react-redux";
-import { createStore, applyMiddleware } from "redux";
-import thunk from "redux-thunk";
-import reducers from "./reducers";
+import React from 'react';
+import { render } from 'react-dom';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+import { createStore, applyMiddleware } from 'redux';
+
+import thunk from 'redux-thunk';
+import reducers from './reducers';
+import App from './containers/app';
 
 const store = createStore(
     reducers,
-    window.__INITIAL_STATE__,
-    applyMiddleware(thunk)
+    window.INITIAL_STATE,
+    applyMiddleware(thunk),
 );
 
-delete window.__INITIAL_STATE__;
+delete window.INITIAL_STATE;
 
 render(
-    <Provider store={store}>
-        <Router routes={routes} history={browserHistory} />
-    </Provider>,
-    document.getElementById("react-root")
+  <Provider store={store}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </Provider>,
+    document.getElementById('react-root'),
 );

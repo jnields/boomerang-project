@@ -2,40 +2,37 @@ import {
     STRING,
     DATEONLY,
     ENUM,
-    INTEGER
-} from "sequelize";
-import orm from "../helpers/orm";
+    BOOLEAN,
+} from 'sequelize';
+
+import orm from '../helpers/orm';
 
 export default orm.define(
-    "user",
-    {
-        firstName: STRING,
-        lastName: STRING,
-        email: STRING,
-        dob: DATEONLY,
-        gender: ENUM("M","F"),
-        age: INTEGER,
-        tier: {
-            type: ENUM("1","2","3"),
-            allowNull: false
-        },
-        username: {
-            type: STRING,
-            unique: true,
-            allowNull: true
-        }
-    }
-    // {
-    //     indexes: [
-    //         {
-    //             unique: true,
-    //             fields: ["username"],
-    //             where: {
-    //                 username: {
-    //                     $ne: null
-    //                 }
-    //             }
-    //         }
-    //     ]
-    // }
+    'user',
+  {
+    firstName: STRING,
+    lastName: STRING,
+    middleName: STRING,
+    phone: STRING,
+    email: STRING,
+    firstLanguage: STRING,
+    languageNeeds: STRING(2550),
+    notes: STRING(2550),
+    gender: ENUM('M', 'F'),
+    dob: DATEONLY,
+
+    homeRoom: STRING,
+    teacher: STRING,
+    oriented: BOOLEAN,
+
+    type: {
+      type: ENUM(
+                'STUDENT',
+                'LEADER',
+                'TEACHER',
+                'ADMIN',
+            ),
+      allowNull: false,
+    },
+  },
 );
