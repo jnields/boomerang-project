@@ -5,7 +5,7 @@ import {
 import orm from '../helpers/orm';
 
 export default orm.define(
-    'school',
+  'school',
   {
     name: STRING,
   },

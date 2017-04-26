@@ -8,14 +8,15 @@ import { createStore, applyMiddleware } from 'redux';
 import App from './containers/app';
 import reducers from './reducers';
 
+window.api = require('./helpers/api').default;
+
 const store = createStore(
-    reducers,
-    window.INITIAL_STATE,
-    applyMiddleware(thunk),
+  reducers,
+  window.INITIAL_STATE,
+  applyMiddleware(thunk),
 );
 
 window.store = store;
-
 function renderApp(Component) {
   render(
     <Provider store={store}>
@@ -23,8 +24,8 @@ function renderApp(Component) {
         <Component />
       </BrowserRouter>
     </Provider>,
-        document.getElementById('react-root'),
-    );
+    document.getElementById('react-root'),
+  );
 }
 
 renderApp(App);

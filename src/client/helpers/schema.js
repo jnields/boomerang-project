@@ -1,4 +1,8 @@
 import { schema } from 'normalizr';
 
-export const school = new schema.Entity('schools');
-export const user = new schema.Entity('users', { school });
+const Entity = schema.Entity;
+
+export const group = new Entity('groups');
+export const address = new Entity('addresses');
+export const school = new Entity('schools', { address });
+export const user = new Entity('users', { school, address, group });

@@ -9,9 +9,9 @@ import reducers from './reducers';
 import App from './containers/app';
 
 const store = createStore(
-    reducers,
-    window.INITIAL_STATE,
-    applyMiddleware(thunk),
+  reducers,
+  window.INITIAL_STATE,
+  applyMiddleware(thunk),
 );
 
 delete window.INITIAL_STATE;
@@ -22,5 +22,5 @@ render(
       <App />
     </BrowserRouter>
   </Provider>,
-    document.getElementById('react-root'),
+  document.getElementById('react-root'),
 );

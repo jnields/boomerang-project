@@ -25,9 +25,6 @@ export default Promise.resolve(api).then(resolvedApi => ({
         loggingIn: false,
         logInFailed: false,
         logInUnsent: false,
-        loggingOut: false,
-        logOutFailed: false,
-        logOutUnsent: false,
         user: normalized.result,
       },
     };
@@ -53,8 +50,8 @@ export default Promise.resolve(api).then(resolvedApi => ({
       title: 'Express',
       lang: 'en',
       initialState: JSON
-              .stringify(initialState)
-              .replace(/</g, '\\u003c'),
+        .stringify(initialState)
+        .replace(/</g, '\\u003c'),
     };
 
     if (env === 'development') {

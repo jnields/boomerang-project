@@ -8,7 +8,7 @@ import {
 import orm from '../helpers/orm';
 
 export default orm.define(
-    'user',
+  'user',
   {
     firstName: STRING,
     lastName: STRING,
@@ -27,10 +27,10 @@ export default orm.define(
 
     type: {
       type: ENUM(
-                'STUDENT',
-                'LEADER',
-                'TEACHER',
-                'ADMIN',
+        'STUDENT',
+        'LEADER',
+        'TEACHER',
+        'ADMIN',
             ),
       allowNull: false,
     },

@@ -13,7 +13,7 @@ module.exports = {
   context: __dirname,
   module: {
     rules: [
-            // enforce linting before build
+      // enforce linting before build
       {
         enforce: 'pre',
         test: /\.jsx?$/,
@@ -26,13 +26,13 @@ module.exports = {
           },
         },
       },
-            // babel compiler for js files
+      // babel compiler for js files
       {
         test: /\.jsx?$/,
         exclude: path.resolve(__dirname, 'node_modules'),
         use: 'babel-loader',
       },
-            // json files
+      // json files
       {
         test: /\.json$/,
         use: 'json-loader',
@@ -45,17 +45,23 @@ module.exports = {
       '.jsx',
     ],
   },
-  entry: glob.sync('./src/scripts/*').reduce(
-    (result, file) => Object.assign(
-      {},
-      result,
-      {
-        [path.basename(file)]: [
-          'babel-polyfill',
-          file,
-        ],
-      }),
-    {}),
+  entry: {
+    [path.basename('./src/client/helpers/api/get-query.js')]: [
+      'babel-polyfill',
+      './src/client/helpers/api/get-query.js'
+    ]
+  },
+  // glob.sync('./src/scripts/*').reduce(
+  //   (result, file) => Object.assign(
+  //     {},
+  //     result,
+  //     {
+  //       [path.basename(file)]: [
+  //         'babel-polyfill',
+  //         file,
+  //       ],
+  //     }),
+  //   {}),
   node: {
     __filename: false,
     __dirname: false,

@@ -5,9 +5,9 @@ import { InsecurePasswordError } from '../helpers/errors';
 
 function sha512(salt, password) {
   const hash = crypto
-        .createHmac('sha512', salt)
-        .update(password)
-        .digest('base64');
+    .createHmac('sha512', salt)
+    .update(password)
+    .digest('base64');
   return { salt, hash };
 }
 
@@ -16,8 +16,8 @@ function saltHashPassword(password) {
     throw new Error('null password');
   }
   return sha512(
-        crypto.randomBytes(16).toString('base64'),
-        password,
+    crypto.randomBytes(16).toString('base64'),
+    password,
     );
 }
 
@@ -34,7 +34,7 @@ function match(salt, hash, password) {
 }
 
 export default orm.define(
-    'authMechanism',
+  'authMechanism',
   {
     type: {
       type: ENUM('BASIC'),

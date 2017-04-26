@@ -5,12 +5,12 @@ import { logOut } from '../actions/authorization';
 import NavBar from '../components/nav-bar';
 
 export default connect(
-    state => ({
-      user: denormalize(
-        state.authorization.user,
-        state.entities,
-        user,
+  state => ({
+    user: denormalize(
+      state.authorization.user,
+      state.entities,
+      user,
       ),
-    }),
+  }),
     { logOut },
 )(NavBar);

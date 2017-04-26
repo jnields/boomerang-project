@@ -32,8 +32,8 @@ App.defaultProps = {
 };
 
 export default connect(
-    state => ({
-      user: state.authorization.user,
-    }),
-    null,
+  state => ({
+    user: state.authorization.user,
+  }),
+  null,
 )(App);
