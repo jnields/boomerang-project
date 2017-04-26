@@ -2,6 +2,7 @@ node_modules
 .DS_Store
 public
 server-bundle.js*
+.git # required for eslint
 
 # Logs
 logs

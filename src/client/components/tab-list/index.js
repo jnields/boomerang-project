@@ -38,10 +38,10 @@ export default class TabList extends Component {
 const { arrayOf, string, shape, node } = PropTypes;
 TabList.propTypes = {
   tabs: arrayOf(
-        shape({
-          title: string.isRequired,
-          href: string.isRequired,
-          content: node.isRequired,
-        }),
+    shape({
+      title: string.isRequired,
+      href: string.isRequired,
+      content: node.isRequired,
+    }),
     ).isRequired,
 };
