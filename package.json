@@ -14,7 +14,7 @@
     "build-server:dev": "webpack --config webpack.config.server.dev.js --watch",
     "build-server:prod": "webpack --config webpack.config.server.prod.js",
     "start": "if [ \"$NODE_ENV\" = 'production' ]; then npm run start:prod; else npm run start:dev; fi;",
-    "start:dev": "npm run build-client:dev & npm run build-server:dev & trap 'kill $(jobs -p) &> /dev/null' INT HUP TERM; nodemon --watch server-bundle.js server-bundle.js;",
+    "start:dev": "npm run build-client:dev & npm run build-server:dev & nodemon --watch server-bundle.js server-bundle.js & trap 'kill $(jobs -p) &> /dev/null' INT HUP TERM; wait; kill $(jobs -p);",
     "start:prod": "npm run build && node server-bundle.js",
     "test": "exit 1",
     "test:watch": "exit 1"

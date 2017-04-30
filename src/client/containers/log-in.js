@@ -6,9 +6,10 @@ import LogIn from '../components/log-in';
 const formDecorated = reduxForm(
   {
     form: 'login',
-    onSubmit: (values, dispatch) => {
-      dispatch(logIn(values.username, values.password));
-    },
+    onSubmit: (values, dispatch) => logIn(
+      values.username,
+      values.password,
+    )(dispatch),
   },
 )(LogIn);
 

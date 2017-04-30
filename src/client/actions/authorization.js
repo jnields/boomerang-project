@@ -24,7 +24,7 @@ export const logIn = (username, password) => (dispatch) => {
     username,
     password,
   });
-  api.auth.logIn(username, password).then(
+  return api.auth.logIn(username, password).then(
     (response) => {
       if (response.statusCode >= 400) {
         return dispatch({ type: LOG_IN, status: COMPLETE, response });

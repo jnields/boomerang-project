@@ -1,11 +1,13 @@
 .pointer{
-    cursor: pointer;
+  cursor: pointer;
 }
 
+.trans-bg {
+  background-color: transparent;
+}
 
 .scroll-box {
     overflow: auto;
-
     $bgc: white;            // background color
     $cto: transparent;      // cover to color
     $sto: 40%;              // shadow percentage $sc

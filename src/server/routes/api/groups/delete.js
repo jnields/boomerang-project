@@ -19,7 +19,7 @@ export default async function (req, res) {
   });
 
   if (existing) {
-    await existing.destroy();
+    await existing.destroy({ transaction });
     await transaction.commit();
     return res.status(204).send();
   }

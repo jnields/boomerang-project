@@ -9,7 +9,7 @@ export default async function (req, res) {
     return res.status(400).send({ error: 'bad request' });
   }
 
-  const existing = Group.findOne({
+  const existing = await Group.findOne({
     where: { id: req.params.id },
     transaction,
   });

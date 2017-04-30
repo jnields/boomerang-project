@@ -32,11 +32,25 @@ renderApp(App);
 
 if (module.hot) {
   module.hot.accept('./reducers', () => {
-    // eslint-disable-next-line global-require
-    store.replaceReducer(require('./reducers').default);
+    try {
+      // eslint-disable-next-line global-require
+      const nextReducer = require('./reducers').default;
+      if (nextReducer) {
+        store.replaceReducer(nextReducer);
+      }
+    } catch (e) {
+      // ignored
+    }
   });
   module.hot.accept('./containers/app', () => {
-    // eslint-disable-next-line global-require
-    renderApp(require('./containers/app').default);
+    try {
+      // eslint-disable-next-line global-require
+      const nextApp = require('./containers/app').default;
+      if (nextApp) {
+        renderApp(nextApp);
+      }
+    } catch (e) {
+      // ignored
+    }
   });
 }

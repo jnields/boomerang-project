@@ -1,5 +1,6 @@
 import xhr from 'xhr';
 import config from './config';
+import handleAbort from './handle-abort';
 
 export default {
   logIn: (username, password, abort) => new Promise((resolve, reject) => {
@@ -16,13 +17,8 @@ export default {
         }
         return resolve(response);
       },
-  ).abort;
-    if (abort !== undefined) {
-      Promise.resolve(abort).then((a) => {
-        if (a && cancel) cancel();
-        resolve();
-      });
-    }
+    ).abort;
+    handleAbort({ abort, cancel, resolve });
   }),
   logOut: () => {
     document.cookie = 'SID=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
@@ -39,12 +35,7 @@ export default {
         return resolve(response);
       },
     ).abort;
-    if (abort !== undefined) {
-      Promise.resolve(abort).then((a) => {
-        if (a && cancel) cancel();
-        resolve();
-      });
-    }
+    handleAbort({ abort, cancel, resolve });
   }),
   reset: (sessionId, password, abort) => new Promise((resolve, reject) => {
     let cancel = xhr.put(
@@ -61,11 +52,6 @@ export default {
         return resolve(response);
       },
     ).abort;
-    if (abort !== undefined) {
-      Promise.resolve(abort).then((a) => {
-        if (a && cancel) cancel();
-        resolve();
-      });
-    }
+    handleAbort({ abort, cancel, resolve });
   }),
 };

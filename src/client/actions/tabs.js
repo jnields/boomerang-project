@@ -1,10 +1,12 @@
 import { normalize } from 'normalizr';
 import { user } from '../helpers/schema';
 import api from '../helpers/api';
+
 import {
   SELECT_TAB,
   QUERY,
 } from './types';
+
 import {
   PENDING,
   COMPLETE,
@@ -17,7 +19,10 @@ export const selectTab = tab => ({
 });
 
 let abort;
-export const query = ({ page = 1, size = 10, params }) => (dispatch) => {
+export const query = params => (dispatch) => {
+  if (params == null || params.constructor !== Object) {
+    throw new TypeError('must supply arguments');
+  }
   if (abort) abort(true);
 
   dispatch({
@@ -25,15 +30,8 @@ export const query = ({ page = 1, size = 10, params }) => (dispatch) => {
     status: PENDING,
     params,
   });
-
-  const translated = {
-    ...params,
-    $limit: size,
-    $offset: ((page - 1) * size) || 0,
-  };
-
   api.users.query(
-    translated,
+    params,
     new Promise((resolve) => {
       abort = resolve;
     }),
@@ -43,11 +41,10 @@ export const query = ({ page = 1, size = 10, params }) => (dispatch) => {
       const { results = [], count = 0 } = (response.body || {});
       if (response.statusCode < 400) {
         if (count > 0 && results.length === 0) {
-          const newPage = Math.ceil(results.length / size);
+          const $offset = count - (count % params.$limit);
           return query({
-            page: newPage,
-            size,
-            params,
+            ...params,
+            $offset,
           })(dispatch);
         }
       }

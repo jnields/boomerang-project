@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Field } from 'redux-form';
 
 import bs from '../styles/bootstrap';
+import fa from '../styles/font-awesome';
 import styles from '../styles/log-in';
 
 export default class LogIn extends Component {
@@ -48,7 +49,7 @@ export default class LogIn extends Component {
           <div className={bs.formGroup}>
             <label className={[bs.controlLabel, bs.colSm2].join(' ')} htmlFor={`${form}-un`}>
             Username:
-          </label>
+           </label>
             <div className={bs.colSm10}>
               <Field
                 name="username"
@@ -81,11 +82,22 @@ export default class LogIn extends Component {
           <div className={bs.formGroup}>
             <div className={[bs.colSmOffset2, bs.colSm10].join(' ')}>
               <button
-                className={[bs.btn, bs.btnDefault].join(' ')}
                 type="submit"
+                className={[bs.btn, bs.btnDefault].join(' ')}
                 disabled={submitting || !valid}
               >
-              Submit
+                {
+                  !submitting ? null
+                  : <i
+                    className={[
+                      fa.fa,
+                      fa.faSpin,
+                      fa.faSpinner,
+                      styles.spinner,
+                    ].join(' ')}
+                  />
+                }
+                Submit
             </button>
             </div>
           </div>

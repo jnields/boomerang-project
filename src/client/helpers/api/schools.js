@@ -1,6 +1,7 @@
 import xhr from 'xhr';
 import config from './config';
 import getQuery from './get-query';
+import handleAbort from './handle-abort';
 
 function isObject(obj) {
   return Object.prototype.toString.call(obj) === '[object Object]';
@@ -18,13 +19,8 @@ export default {
         }
         return resolve(response);
       },
-          ).abort;
-    if (abort !== undefined) {
-      Promise.resolve(abort).then((a) => {
-        if (a && cancel) cancel();
-        resolve();
-      });
-    }
+    ).abort;
+    handleAbort({ abort, cancel, resolve });
   }),
   get: (id, abort) => new Promise((resolve, reject) => {
     if (typeof id !== 'number') {
@@ -40,13 +36,8 @@ export default {
         }
         return resolve(response);
       },
-          ).abort;
-    if (abort !== undefined) {
-      Promise.resolve(abort).then((a) => {
-        if (a && cancel) cancel();
-        resolve();
-      });
-    }
+    ).abort;
+    handleAbort({ abort, cancel, resolve });
   }),
   delete: (id, abort) => new Promise((resolve, reject) => {
     if (typeof id !== 'number') {
@@ -62,13 +53,8 @@ export default {
         }
         return resolve(response);
       },
-          ).abort;
-    if (abort !== undefined) {
-      Promise.resolve(abort).then((a) => {
-        if (a && cancel) cancel();
-        resolve();
-      });
-    }
+    ).abort;
+    handleAbort({ abort, cancel, resolve });
   }),
   post: (obj, abort) => new Promise((resolve, reject) => {
     const type = Object.prototype.toString.call(obj);
@@ -99,13 +85,8 @@ export default {
         }
         return resolve(response);
       },
-          ).abort;
-    if (abort !== undefined) {
-      Promise.resolve(abort).then((a) => {
-        if (a && cancel) cancel();
-        resolve();
-      });
-    }
+    ).abort;
+    handleAbort({ abort, cancel, resolve });
   }),
   patch: (id, patch, abort) => new Promise((resolve, reject) => {
     if (typeof id !== 'number') {
@@ -127,12 +108,7 @@ export default {
         }
         return resolve(response);
       },
-          ).abort;
-    if (abort !== undefined) {
-      Promise.resolve(abort).then((a) => {
-        if (a && cancel) cancel();
-        resolve();
-      });
-    }
+    ).abort;
+    handleAbort({ abort, cancel, resolve });
   }),
 };

@@ -8,9 +8,9 @@ export default connect(
   state => ({
     user: denormalize(
       state.authorization.user,
-      state.entities,
       user,
-      ),
+      state.entities,
+    ),
   }),
-    { logOut },
+  { logOut },
 )(NavBar);

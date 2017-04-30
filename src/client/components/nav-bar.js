@@ -2,15 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
+import { user as userShape } from '../helpers/models';
 import styles from '../styles/nav-bar';
 import bs from '../styles/bootstrap';
 
 
-export default function NavBar(props) {
-  const {
-    logOut,
-    user,
-  } = props;
+export default function NavBar({ logOut, user }) {
   if (user == null) return <div className={styles.default} />;
   const { firstName, lastName } = user;
 
@@ -37,16 +34,11 @@ export default function NavBar(props) {
 
 const {
   func,
-  shape,
-  string,
 } = PropTypes;
 
 NavBar.propTypes = {
   logOut: func.isRequired,
-  user: shape({
-    firstName: string,
-    lastName: string,
-  }),
+  user: userShape,
 };
 
 NavBar.defaultProps = {

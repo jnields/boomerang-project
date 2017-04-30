@@ -20,6 +20,8 @@ module.exports = {
             fix: true,
             failOnWarning: false,
             failOnError: false,
+            emitError: false,
+            emitWarning: false,
           },
         },
       },
