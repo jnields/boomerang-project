@@ -9,27 +9,28 @@ import Spinner from './spinner';
 import bs from '../styles/bootstrap';
 
 import {
-  student as studentProps,
+  school as schoolProps,
   address as addressProps,
 } from '../helpers/properties';
 
-export default function StudentForm(props) {
+export default function SchoolForm(props) {
   const {
     form,
     valid,
     handleSubmit,
     submitting,
+    onSubmit,
 
     cancel,
   } = props;
   return (
-    <form className={bs.formHorizontal} onSubmit={handleSubmit}>
+    <form className={bs.formHorizontal} onSubmit={handleSubmit(onSubmit)}>
       <fieldset>
         <legend>Info</legend>
-        {studentProps.map(prop => (
+        {schoolProps.map(prop => (
           <PropertyField
             valid
-            form="student"
+            form={form}
             property={prop}
             key={prop.name}
           />
@@ -40,7 +41,7 @@ export default function StudentForm(props) {
         {addressProps.map(prop => (
           <PropertyField
             valid
-            form="student"
+            form={form}
             property={prop}
             key={prop.name}
           />
@@ -72,15 +73,16 @@ export default function StudentForm(props) {
   );
 }
 
-StudentForm.propTypes = {
+SchoolForm.propTypes = {
   valid: bool.isRequired,
   form: string.isRequired,
   handleSubmit: func.isRequired,
   submitting: bool.isRequired,
 
+  onSubmit: func.isRequired,
   cancel: func.isRequired,
 };
 
-StudentForm.defaultProps = {
+SchoolForm.defaultProps = {
   student: null,
 };

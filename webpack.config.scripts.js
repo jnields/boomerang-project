@@ -45,23 +45,18 @@ module.exports = {
       '.jsx',
     ],
   },
-  entry: {
-    [path.basename('./src/client/helpers/api/get-query.js')]: [
-      'babel-polyfill',
-      './src/client/helpers/api/get-query.js'
-    ]
-  },
-  // glob.sync('./src/scripts/*').reduce(
-  //   (result, file) => Object.assign(
-  //     {},
-  //     result,
-  //     {
-  //       [path.basename(file)]: [
-  //         'babel-polyfill',
-  //         file,
-  //       ],
-  //     }),
-  //   {}),
+  entry: glob.sync('./src/scripts/*').reduce(
+    (result, file) => Object.assign(
+      {},
+      result,
+      {
+        [path.basename(file)]: [
+          'babel-polyfill',
+          file,
+        ],
+      }),
+    {}
+  ),
   node: {
     __filename: false,
     __dirname: false,

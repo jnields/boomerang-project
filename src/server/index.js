@@ -10,6 +10,20 @@ import appPromise from './app';
 const cpus = os.cpus().length;
 const debugLog = debug('mern:server');
 
+(function validateEnvironment() {
+  const envVars = [
+    'BOOMERANG_PASSWORD',
+  ];
+  if (process.env.NODE_ENV === 'production') {
+    envVars.push('CERT_FILE', 'KEY_FILE', 'PORT');
+  }
+  envVars.forEach((envVar) => {
+    if (!process.env[envVar]) {
+      throw new Error(`Environment variable '${envVar}' not defined.`);
+    }
+  });
+}());
+
 const port = ((val) => {
   const intPort = parseInt(val, 10);
   if (isNaN(intPort)) {

@@ -2,20 +2,21 @@ import React from 'react';
 import { string, arrayOf, node, shape } from 'prop-types';
 import TabList from './tab-list';
 
-export default function SchoolHome({ tabs, activeTab }) {
+export default function SchoolHome({ tabs, content, location }) {
   return (
-    <TabList tabs={tabs.map(tab => tab.name)} activeTab={activeTab.name}>
-      {activeTab.content}
-    </TabList>
+    <TabList tabs={tabs} location={location} content={content} />
   );
 }
 
 const tabShape = shape({
   name: string.isRequired,
-  content: node.isRequired,
+  path: string.isRequired,
 });
 
 SchoolHome.propTypes = {
   tabs: arrayOf(tabShape).isRequired,
-  activeTab: tabShape.isRequired,
+  content: node.isRequired,
+  location: shape({
+    pathname: string.isRequired,
+  }).isRequired,
 };

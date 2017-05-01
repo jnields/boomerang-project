@@ -6,6 +6,7 @@ import { shape as propertyShape } from '../helpers/properties';
 import bs from '../styles/bootstrap';
 import Select from './select';
 
+
 export default function PropertyField(props) {
   const {
     name,
@@ -51,6 +52,17 @@ export default function PropertyField(props) {
       delete fieldProps.type;
       fieldProps.component = 'textarea';
       fieldProps.rows = 3;
+      fieldProps.style = { resize: 'none' };
+      fieldProps.onInput = (e) => {
+        const el = e.target;
+        const style = el.currentStyle || window.getComputedStyle(el);
+        const boxSizing = style.boxSizing === 'border-box'
+            ? parseInt(style.borderBottomWidth, 10) +
+              parseInt(style.borderTopWidth, 10)
+            : 0;
+        el.style.height = '';
+        el.style.height = `${el.scrollHeight + boxSizing}px`;
+      };
       break;
     case 'number':
       fieldProps.component = 'input';
@@ -72,10 +84,10 @@ export default function PropertyField(props) {
   switch (props.property.type) {
     case 'text':
     case 'number':
-    case 'textarea':
     case 'select':
     case 'date':
-      labelClasses.push(bs.controlLabel, bs.colSm2);
+    case 'textarea':
+      labelClasses.push(bs.controlLabel, bs.colSm3);
       fieldClasses.push(bs.formControl);
       if (!props.valid) {
         groupClasses.push(bs.hasError, bs.hasFeedback);
@@ -88,7 +100,7 @@ export default function PropertyField(props) {
           >
             {props.property.header}
           </label>
-          <div className={bs.colSm10}>
+          <div className={bs.colSm9}>
             <Field
               {...fieldProps}
               className={fieldClasses.join(' ')}
@@ -108,7 +120,7 @@ export default function PropertyField(props) {
       }
       return (
         <div className={groupClasses.join(' ')}>
-          <div className={[bs.colSmOffset2, bs.colSm10].join(' ')}>
+          <div className={[bs.colSmOffset3, bs.colSm9].join(' ')}>
             <div className={bs.checkbox}>
               <label
                 className={labelClasses.join(' ')}

@@ -6,12 +6,9 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import proxy from 'proxy-middleware';
-import url from 'url';
 
 import routes from './routes';
 import authentication from './helpers/authentication';
-
-const proxyPort = process.env.PROXY_PORT || 35612;
 
 const app = express();
 
@@ -21,7 +18,7 @@ function setupApp(resolvedRoutes) {
   if (process.env.NODE_ENV !== 'production') {
     app.use(
       '/hot-reload-server',
-      proxy(url.parse(`http://localhost:${proxyPort}/hot-reload-server/`)),
+      proxy('http://localhost:35612/hot-reload-server/'),
     );
   }
 

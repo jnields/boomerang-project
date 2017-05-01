@@ -1,11 +1,21 @@
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { denormalize } from 'normalizr';
+import { school } from '../helpers/schema';
+import { showModal } from '../actions/modal';
+import { goToPage } from '../actions/schools';
+import AdminHome from '../components/admin-home';
 
-import TabList from '../components/tab-list';
-
-export default withRouter(connect(
+export default connect(
   state => ({
-    tabs: state.tabs.tabs,
-    content: state.tabs.routes,
+    pageLength: state.schools.query.$limit,
+    schools: denormalize(
+      state.schools.items,
+      [school],
+      state.entities,
+    ),
+    itemCount: state.schools.count,
+    offset: state.schools.query.$offset,
+    query: state.schools.query,
   }),
-)(TabList));
+  { goToPage, showModal },
+)(AdminHome);

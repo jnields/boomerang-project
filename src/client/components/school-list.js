@@ -2,17 +2,17 @@ import React, { Component } from 'react';
 import { arrayOf, number, func } from 'prop-types';
 
 import Paginator from './paginator';
-import StudentForm from '../containers/student-form';
+import SchoolForm from '../containers/school-form';
 
 import {
-  student as studentProperties,
+  school as schoolProperties,
   address as addressProperties,
 } from '../helpers/properties';
 import bs from '../styles/bootstrap';
 import styles from '../styles/helpers';
-import { user } from '../helpers/models';
+import { school } from '../helpers/models';
 
-export default class StudentTab extends Component {
+export default class SchoolList extends Component {
 
   componentDidMount() {
     this.props.goToPage(1);
@@ -22,7 +22,7 @@ export default class StudentTab extends Component {
     const {
       itemCount,
       offset,
-      students,
+      schools,
       pageLength,
       goToPage,
       showModal,
@@ -34,14 +34,15 @@ export default class StudentTab extends Component {
       goToPage,
     };
 
-    const studentContent = students.length === 0
+    const schoolContent = schools.length === 0
       ? (
         <div className={bs.colLg6}>
-          <h2>No Students Listed</h2>
+          <h2>No Schools Listed</h2>
         </div>
       )
       : (
         <div className={bs.colLg6}>
+          <h2>Schools</h2>
           <div className={styles.scrollBox}>
             <table
               className={[
@@ -51,28 +52,28 @@ export default class StudentTab extends Component {
             >
               <thead>
                 <tr>
-                  {studentProperties.map(prop => (
+                  {schoolProperties.map(prop => (
                     <th key={prop.name}>{prop.header}</th>
-                    ))}
+                  ))}
                   {addressProperties.map(prop => (
                     <th key={prop.name}>{prop.header}</th>
-                    ))}
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {students.map(item => (
+                {schools.map(item => (
                   <tr key={item.id} className={styles.pointer}>
-                    {studentProperties.map(prop => (
+                    {schoolProperties.map(prop => (
                       <td key={prop.name}>{item[prop.name]}</td>
-                      ))}
+                    ))}
                     {addressProperties.map(prop => (
                       <td key={prop.name}>{(item.address || {})[prop.name]}</td>
-                      ))}
+                    ))}
                   </tr>
-                  ))}
+                ))}
               </tbody>
             </table>
-          </div>
+          </div>          
           <div className={[bs.textCenter].join(' ')}>
             <Paginator {...pagination} />
           </div>
@@ -80,15 +81,15 @@ export default class StudentTab extends Component {
       );
     return (
       <div className={bs.row}>
-        {studentContent}
+        {schoolContent}
         <button
           className={[
             bs.btn,
             bs.btnDefault,
           ].join(' ')}
           onClick={() => showModal({
-            title: 'Add Student',
-            content: <StudentForm />,
+            title: 'Add School',
+            content: <SchoolForm />,
           })}
         >
           <span
@@ -103,9 +104,9 @@ export default class StudentTab extends Component {
   }
 }
 
-StudentTab.propTypes = {
+SchoolList.propTypes = {
   pageLength: number.isRequired,
-  students: arrayOf(user).isRequired,
+  schools: arrayOf(school).isRequired,
   itemCount: number.isRequired,
   offset: number.isRequired,
   goToPage: func.isRequired,

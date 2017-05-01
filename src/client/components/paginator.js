@@ -9,7 +9,7 @@ export default function Paginator(props) {
   const offset = currentPage - (currentPage % length);
   const pages = [];
 
-  for (let i = 1; i < length; i += 1) {
+  for (let i = 1; i <= length; i += 1) {
     const thisPage = i + offset;
     let className = '';
     if (currentPage === thisPage) {

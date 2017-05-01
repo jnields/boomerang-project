@@ -1,10 +1,12 @@
 import { normalize } from 'normalizr';
+import { initialize } from 'redux-form';
 import { user } from '../helpers/schema';
 import api from '../helpers/api';
 
 import {
   SELECT_TAB,
-  QUERY,
+  SELECT_ITEM,
+  QUERY_USERS,
 } from './types';
 
 import {
@@ -18,6 +20,11 @@ export const selectTab = tab => ({
   tab,
 });
 
+export const selectItem = ({ item, form }) => (dispatch) => {
+  dispatch(initialize(form, item));
+  dispatch({ type: SELECT_ITEM, item });
+};
+
 let abort;
 export const query = params => (dispatch) => {
   if (params == null || params.constructor !== Object) {
@@ -26,9 +33,9 @@ export const query = params => (dispatch) => {
   if (abort) abort(true);
 
   dispatch({
-    type: QUERY,
+    type: QUERY_USERS,
     status: PENDING,
-    params,
+    query: params,
   });
   api.users.query(
     params,
@@ -48,9 +55,9 @@ export const query = params => (dispatch) => {
           })(dispatch);
         }
       }
-      const normalized = normalize(results, user);
+      const normalized = normalize(results, [user]);
       return dispatch({
-        type: QUERY,
+        type: QUERY_USERS,
         status: COMPLETE,
         response,
         ...normalized,
@@ -59,10 +66,19 @@ export const query = params => (dispatch) => {
     (error) => {
       abort = null;
       dispatch({
-        type: QUERY,
+        type: QUERY_USERS,
         status: ERROR,
         error,
       });
     },
   );
+};
+
+export const goToPage = page => (dispatch, getState) => {
+  const state = getState();
+  const tab = state.tabs.meta[state.tabs.selected];
+  return query({
+    ...tab.query,
+    $offset: tab.query.$limit * (page - 1),
+  })(dispatch);
 };

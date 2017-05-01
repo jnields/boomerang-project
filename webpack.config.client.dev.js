@@ -128,7 +128,7 @@ module.exports = {
   },
   devServer: {
     hot: true,
-    port: proxyPort,
+    port: 35612,
     contentBase: path.resolve(__dirname, 'public', 'build'),
     publicPath: `http://localhost:${proxyPort}/hot-reload-server/`,
   },

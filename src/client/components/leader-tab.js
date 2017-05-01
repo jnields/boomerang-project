@@ -21,7 +21,7 @@ export default function LeaderTab(props) {
     goToPage,
   } = props;
   const pagination = {
-    length: pageLength,
+    length: 5,
     currentPage: 1 + (offset / pageLength),
     totalPages: Math.ceil(itemCount / pageLength),
     goToPage,

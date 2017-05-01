@@ -3,7 +3,8 @@ import { denormalize } from 'normalizr';
 
 import StudentTab from '../components/student-tab';
 import { user } from '../helpers/schema';
-import { query } from '../actions/tabs';
+import { goToPage, selectItem } from '../actions/tabs';
+import { showModal } from '../actions/modal';
 
 export default connect(
   (state) => {
@@ -20,15 +21,5 @@ export default connect(
       query: meta.query,
     };
   },
-  null,
-  (state, { dispatch }, ownProps) => ({
-    ...ownProps,
-    ...state,
-    goToPage: (page) => {
-      dispatch(query({
-        ...state.query,
-        $offset: state.query.$limit * (page - 1),
-      }));
-    },
-  }),
+  { selectItem, showModal, goToPage },
 )(StudentTab);
