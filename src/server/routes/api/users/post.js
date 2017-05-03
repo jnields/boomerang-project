@@ -1,76 +1,124 @@
 import {
     User,
     School,
-    Address,
     Group,
+    Address,
 } from '../../../models';
 
-export default async function postUser(req, res, next) {
-  const user = req.body;
-  const transaction = req.transaction;
-  const include = [
+async function createUser(user, transaction) {
+  const created = await User.create(
+    user,
     {
-      model: School,
-      include: [{ model: Address }],
+      transaction,
+      include: [
+        { model: Group },
+        { model: School },
+        { model: Address },
+      ],
     },
-    { model: Address },
-    { model: Group },
-  ];
-
-  if (req.body == null || req.body.id != null) {
-    await transaction.rollback();
-    return res.status(400).send({ error: 'bad request' });
+  );
+  if (user.address) {
+    await created.createAddress(user.address, { transaction });
   }
-  if (req.user.school) {
-    user.schoolId = req.user.school.id;
+
+  return created;
+}
+
+function validateUser(user, req, res, next) {
+  if (user == null || user.id != null) {
+    res.status(400).send({ error: 'bad request' });
+    return false;
   }
   switch (req.user.type) {
     case 'ADMIN':
       if (['TEACHER', 'LEADER', 'STUDENT'].indexOf(user.type) !== -1
                 && user.school == null
                 && user.schoolId == null) {
-        await transaction.rollback();
-        return res.status(400).send(
-                { error: 'incorrect user type provided' },
-            );
-      }
-      break;
-    case 'TEACHER':
-      if (['STUDENT', 'LEADER'].indexOf(user.type) === -1) {
-        await transaction.rollback();
-        return res.status(400).send(
+        res.status(400).send(
           { error: 'incorrect user type provided' },
         );
+        return false;
       }
-      break;
+      return true;
+    case 'TEACHER':
+      if (['STUDENT', 'LEADER'].indexOf(user.type) === -1) {
+        res.status(400).send(
+          { error: 'incorrect user type provided' },
+        );
+        return false;
+      }
+      return true;
     default:
-      return next(new RangeError(`unhandled case: ${req.user.type}`));
+      next(new RangeError(`unhandled case: ${req.user.type}`));
+      return false;
   }
+}
 
-  const created = User.create(req.body, { transaction });
-
-  async function saveAddress() {
-    if (!user.address) return;
-    const newAddress = await Address.create(user.address, { transaction });
-    delete user.address;
-    user.addressId = newAddress.id;
-  }
-
-  async function saveGroup() {
-    if (!user.group && !user.groupId) return;
-    const groupId = user.groupId || user.group.id;
-    if (groupId) {
-      user.groupId = groupId;
-    } else {
-      const newGroup = await Group.create(user.group, { transaction });
-      user.groupId = newGroup.id;
+async function postUsers(req, res, next) {
+  console.log('posting several');
+  const users = req.body;
+  const transaction = req.transaction;
+  let thrown;
+  const promises = [];
+  for (
+    let i = 0, user = users[i];
+    i < users.length;
+    i += 1, user = users[i]
+  ) {
+    if (req.user.school) {
+      user.schoolId = req.user.school.id;
     }
-    delete user.group;
+    if (validateUser(user, req, res, next)) {
+      promises.push(createUser(user, transaction).then(
+        created => created.reload({
+          transaction: req.transaction,
+          include: [
+              { model: Group },
+              { model: Address },
+          ],
+        }),
+      ));
+    } else {
+      thrown = true; break;
+    }
   }
-
-  await Promise.all(saveAddress(), saveGroup());
-
-  const result = await created.reload({ transaction, include });
+  const results = await Promise.all(promises);
+  if (thrown) {
+    await transaction.rollback();
+    return;
+  }
   await transaction.commit();
-  return res.send(result.toJSON());
+  res.send(results.map(result => result.toJSON()));
+}
+
+async function postUser(req, res, next) {
+  const user = req.body;
+  if (req.user.school) {
+    user.schoolId = req.user.school.id;
+  }
+  if (validateUser(user, req, res, next)) {
+    const created = await createUser(user, req.transaction);
+    const result = await created.reload({
+      transaction: req.transaction,
+      include: [
+        { model: Group },
+        { model: Address },
+      ],
+    });
+    await req.transaction.commit();
+    res
+      .status(201)
+      .set('Location', `/api/users/${created.id}`)
+      .send(result.toJSON());
+  } else {
+    await req.transaction.rollback();
+  }
+}
+
+export default function post(req, res, next) {
+  if (Array.isArray(req.body)) {
+    postUsers(req, res, next);
+  } else {
+    postUser(req, res, next);
+  }
 }

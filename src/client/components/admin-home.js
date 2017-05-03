@@ -1,114 +1,32 @@
-import React, { Component } from 'react';
-import { arrayOf, number, func } from 'prop-types';
+import React from 'react';
 
-import Paginator from './paginator';
-import SchoolForm from '../containers/school-form';
+import SchoolList from '../containers/school-list';
+import TeacherList from '../containers/teacher-list';
 
-import {
-  school as schoolProperties,
-  address as addressProperties,
-} from '../helpers/properties';
 import bs from '../styles/bootstrap';
-import styles from '../styles/helpers';
 import { school } from '../helpers/models';
 
-export default class AdminHome extends Component {
-
-  componentDidMount() {
-    this.props.goToPage(1);
-  }
-
-  render() {
-    const {
-      itemCount,
-      offset,
-      schools,
-      pageLength,
-      goToPage,
-      showModal,
-    } = this.props;
-    const pagination = {
-      length: 5,
-      currentPage: 1 + (offset / pageLength),
-      totalPages: Math.ceil(itemCount / pageLength),
-      goToPage,
-    };
-
-    const schoolContent = schools.length === 0
-      ? (
-        <div className={bs.colLg6}>
-          <h2>No Schools Listed</h2>
-        </div>
-      )
+export default function AdminHome({ selectedSchool }) {
+  const selectedSchoolContent = selectedSchool == null ? null
       : (
         <div className={bs.colLg6}>
-          <h2>Schools</h2>
-          <div className={styles.scrollBox}>
-            <table
-              className={[
-                bs.table,
-                bs.tableHover,
-              ].join(' ')}
-            >
-              <thead>
-                <tr>
-                  {schoolProperties.map(prop => (
-                    <th key={prop.name}>{prop.header}</th>
-                  ))}
-                  {addressProperties.map(prop => (
-                    <th key={prop.name}>{prop.header}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {schools.map(item => (
-                  <tr key={item.id} className={styles.pointer}>
-                    {schoolProperties.map(prop => (
-                      <td key={prop.name}>{item[prop.name]}</td>
-                    ))}
-                    {addressProperties.map(prop => (
-                      <td key={prop.name}>{(item.address || {})[prop.name]}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className={[bs.textCenter].join(' ')}>
-            <Paginator {...pagination} />
-          </div>
+          <h2>Teachers at {selectedSchool.name}</h2>
+          <TeacherList />
         </div>
       );
-    return (
-      <div className={bs.row}>
-        {schoolContent}
-        <button
-          className={[
-            bs.btn,
-            bs.btnDefault,
-          ].join(' ')}
-          onClick={() => showModal({
-            title: 'Add School',
-            content: <SchoolForm />,
-          })}
-        >
-          <span
-            className={[
-              bs.glyphicon,
-              bs.glyphiconPlus,
-            ].join(' ')}
-          />
-        </button>
+  return (
+    <div className={bs.row}>
+      <div className={bs.colLg6}>
+        <SchoolList />
       </div>
-    );
-  }
+      {selectedSchoolContent}
+    </div>
+  );
 }
 
 AdminHome.propTypes = {
-  pageLength: number.isRequired,
-  schools: arrayOf(school).isRequired,
-  itemCount: number.isRequired,
-  offset: number.isRequired,
-  goToPage: func.isRequired,
-  showModal: func.isRequired,
+  selectedSchool: school,
+};
+AdminHome.defaultProps = {
+  selectedSchool: null,
 };

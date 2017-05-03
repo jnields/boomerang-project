@@ -1,10 +1,5 @@
 import validate from './validate';
-
-// thanks html5 spec writers.
-// disable insane no-useless-escape implementation / maxLength
-// eslint-disable-next-line
-const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-
+import emailRegex from './email-pattern';
 
 export default [
   {

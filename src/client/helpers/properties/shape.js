@@ -21,6 +21,7 @@ export default shape({
     'date',
     'select',
     'checkbox',
+    'password',
   ]).isRequired,
   options: arrayOf(shape({
     label: string.isRequired,

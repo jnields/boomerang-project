@@ -3,24 +3,28 @@ import React from 'react';
 
 import bs from '../styles/bootstrap';
 import styles from '../styles/helpers';
+import cs from '../helpers/join-classes';
 
 export default function Paginator(props) {
   const { length, totalPages, currentPage, goToPage } = props;
-  const offset = currentPage - (currentPage % length);
+  const offset = (currentPage - 1) - ((currentPage - 1) % length);
   const pages = [];
 
   for (let i = 1; i <= length; i += 1) {
     const thisPage = i + offset;
-    let className = '';
+    const classes = {};
     if (currentPage === thisPage) {
-      className = bs.active;
+      classes[bs.active] = true;
+      classes[styles.pointer] = true;
     } else if (totalPages < thisPage) {
-      className = bs.disabled;
+      classes[bs.disabled] = true;
+    } else {
+      classes[styles.pointer] = true;
     }
     pages.push(
       <li
         key={i}
-        className={className}
+        className={cs(classes)}
       >
         {// eslint-disable-next-line
         }<span
@@ -30,7 +34,7 @@ export default function Paginator(props) {
           ].join(' ')}
           onClick={(e) => {
             e.preventDefault();
-            if (className) return false;
+            if (classes[bs.disabled]) return false;
             goToPage(thisPage);
             return false;
           }}
@@ -44,7 +48,7 @@ export default function Paginator(props) {
   return (
     <nav aria-label="Page navigation">
       <ul className={bs.pagination}>
-        <li className={currentPage === 1 ? bs.disabled : ''}>
+        <li className={currentPage === 1 ? bs.disabled : styles.pointer}>
           {// eslint-disable-next-line
           }<span
             aria-label="Previous"
@@ -64,7 +68,7 @@ export default function Paginator(props) {
           </span>
         </li>
         {pages}
-        <li className={currentPage + 1 > totalPages ? bs.disabled : ''}>
+        <li className={currentPage + 1 > totalPages ? bs.disabled : styles.pointer}>
           {// eslint-disable-next-line
           }<span
             className={[

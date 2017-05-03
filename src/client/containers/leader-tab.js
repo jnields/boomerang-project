@@ -3,32 +3,27 @@ import { denormalize } from 'normalizr';
 
 import LeaderTab from '../components/leader-tab';
 import { user } from '../helpers/schema';
-import { query } from '../actions/tabs';
+import { goToPage, selectLeader, clearUploaded, parseFile, saveUploaded } from '../actions/leaders';
+import { showModal } from '../actions/modal';
 
 export default connect(
   (state) => {
-    const meta = state.tabs.meta.Leaders;
+    const slice = state.leaders;
     return {
-      pageLength: meta.query.$limit,
+      uploading: slice.uploading,
+      uploaded: slice.uploaded,
+      uploadError: slice.uploadError,
+      savingUploaded: slice.savingUploaded,
+      pageLength: slice.query.$limit,
       leaders: denormalize(
-        meta.items,
+        slice.items,
         [user],
         state.entities,
       ),
-      itemCount: meta.count,
-      offset: meta.query.$offset,
-      query: meta.query,
+      itemCount: slice.count,
+      offset: slice.query.$offset,
+      query: slice.query,
     };
   },
-  null,
-  (state, { dispatch }, ownProps) => ({
-    ...ownProps,
-    ...state,
-    goToPage: (page) => {
-      dispatch(query({
-        ...state.query,
-        $offset: state.query.$limit * (page - 1),
-      }));
-    },
-  }),
+  { selectLeader, showModal, goToPage, parseFile, clearUploaded, saveUploaded },
 )(LeaderTab);

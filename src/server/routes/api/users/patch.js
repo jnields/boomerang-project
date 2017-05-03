@@ -18,27 +18,17 @@ export default async function patchUser(req, res) {
   delete updates.addressId;
   delete updates.email;
 
-  const schoolInclude = { model: School };
+  const schoolInclude = {
+    model: School,
+    where: req.user.school ? { id: req.user.school.id } : undefined,
+  };
+
   const groupInclude = { model: Group };
-  const include = [
-    { model: Address },
-    groupInclude,
-    schoolInclude,
-  ];
-
-
-  if (req.user.school) {
-    schoolInclude.where = { id: req.user.school.id };
-    groupInclude.include = [{
-      model: School,
-      where: { id: req.user.school.id },
-    }];
-  }
-
+  const addressInclude = { model: Address };
 
   const existing = await User.findOne({
     where: { id: req.params.id },
-    include,
+    include: [schoolInclude],
     transaction,
   });
 
@@ -68,7 +58,7 @@ export default async function patchUser(req, res) {
 
   async function updateAddress() {
     if (updates.address) {
-      const existingAddress = existing.getAddress();
+      const existingAddress = await existing.getAddress({ transaction });
       if (existingAddress) {
         return existingAddress.update(updates.address, { transaction });
       }
@@ -79,8 +69,11 @@ export default async function patchUser(req, res) {
     return null;
   }
 
-  await Promise.all(updateGroup(), updateAddress());
-  await existing.reload({ transaction, include });
+  await Promise.all([updateGroup(), updateAddress()]);
+  await existing.reload({
+    transaction,
+    include: [groupInclude, addressInclude],
+  });
   await transaction.commit();
   return res.send(updated);
 }

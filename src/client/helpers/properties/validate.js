@@ -8,8 +8,16 @@ export default function validate(value) {
   ) {
     return 'too long';
   }
+  if (value
+      && this.minLength
+      && value.length < this.minLength
+  ) {
+    return 'too short';
+  }
 
-  if (this.pattern && !this.pattern.test(value)) {
+  if (value
+      && this.pattern
+      && !this.pattern.test(value)) {
     return 'invalid';
   }
 

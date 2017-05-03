@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import cd from '../catch-decorator';
 import del from './delete';
-import get from './get';
 import patch from './patch';
 import post from './post';
 import query from './query';
+import gett from './get';
 
 const router = Router();
 
@@ -13,7 +13,7 @@ router.route('/')
   .post(cd(post));
 router.route('/:id')
   .delete(cd(del))
-  .get(cd(get))
+  .get(cd(gett))
   .patch(cd(patch));
 
 export default router;

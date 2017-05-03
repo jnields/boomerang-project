@@ -7,6 +7,7 @@ import PropertyField from './property-field';
 import Spinner from './spinner';
 
 import bs from '../styles/bootstrap';
+import groupName from '../helpers/properties/group-name';
 
 import {
   leader as leaderProps,
@@ -19,30 +20,62 @@ export default function LeaderForm(props) {
     valid,
     handleSubmit,
     submitting,
-
     cancel,
+    deleting,
+    delete: del,
+    deletable,
   } = props;
   return (
     <form className={bs.formHorizontal} onSubmit={handleSubmit}>
-      {leaderProps.map(prop => (
+      <fieldset>
+        <legend>Group</legend>
         <PropertyField
           valid
-          form="student"
-          property={prop}
-          key={prop.name}
+          form={form}
+          property={groupName}
         />
-      ))}
-      {addressProps.map(prop => (
-        <PropertyField
-          valid
-          form="student"
-          property={prop}
-          key={prop.name}
-        />
-      ))}
+      </fieldset>
+      <fieldset>
+        <legend>Info</legend>
+        {leaderProps.map(prop => (
+          <PropertyField
+            valid
+            form="student"
+            property={prop}
+            key={prop.name}
+          />
+        ))}
+      </fieldset>
+      <fieldset>
+        <legend>Address</legend>
+        {addressProps.map(prop => (
+          <PropertyField
+            valid
+            form="student"
+            property={prop}
+            key={prop.name}
+          />
+        ))}
+      </fieldset>
       <div className={bs.formGroup}>
-        <div className={[bs.colSm2, bs.colSmOffset10].join(' ')}>
+        <div className={[bs.colSm9, bs.colSmOffset3].join(' ')}>
           <div className={bs.btnToolbar}>
+            { !deletable ? null : (
+              <button
+                type="button"
+                disabled={submitting || deleting}
+                className={[bs.btn, bs.btnDanger].join(' ')}
+                onClick={del}
+              >
+                {deleting ? <Spinner /> : <span
+                  className={[
+                    bs.glyphicon,
+                    bs.glyphiconTrash,
+                  ].join(' ')}
+                />}
+                {deleting ? ' …deleting' : ' Delete'}
+              </button>
+            )}
             <button
               type="button"
               className={[bs.btn, bs.btnPrimary].join(' ')}
@@ -54,10 +87,10 @@ export default function LeaderForm(props) {
             <button
               type="submit"
               className={[bs.btn, bs.btnDefault].join(' ')}
-              disabled={!valid || submitting}
+              disabled={!valid || submitting || deleting}
             >
               { submitting ? <Spinner /> : null }
-              Save
+              { submitting ? ' …saving' : ' Save' }
             </button>
           </div>
         </div>
@@ -71,10 +104,8 @@ LeaderForm.propTypes = {
   form: string.isRequired,
   handleSubmit: func.isRequired,
   submitting: bool.isRequired,
-
+  deleting: bool.isRequired,
+  deletable: bool.isRequired,
   cancel: func.isRequired,
-};
-
-LeaderForm.defaultProps = {
-  student: null,
+  delete: func.isRequired,
 };

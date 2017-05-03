@@ -26,22 +26,25 @@ export default class SchoolList extends Component {
       pageLength,
       goToPage,
       showModal,
+      selectSchool,
     } = this.props;
-    const pagination = {
-      length: 5,
-      currentPage: 1 + (offset / pageLength),
-      totalPages: Math.ceil(itemCount / pageLength),
-      goToPage,
-    };
+    const pagination = itemCount <= pageLength
+      ? null
+      : (
+        <div className={[bs.textCenter].join(' ')}>
+          <Paginator
+            length={5}
+            currentPage={1 + (offset / pageLength)}
+            totalPages={Math.ceil(itemCount / pageLength)}
+            goToPage={goToPage}
+          />
+        </div>
+      );
 
     const schoolContent = schools.length === 0
-      ? (
-        <div className={bs.colLg6}>
-          <h2>No Schools Listed</h2>
-        </div>
-      )
+      ? <h2>No Schools Listed</h2>
       : (
-        <div className={bs.colLg6}>
+        <div>
           <h2>Schools</h2>
           <div className={styles.scrollBox}>
             <table
@@ -62,7 +65,8 @@ export default class SchoolList extends Component {
               </thead>
               <tbody>
                 {schools.map(item => (
-                  <tr key={item.id} className={styles.pointer}>
+                  // eslint-disable-next-line
+                  <tr key={item.id} className={styles.pointer} onClick={() => selectSchool(item)}>
                     {schoolProperties.map(prop => (
                       <td key={prop.name}>{item[prop.name]}</td>
                     ))}
@@ -73,32 +77,34 @@ export default class SchoolList extends Component {
                 ))}
               </tbody>
             </table>
-          </div>          
-          <div className={[bs.textCenter].join(' ')}>
-            <Paginator {...pagination} />
           </div>
+          {pagination}
         </div>
       );
     return (
       <div className={bs.row}>
-        {schoolContent}
-        <button
-          className={[
-            bs.btn,
-            bs.btnDefault,
-          ].join(' ')}
-          onClick={() => showModal({
-            title: 'Add School',
-            content: <SchoolForm />,
-          })}
-        >
-          <span
+        <div className={bs.colSm12}>
+          {schoolContent}
+        </div>
+        <div className={bs.colSm12}>
+          <button
             className={[
-              bs.glyphicon,
-              bs.glyphiconPlus,
+              bs.btn,
+              bs.btnDefault,
             ].join(' ')}
-          />
-        </button>
+            onClick={() => showModal({
+              title: 'Add School',
+              content: <SchoolForm />,
+            })}
+          >
+            <span
+              className={[
+                bs.glyphicon,
+                bs.glyphiconPlus,
+              ].join(' ')}
+            />
+          </button>
+        </div>
       </div>
     );
   }
@@ -111,4 +117,5 @@ SchoolList.propTypes = {
   offset: number.isRequired,
   goToPage: func.isRequired,
   showModal: func.isRequired,
+  selectSchool: func.isRequired,
 };

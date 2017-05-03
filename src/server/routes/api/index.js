@@ -7,6 +7,7 @@ import authenticated from './authentication-required';
 import auth from './auth';
 import schools from './schools';
 import users from './users';
+import groups from './groups';
 
 const router = Router();
 
@@ -45,6 +46,13 @@ router.use(
   hasRole('ADMIN', 'TEACHER'),
   users,
 );
+router.use(
+  '/groups',
+  authenticated,
+  hasRole('ADMIN', 'TEACHER'),
+  groups,
+);
+
 router.use(handleError);
 
 export default router;

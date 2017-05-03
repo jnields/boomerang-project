@@ -7,11 +7,11 @@ import parseQuery from '../parse-query';
 
 export default async function (req, res) {
   const transaction = req.transaction;
-  const include = {
+  const include = [{
     model: School,
     where: req.user.school ? { id: req.user.school.id } : undefined,
     include: [{ model: Address }],
-  };
+  }];
 
   const { rows, count } = await Group.findAndCount(
     parseQuery(req.query, { transaction, include }, Group),

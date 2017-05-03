@@ -33,7 +33,7 @@ export default async function (req, res) {
     await transaction.rollback();
     return res.status(400).send({ error: 'bad request' });
   }
-  authMech.username = updates.username;
+  authMech.username = updates.username || user.email;
   await authMech.save({ transaction });
   await transaction.commit();
   return res.status(204).send();

@@ -1,27 +1,30 @@
 import { reduxForm } from 'redux-form';
 import { connect } from 'react-redux';
-import { logIn } from '../actions/authorization';
+import { denormalize } from 'normalizr';
+import { user } from '../helpers/schema';
+import { closeModal } from '../actions/modal';
+import { getValues, handleSubmit, deleteLeader } from '../actions/leaders';
 import LeaderForm from '../components/leader-form';
 
 const formDecorated = reduxForm(
   {
     form: 'student',
-    onSubmit: (values, dispatch) => logIn(
-      values.username,
-      values.password,
-    )(dispatch),
+    onSubmit: (values, dispatch) => dispatch(handleSubmit(values)),
   },
 )(LeaderForm);
 
 export default connect(
-  state => ({ user: state.authorization.user }),
-  null,
-  (state, { dispatch }, ownProps) => ({
-    ...ownProps,
-    ...state,
-    cancel: () => {
-    },
-    save: () => {
-    },
+  state => ({
+    initialValues: getValues(denormalize(
+      state.leaders.selectedLeader,
+      user,
+      state.entities,
+    )),
+    deleting: state.leaders.deleting,
+    deletable: !!state.leaders.selectedLeader,
   }),
+  {
+    cancel: closeModal,
+    delete: deleteLeader,
+  },
 )(formDecorated);

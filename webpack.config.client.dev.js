@@ -131,6 +131,11 @@ module.exports = {
     port: 35612,
     contentBase: path.resolve(__dirname, 'public', 'build'),
     publicPath: `http://localhost:${proxyPort}/hot-reload-server/`,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
+    }
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),

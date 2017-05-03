@@ -50,10 +50,14 @@ export default class ReportTab extends Component {
                           [report.key]: false,
                         },
                       });
-                      Promise.resolve(report.key).then(
+                      Promise.resolve(report.download()).then(
                         () => this.setState({ [report.key]: false }),
                         () => this.setState({
-                          errors: { ...this.state.errors, [report.key]: true },
+                          [report.key]: false,
+                          errors: {
+                            ...this.state.errors,
+                            [report.key]: true,
+                          },
                         }),
                         );
                     }}

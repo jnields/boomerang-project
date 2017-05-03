@@ -1,10 +1,11 @@
-import { User, School, Address } from '../../../models';
+import { User, School, Address, Group } from '../../../models';
 import formatUser from '../format-user';
 import parseQuery from '../parse-query';
 
 export default async function queryUsers(req, res) {
   const include = [
     { model: Address },
+    { model: Group },
     {
       model: School,
       where: req.user.school ? { id: req.user.school.id } : undefined,

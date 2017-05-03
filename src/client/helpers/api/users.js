@@ -5,7 +5,8 @@ import handleAbort from './handle-abort';
 
 export default {
   query: (query, abort) => new Promise((resolve, reject) => {
-    let cancel = xhr.get(
+    let cancel;
+    const req = xhr.get(
       `/api/users${getQuery(query)}`,
       config,
       (error, response) => {
@@ -15,14 +16,16 @@ export default {
         }
         return resolve(response);
       },
-    ).abort;
+    );
+    cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
   get: (id, abort) => new Promise((resolve, reject) => {
     if (typeof id !== 'number') {
       throw new TypeError('id must be of type number');
     }
-    let cancel = xhr.get(
+    let cancel;
+    const req = xhr.get(
       `/api/users/${id}`,
       config,
       (error, response) => {
@@ -32,14 +35,16 @@ export default {
         }
         return resolve(response);
       },
-    ).abort;
+    );
+    cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
   delete: (id, abort) => new Promise((resolve, reject) => {
     if (typeof id !== 'number') {
       throw new TypeError('id must be of type number');
     }
-    let cancel = xhr.del(
+    let cancel;
+    const req = xhr.del(
       `/api/users/${id}`,
       config,
       (error, response) => {
@@ -49,7 +54,8 @@ export default {
         }
         return resolve(response);
       },
-    ).abort;
+    );
+    cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
   post: (obj, abort) => new Promise((resolve, reject) => {
@@ -68,7 +74,8 @@ export default {
       'POST body must be plain object or array of plain objects',
     );
     }
-    let cancel = xhr.post(
+    let cancel;
+    const req = xhr.post(
       '/api/users',
       {
         ...config,
@@ -81,7 +88,8 @@ export default {
         }
         return resolve(response);
       },
-    ).abort;
+    );
+    cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
   patch: (id, patch, abort) => new Promise((resolve, reject) => {
@@ -91,8 +99,9 @@ export default {
     if (Object.prototype.toString.call(patch) !== '[object Object]') {
       throw new TypeError('patch must be plain object');
     }
-    let cancel = xhr.patch(
-      `/api/users${id}`,
+    let cancel;
+    const req = xhr.patch(
+      `/api/users/${id}`,
       {
         ...config,
         body: patch,
@@ -104,7 +113,8 @@ export default {
         }
         return resolve(response);
       },
-    ).abort;
+    );
+    cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
 };

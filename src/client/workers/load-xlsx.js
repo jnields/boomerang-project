@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import xlsx from 'xlsx';
 
 function parseBool(raw) {
@@ -31,7 +32,7 @@ function mapObject(properties, raw) {
   Object.keys(raw).forEach((key) => {
     let value = raw[key];
     properties.forEach((property) => {
-      if (property.regex.test(key)) {
+      if (property.test.test(key)) {
         switch (property.dataType) {
           case 'bool':
             value = parseBool(value);
@@ -44,7 +45,7 @@ function mapObject(properties, raw) {
             break;
           default: break;
         }
-        property.setValue(result, value);
+        result[property.name] = value;
       }
     });
   });
@@ -123,7 +124,7 @@ async function handleMessage({ data: { properties, files } }) {
       if (ix) {
         if (ix === 1) {
           if (!Object.keys(props).some(
-            key => properties.some(prop => prop.regex.test(props[key])))
+            key => properties.some(prop => prop.test.test(props[key])))
           ) {
             throw new Error('Badly formatted spreadsheet');
           }
@@ -151,5 +152,7 @@ onmessage = (message) => {
     (error) => {
       postMessage({ error });
     },
+  ).catch(
+    () => postMessage({ error: 'error' }),
   );
 };

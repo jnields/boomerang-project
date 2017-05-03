@@ -4,7 +4,8 @@ import handleAbort from './handle-abort';
 
 export default {
   logIn: (username, password, abort) => new Promise((resolve, reject) => {
-    let cancel = xhr.post(
+    let cancel;
+    const req = xhr.post(
       '/api/auth/login',
       {
         ...config,
@@ -17,14 +18,26 @@ export default {
         }
         return resolve(response);
       },
-    ).abort;
+    );
+    cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
   logOut: () => {
     document.cookie = 'SID=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   },
+  patch: (id, body) => new Promise((resolve, reject) => {
+    xhr.patch(
+      `api/auth/login/${id}`,
+      {
+        ...config,
+        body,
+      },
+      (error, response) => (error ? reject(error) : resolve(response)),
+    );
+  }),
   requestReset: (username, abort) => new Promise((resolve, reject) => {
-    let cancel = xhr.put(
+    let cancel;
+    const req = xhr.put(
       `/api/auth/reset/${username}`,
       config,
       (error, response) => {
@@ -34,11 +47,13 @@ export default {
         }
         return resolve(response);
       },
-    ).abort;
+    );
+    cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
   reset: (sessionId, password, abort) => new Promise((resolve, reject) => {
-    let cancel = xhr.put(
+    let cancel;
+    const req = xhr.put(
       '/api/auth/reset',
       {
         ...config,
@@ -51,7 +66,8 @@ export default {
         }
         return resolve(response);
       },
-    ).abort;
+    );
+    cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
 };

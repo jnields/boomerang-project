@@ -103,4 +103,5 @@ panels.forEach(
     },
   ),
 );
-export default panels;
+
+export default state => state || { panels };

@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { arrayOf, number, func } from 'prop-types';
+import { bool, arrayOf, number, func, shape } from 'prop-types';
 
+import Spinner from './spinner';
 import Paginator from './paginator';
+import UploadPreview from './upload-preview';
 import StudentForm from '../containers/student-form';
 
 import {
@@ -20,28 +22,35 @@ export default class StudentTab extends Component {
 
   render() {
     const {
+      uploading,
       itemCount,
       offset,
       students,
       pageLength,
       goToPage,
       showModal,
+      parseFile,
+      uploaded,
+      saveUploaded,
+      selectStudent,
     } = this.props;
-    const pagination = {
-      length: 5,
-      currentPage: 1 + (offset / pageLength),
-      totalPages: Math.ceil(itemCount / pageLength),
-      goToPage,
-    };
+    const pagination = itemCount <= pageLength
+      ? null
+      : (
+        <div className={[bs.textCenter].join(' ')}>
+          <Paginator
+            length={5}
+            currentPage={1 + (offset / pageLength)}
+            totalPages={Math.ceil(itemCount / pageLength)}
+            goToPage={goToPage}
+          />
+        </div>
+      );
 
     const studentContent = students.length === 0
-      ? (
-        <div className={bs.colLg6}>
-          <h2>No Students Listed</h2>
-        </div>
-      )
+      ? <h2>No Students Listed</h2>
       : (
-        <div className={bs.colLg6}>
+        <div>
           <div className={styles.scrollBox}>
             <table
               className={[
@@ -51,6 +60,7 @@ export default class StudentTab extends Component {
             >
               <thead>
                 <tr>
+                  <th>Group</th>
                   {studentProperties.map(prop => (
                     <th key={prop.name}>{prop.header}</th>
                     ))}
@@ -61,7 +71,13 @@ export default class StudentTab extends Component {
               </thead>
               <tbody>
                 {students.map(item => (
-                  <tr key={item.id} className={styles.pointer}>
+                  // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+                  <tr
+                    key={item.id}
+                    className={styles.pointer}
+                    onClick={() => selectStudent(item)}
+                  >
+                    <td>{(item.group || {}).name}</td>
                     {studentProperties.map(prop => (
                       <td key={prop.name}>{item[prop.name]}</td>
                       ))}
@@ -73,14 +89,11 @@ export default class StudentTab extends Component {
               </tbody>
             </table>
           </div>
-          <div className={[bs.textCenter].join(' ')}>
-            <Paginator {...pagination} />
-          </div>
+          {pagination}
         </div>
       );
-    return (
-      <div className={bs.row}>
-        {studentContent}
+    const buttons = (
+      <div className={bs.btnToolbar}>
         <button
           className={[
             bs.btn,
@@ -96,18 +109,77 @@ export default class StudentTab extends Component {
               bs.glyphicon,
               bs.glyphiconPlus,
             ].join(' ')}
-          />
+          /> Add
         </button>
+        <label
+          htmlFor="student.file"
+          className={[
+            bs.btn,
+            bs.btnDefault,
+          ].join(' ')}
+          style={{ cursor: 'pointer', marginBottom: 0 }}
+        >
+          {
+            uploading
+              ? <Spinner />
+              : <span
+                className={[
+                  bs.glyphicon,
+                  bs.glyphiconUpload,
+                ].join(' ')}
+              />
+          }
+          {uploading ? ' uploading…' : ' Upload via Excel File'}
+          <input
+            id="student.file"
+            style={{ display: 'none' }}
+            type="file"
+            accept=".xlsx"
+            ref={() => {}}
+            onChange={e => parseFile(e)}
+            onClick={(e) => {
+              e.target.value = null;
+            }}
+          />
+        </label>
+      </div>
+    );
+    return (
+      <div className={bs.row}>
+        <div className={bs.colSm12}>
+          {studentContent}
+        </div>
+        <div className={bs.colSm12}>
+          {buttons}
+        </div>
+        { uploaded.length === 0 ? null : (
+          <div className={bs.colSm12}>
+            <UploadPreview
+              items={uploaded}
+              isSaving={this.props.savingUploaded}
+              cancel={this.props.clearUploaded}
+              properties={[...studentProperties, ...addressProperties]}
+              save={saveUploaded}
+            />
+          </div>
+        )}
       </div>
     );
   }
 }
 
 StudentTab.propTypes = {
+  uploading: bool.isRequired,
+  savingUploaded: bool.isRequired,
   pageLength: number.isRequired,
   students: arrayOf(user).isRequired,
+  uploaded: arrayOf(shape({})).isRequired,
   itemCount: number.isRequired,
   offset: number.isRequired,
   goToPage: func.isRequired,
   showModal: func.isRequired,
+  parseFile: func.isRequired,
+  clearUploaded: func.isRequired,
+  saveUploaded: func.isRequired,
+  selectStudent: func.isRequired,
 };

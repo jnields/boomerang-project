@@ -8,7 +8,6 @@ export default [
     type: 'text',
     validate,
     maxLength: 255,
-    required: true,
   },
   {
     header: 'Line 2',

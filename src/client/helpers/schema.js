@@ -5,4 +5,4 @@ const Entity = schema.Entity;
 export const group = new Entity('groups');
 export const address = new Entity('addresses');
 export const school = new Entity('schools', { address });
-export const user = new Entity('users', { school, address, group });
+export const user = new Entity('users', { address, group });

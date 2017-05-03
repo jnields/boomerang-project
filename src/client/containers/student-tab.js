@@ -3,23 +3,33 @@ import { denormalize } from 'normalizr';
 
 import StudentTab from '../components/student-tab';
 import { user } from '../helpers/schema';
-import { goToPage, selectItem } from '../actions/tabs';
+import {
+  parseFile,
+  saveUploaded,
+  goToPage,
+  selectStudent,
+  clearUploaded,
+} from '../actions/students';
 import { showModal } from '../actions/modal';
 
 export default connect(
   (state) => {
-    const meta = state.tabs.meta.Students;
+    const slice = state.students;
     return {
-      pageLength: meta.query.$limit,
+      uploading: slice.uploading,
+      uploaded: slice.uploaded,
+      uploadError: slice.uploadError,
+      savingUploaded: slice.savingUploaded,
+      pageLength: slice.query.$limit,
       students: denormalize(
-        meta.items,
+        slice.items,
         [user],
         state.entities,
       ),
-      itemCount: meta.count,
-      offset: meta.query.$offset,
-      query: meta.query,
+      itemCount: slice.count,
+      offset: slice.query.$offset,
+      query: slice.query,
     };
   },
-  { selectItem, showModal, goToPage },
+  { selectStudent, showModal, goToPage, parseFile, clearUploaded, saveUploaded },
 )(StudentTab);

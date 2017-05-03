@@ -2,10 +2,10 @@ import React from 'react';
 import {
   string, bool, func,
 } from 'prop-types';
-
 import PropertyField from './property-field';
 import Spinner from './spinner';
 
+import groupName from '../helpers/properties/group-name';
 import bs from '../styles/bootstrap';
 
 import {
@@ -19,11 +19,21 @@ export default function StudentForm(props) {
     valid,
     handleSubmit,
     submitting,
-
     cancel,
+    deleting,
+    delete: del,
+    deletable,
   } = props;
   return (
     <form className={bs.formHorizontal} onSubmit={handleSubmit}>
+      <fieldset>
+        <legend>Group</legend>
+        <PropertyField
+          valid
+          form={form}
+          property={groupName}
+        />
+      </fieldset>
       <fieldset>
         <legend>Info</legend>
         {studentProps.map(prop => (
@@ -49,10 +59,26 @@ export default function StudentForm(props) {
       <div className={bs.formGroup}>
         <div className={[bs.colSmOffset3, bs.colSm9].join(' ')}>
           <div className={bs.btnToolbar}>
+            { !deletable ? null : (
+              <button
+                type="button"
+                disabled={submitting || deleting}
+                className={[bs.btn, bs.btnDanger].join(' ')}
+                onClick={del}
+              >
+                {deleting ? <Spinner /> : <span
+                  className={[
+                    bs.glyphicon,
+                    bs.glyphiconTrash,
+                  ].join(' ')}
+                />}
+                {deleting ? ' …deleting' : ' Delete'}
+              </button>
+            )}
             <button
               type="button"
               className={[bs.btn, bs.btnPrimary].join(' ')}
-              disabled={submitting}
+              disabled={submitting || deleting}
               onClick={cancel}
             >
               Cancel
@@ -60,10 +86,10 @@ export default function StudentForm(props) {
             <button
               type="submit"
               className={[bs.btn, bs.btnDefault].join(' ')}
-              disabled={!valid || submitting}
+              disabled={!valid || submitting || deleting}
             >
               { submitting ? <Spinner /> : null }
-              Save
+              { submitting ? ' …saving' : ' Save' }
             </button>
           </div>
         </div>
@@ -77,10 +103,8 @@ StudentForm.propTypes = {
   form: string.isRequired,
   handleSubmit: func.isRequired,
   submitting: bool.isRequired,
-
+  deleting: bool.isRequired,
+  deletable: bool.isRequired,
   cancel: func.isRequired,
-};
-
-StudentForm.defaultProps = {
-  student: null,
+  delete: func.isRequired,
 };

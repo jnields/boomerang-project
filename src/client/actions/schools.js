@@ -1,11 +1,11 @@
 import { normalize } from 'normalizr';
-import { initialize } from 'redux-form';
 import { school as schoolSchema } from '../helpers/schema';
 import { closeModal } from './modal';
 import api from '../helpers/api';
+import { query as teacherQuery } from './teachers';
 
 import {
-  SELECT_ITEM,
+  SELECT_SCHOOL,
   QUERY_SCHOOLS,
   SAVE_SCHOOL,
   DELETE_SCHOOL,
@@ -17,10 +17,10 @@ import {
   ERROR,
 } from './xhr-statuses';
 
-export const selectItem = ({ item, form }) => (dispatch) => {
-  dispatch(initialize(form, item));
-  dispatch({ type: SELECT_ITEM, item });
-};
+// export const selectItem = ({ item, form }) => (dispatch) => {
+//   dispatch(initialize(form, item));
+//   dispatch({ type: SELECT_ITEM, item });
+// };
 
 let abort;
 export const query = params => (dispatch) => {
@@ -90,10 +90,31 @@ function getSchool(values) {
   };
 }
 
-export const requery = () => (dispatch, getState) => {
-  const params = getState().schools.query;
-  return query(params)(dispatch);
+export const deleteSchool = school => (dispatch) => {
+  dispatch({
+    type: DELETE_SCHOOL,
+    school,
+    status: PENDING,
+  });
+  return api.schools.delete(school.id).then(
+    (response) => {
+      if (response.statusCode < 400) {
+        return dispatch({
+          type: DELETE_SCHOOL,
+          status: COMPLETE,
+          entities: { schools: { [school.id]: undefined } },
+        });
+      }
+      return dispatch({ type: DELETE_SCHOOL, response, status: COMPLETE });
+    },
+    error => dispatch({ type: DELETE_SCHOOL, status: ERROR, error }),
+  );
 };
+
+export const requery =
+() =>
+(dispatch, getState) =>
+query(getState().schools.query)(dispatch);
 
 export const saveSchool = values => (dispatch) => {
   dispatch({ type: SAVE_SCHOOL, status: PENDING });
@@ -121,26 +142,6 @@ export const saveSchool = values => (dispatch) => {
   );
 };
 
-export const deleteSchool = school => (dispatch) => {
-  dispatch({
-    type: DELETE_SCHOOL,
-    school,
-    status: PENDING,
-  });
-  return api.schools.delete(school.id).then(
-    (response) => {
-      if (response.statusCode < 400) {
-        return dispatch({
-          type: DELETE_SCHOOL,
-          status: COMPLETE,
-          entities: { schools: { [school.id]: undefined } },
-        });
-      }
-      return dispatch({ type: DELETE_SCHOOL, response, status: COMPLETE });
-    },
-    error => dispatch({ type: DELETE_SCHOOL, status: ERROR, error }),
-  );
-};
 
 export const onSubmit =
 values =>
@@ -148,3 +149,16 @@ values =>
 saveSchool(values)(dispatch, getState).then(
   () => requery()(dispatch, getState).then(() => dispatch(closeModal())),
 );
+
+export const selectSchool = school => (dispatch, getState) => {
+  dispatch({
+    type: SELECT_SCHOOL,
+    ...normalize(school, schoolSchema),
+  });
+  const initialQuery = getState().teachers;
+  return dispatch(teacherQuery({
+    ...initialQuery.query,
+    $offset: 0,
+    school: { id: school.id },
+  }));
+};

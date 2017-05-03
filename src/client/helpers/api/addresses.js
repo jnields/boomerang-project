@@ -11,7 +11,8 @@ export default {
     if (typeof id !== 'number') {
       throw new TypeError('id must be of type number');
     }
-    let cancel = xhr.del(
+    let cancel;
+    const req = xhr.del(
       `/api/addresses/${id}`,
       config,
       (error, response) => {
@@ -21,7 +22,8 @@ export default {
         }
         return resolve(response);
       },
-    ).abort;
+    );
+    cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
   patch: (id, patch, abort) => new Promise((resolve, reject) => {
@@ -31,7 +33,8 @@ export default {
     if (!isObject(patch)) {
       throw new TypeError('patch must be plain object');
     }
-    let cancel = xhr.patch(
+    let cancel;
+    const req = xhr.patch(
       `/api/addresses/${id}`,
       {
         ...config,
@@ -44,7 +47,8 @@ export default {
         }
         return resolve(response);
       },
-    ).abort;
+    );
+    cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
 };
