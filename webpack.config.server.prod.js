@@ -10,6 +10,10 @@ const builtins = require('repl')._builtinLibs.reduce(
   {}
 );
 
+if (process.env.NODE_ENV !== 'production') {
+  console.log('Incorrect NODE_ENV!');
+  process.exit(1);
+}
 
 module.exports = {
   context: __dirname,
@@ -113,7 +117,8 @@ module.exports = {
   externals(context, request, cb) {
     let translatedRequest = request;
     let external = builtins[request]
-      || /(^[^\\/.]|(?:!))/.test(request); // starts with /\. or has !
+      || /(^[^\/.]|(?:!))/.test(request);
+      // starts with "/", "\", or "."; or contains "!"
 
     if (!external) {
       const fullPath = path.resolve(context, request);

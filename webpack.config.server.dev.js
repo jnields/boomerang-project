@@ -4,6 +4,11 @@ const builtins = require('repl')._builtinLibs.reduce(
   {}
 );
 
+if (process.env.NODE_ENV === 'production') {
+  console.log('Incorrect NODE_ENV!');
+  process.exit(1);
+}
+
 const nodePath = path.resolve(__dirname, 'node_modules');
 const nodePathLength = nodePath.length;
 
@@ -77,7 +82,7 @@ module.exports = {
   },
   entry: [
     'babel-polyfill',
-    path.resolve(__dirname, 'src', 'server'),
+    path.resolve(__dirname, 'src', 'server', 'dev-server'),
   ],
   node: {
     __filename: false,

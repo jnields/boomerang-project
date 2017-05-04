@@ -1,11 +1,9 @@
+import { Router } from 'express';
 import api from './api';
+import render from './server-rendering';
 
-const prod = process.env.NODE_ENV === 'production';
-const render = prod
-  ? require('./server').default
-  : require('./dev-server').default;
+const router = new Router();
+router.use('/api', api);
+router.use('/', render);
 
-export default Promise.resolve(api).then(resolvedApi => ({
-  '/api': resolvedApi,
-  '/': render,
-}));
+export default router;

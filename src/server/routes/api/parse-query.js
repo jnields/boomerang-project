@@ -10,7 +10,11 @@ function parseValue(attribute, rawValue, operator) {
     if (isObject(value)) {
       throw new BadQueryError(`Object passed to operand${operator}`);
     }
-    if (attribute.allowNull && value === '') return null;
+    console.log(attribute);
+    const validate = attribute.validate;
+    const nullable = attribute.allowNull !== false
+      && !(validate && validate.allowNull !== false);
+    if (nullable && value === '') return null;
     switch (attribute.type.constructor.key) {
       case 'STRING':
       case 'CHAR':

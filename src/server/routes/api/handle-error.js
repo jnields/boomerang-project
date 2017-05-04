@@ -3,6 +3,7 @@ import {
 } from 'sequelize';
 import { InsecurePasswordError, BadQueryError } from '../../helpers/errors';
 
+// eslint-disable-next-line no-unused-vars
 export default async function (err, req, res, next) {
   try {
     await req.transaction.rollback();
@@ -20,7 +21,6 @@ export default async function (err, req, res, next) {
         error: 'password does not meet length requirements',
       });
     default:
-      res.status(500).send({ error: 'server error' });
+      return res.status(500).send({ error: 'server error' });
   }
-  return next(err);
 }

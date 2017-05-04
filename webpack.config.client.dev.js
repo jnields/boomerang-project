@@ -1,7 +1,13 @@
 const proxyPort = process.env.PROXY_PORT || 35612;
+const port = process.env.PORT || 3000;
 const autoprefixer = require('autoprefixer');
 const webpack = require('webpack');
 const path = require('path');
+
+if (process.env.NODE_ENV === 'production') {
+  console.log('Incorrect NODE_ENV!');
+  process.exit(1);
+}
 
 module.exports = {
   devtool: 'cheap-module-eval-source-map',
@@ -33,7 +39,9 @@ module.exports = {
           {
             loader: 'worker-loader',
             options: {
-              inline: false,
+              // must inline for dev-server. no workers allowed via CORS
+              inline: true,
+              fallback: false,
             },
           },
           'babel-loader',
@@ -128,11 +136,11 @@ module.exports = {
   },
   devServer: {
     hot: true,
-    port: 35612,
+    port: proxyPort,
     contentBase: path.resolve(__dirname, 'public', 'build'),
     publicPath: `http://localhost:${proxyPort}/hot-reload-server/`,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': `http://localhost:${port}`,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
     }
