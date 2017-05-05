@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { string } from 'prop-types';
 
-import { shape as propertyShape } from '../helpers/properties';
+import { propertyShape } from '../helpers/properties';
 import bs from '../styles/bootstrap';
 import styles from '../styles/filter-thead';
 
@@ -31,7 +31,7 @@ class FilterItem extends Component {
           ].join(' ')}
         >
           <ul className={bs.dropDownMenu}>
-            <li> 
+            <li>
             </li>
           </ul>
         </button>

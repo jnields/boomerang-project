@@ -41,6 +41,7 @@ export default function GroupForm(props) {
                 type="button"
                 disabled={submitting || deleting}
                 className={[bs.btn, bs.btnDanger].join(' ')}
+                tabIndex={-1}
                 onClick={deleteGroup}
               >
                 {deleting ? <Spinner /> : <span

@@ -69,7 +69,7 @@ function stringifyParams(params) {
           const toEncode = isDate(param)
             ? JSON.parse(JSON.stringify(param))
             : param;
-          return `${encodeURIComponent(key)}=${encodeURIComponent(toEncode)}`;
+          return `${encodeURIComponent(key)}=${encodeURIComponent(toEncode || '')}`;
         },
       ),
     );

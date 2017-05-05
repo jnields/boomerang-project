@@ -14,6 +14,7 @@ export default shape({
   header: string.isRequired,
   name: string.isRequired,
   test: instanceOf(RegExp).isRequired,
+  pattern: instanceOf(RegExp),
   type: oneOf([
     'text',
     'textarea',
@@ -32,6 +33,8 @@ export default shape({
     ]).isRequired,
     disabled: bool,
   })),
+  getValue: func,
+  setValue: func,
   validate: func,
   asyncValidate: func,
   maxLength: number,

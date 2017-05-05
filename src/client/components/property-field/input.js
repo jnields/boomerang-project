@@ -1,7 +1,7 @@
 import React from 'react';
 import { shape, string, bool } from 'prop-types';
 import bs from '../../styles/bootstrap';
-import { shape as propertyShape } from '../../helpers/properties';
+import { propertyShape } from '../../helpers/properties';
 
 export default function Input(props) {
   const groupClasses = [bs.formGroup];

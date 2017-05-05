@@ -1,29 +1,18 @@
 import { connect } from 'react-redux';
 import { denormalize } from 'normalizr';
 
-import LeaderTab from '../components/leader-tab';
+import PropertyList from '../components/property-list';
 import { user } from '../helpers/schema';
-import { goToPage, selectLeader, clearUploaded, parseFile, saveUploaded } from '../actions/leaders';
-import { showModal } from '../actions/modal';
+import * as actions from '../actions/leaders';
 
 export default connect(
-  (state) => {
-    const slice = state.leaders;
-    return {
-      uploading: slice.uploading,
-      uploaded: slice.uploaded,
-      uploadError: slice.uploadError,
-      savingUploaded: slice.savingUploaded,
-      pageLength: slice.query.$limit,
-      leaders: denormalize(
-        slice.items,
-        [user],
-        state.entities,
-      ),
-      itemCount: slice.count,
-      offset: slice.query.$offset,
-      query: slice.query,
-    };
-  },
-  { selectLeader, showModal, goToPage, parseFile, clearUploaded, saveUploaded },
-)(LeaderTab);
+  state => ({
+    ...state.lists.leaders,
+    items: denormalize(
+      state.lists.leaders.items,
+      [user],
+      state.entities,
+    ),
+  }),
+  actions,
+)(PropertyList);

@@ -1,11 +1,13 @@
 import {
   QUERY_STUDENTS,
+  DELETE_STUDENT,
+  SAVE_STUDENT,
+
   SELECT_STUDENT,
   PARSE_STUDENT_FILE,
   SAVE_UPLOADED_STUDENTS,
   CLEAR_UPLOADED_STUDENTS,
   CLOSE_MODAL,
-  DELETE_STUDENT,
 } from '../actions/types';
 import { PENDING, COMPLETE, ERROR } from '../actions/xhr-statuses';
 
@@ -21,6 +23,8 @@ const initialState = {
     $limit: 10,
     type: 'STUDENT',
   },
+  querying: true,
+  queryError: null,
   selectedStudent: null,
   count: 0,
   deleting: false,
@@ -37,15 +41,22 @@ export default function (state = initialState, action) {
         case PENDING:
           return {
             ...state,
+            querying: true,
             query: action.query,
           };
         case COMPLETE:
           return {
             ...state,
+            querying: false,
             items: action.result,
             count: action.count,
           };
         case ERROR:
+          return {
+            ...state,
+            querying: false,
+            queryError: action.error,
+          };
         default: throw new TypeError(`unhandled case: ${action.status}`);
       }
     case PARSE_STUDENT_FILE:

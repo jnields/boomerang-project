@@ -1,44 +1,20 @@
-export const LOG_IN = 'LOG_IN';
-export const LOG_OUT = 'LOG_OUT';
+// eslint-disable-next-line no-new-wrappers
+const s = str => (new String(str));
 
-export const SHOW_MODAL = 'SHOW_MODAL';
-export const HIDE_MODAL = 'HIDE_MODAL';
-export const CLOSE_MODAL = HIDE_MODAL;
+export const LOG_IN = s('LOG_IN');
+export const LOG_OUT = s('LOG_OUT');
+export const SHOW_MODAL = s('SHOW_MODAL');
+export const HIDE_MODAL = s('HIDE_MODAL');
+export const ASSIGN_GROUPS = s('ASSIGN_GROUPS');
+export const CREATE_GROUP = s('CREATE_GROUP');
 
-export const QUERY_SCHOOLS = 'QUERY_SCHOOLS';
-export const SAVE_SCHOOL = 'SAVE_SCHOOL';
-export const DELETE_SCHOOL = 'DELETE_SCHOOL';
-export const SELECT_SCHOOL = 'SELECT_SCHOOL';
+export const SAVE = s('SAVE');
+export const QUERY = s('QUERY');
+export const GET = s('GET');
+export const UPDATE = s('UPDATE');
+export const DELETE = s('DELETE');
 
-export const QUERY_TEACHERS = 'QUERY_TEACHERS';
-export const SELECT_TEACHER = 'SELECT_TEACHER';
-export const DELETE_TEACHER = 'DELETE_TEACHER';
-export const SAVE_TEACHER = 'SAVE_TEACHER';
-export const VALIDATE_EMAIL = 'VALIDATE_EMAIL';
-
-export const QUERY_LEADERS = 'QUERY_LEADERS';
-export const SAVE_LEADER = 'SAVE_LEADER';
-export const UPDATE_LEADER = 'UPDATE_LEADER';
-export const DELETE_LEADER = 'DELETE_LEADER';
-export const PARSE_LEADER_FILE = 'PARSE_LEADER_FILE';
-export const SELECT_LEADER = 'SELECT_LEADER';
-export const SAVE_UPLOADED_LEADERS = 'SAVE_UPLOADED_LEADERS';
-export const CLEAR_UPLOADED_LEADERS = 'CLEAR_UPLOADED_LEADERS';
-
-export const QUERY_STUDENTS = 'QUERY_STUDENTS';
-export const DELETE_STUDENT = 'DELETE_STUDENT';
-export const SAVE_STUDENT = 'SAVE_STUDENT';
-export const UPDATE_STUDENT = 'UDPATE_STUDENT';
-export const SELECT_STUDENT = 'SELECT_STUDENT';
-export const PARSE_STUDENT_FILE = 'PARSE_STUDENT_FILE';
-export const SAVE_UPLOADED_STUDENTS = 'SAVE_UPLOADED_STUDENTS';
-export const CLEAR_UPLOADED_STUDENTS = 'CLEAR_UPLOADED_STUDENTS';
-
-export const GET_ALL_GROUPS = 'GET_ALL_GROUPS';
-export const ASSIGN_GROUPS = 'ASSIGN_GROUPS';
-export const SAVE_GROUP = 'SAVE_GROUP';
-export const UPDATE_GROUP = 'UPDATE_GROUP';
-export const CREATE_GROUP = 'CREATE_GROUP';
-export const VALIDATE_GROUP_NAME = 'VALIDATE_GROUP_NAME';
-export const SELECT_GROUP = 'SELECT_GROUP';
-export const DELETE_GROUP = 'DELETE_GROUP';
+export const UPLOAD = s('UPLOAD');
+export const PARSE = s('PARSE');
+export const SELECT_ITEM = s('SELECT_ITEM');
+export const CLEAR_PARSED = s('CLEAR_PARSED');

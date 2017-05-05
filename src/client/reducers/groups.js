@@ -14,7 +14,7 @@ import {
 
 const initialState = {
   groups: [],
-  gettingGroups: false,
+  querying: false,
   assigningGroups: false,
   selectedGroup: null,
   deleting: false,
@@ -29,11 +29,11 @@ export default function (state = initialState, action) {
     case GET_ALL_GROUPS:
       switch (action.status) {
         case PENDING:
-          return { ...state, gettingGroups: true };
+          return { ...state, querying: true };
         case COMPLETE:
-          return { ...state, gettingGroups: false, groups: action.result };
+          return { ...state, querying: false, groups: action.result };
         case ERROR:
-          return { ...state, gettingGroups: false };
+          return { ...state, querying: false };
         default:
           throw new TypeError(`unhandled case in switch: ${action.status}`);
       }

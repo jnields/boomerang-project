@@ -5,6 +5,7 @@ import Spinner from './spinner';
 import Paginator from './paginator';
 import UploadPreview from './upload-preview';
 import StudentForm from '../containers/student-form';
+import StudentSearchForm from '../containers/student-search-form';
 
 import {
   student as studentProperties,
@@ -146,6 +147,11 @@ export default class StudentTab extends Component {
     );
     return (
       <div className={bs.row}>
+        {students.length === 0 ? null : (
+          <div className={bs.colSm12}>
+            <StudentSearchForm />
+          </div>
+        )}
         <div className={bs.colSm12}>
           {studentContent}
         </div>

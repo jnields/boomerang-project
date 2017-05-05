@@ -7,7 +7,7 @@ import Select from './select';
 import Textarea from './textarea';
 import Checkbox from './checkbox';
 
-import { shape as propertyShape } from '../../helpers/properties';
+import { propertyShape } from '../../helpers/properties';
 
 export default function PropertyField(props) {
   const {

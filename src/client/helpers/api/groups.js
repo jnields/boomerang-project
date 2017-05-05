@@ -43,7 +43,7 @@ export default {
     cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
-  delete: (id, abort) => new Promise((resolve, reject) => {
+  del: (id, abort) => new Promise((resolve, reject) => {
     if (isNaN(parseInt(id, 10))) {
       throw new TypeError('id must be of type number');
     }

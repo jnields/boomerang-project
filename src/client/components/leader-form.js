@@ -65,6 +65,7 @@ export default function LeaderForm(props) {
                 type="button"
                 disabled={submitting || deleting}
                 className={[bs.btn, bs.btnDanger].join(' ')}
+                tabIndex={-1}
                 onClick={del}
               >
                 {deleting ? <Spinner /> : <span

@@ -1,3 +1,15 @@
 .app {
     margin-top: 70px;
+    margin-bottom: 100px;
+}
+
+table {
+  tr {
+    th, td {
+      white-space: nowrap;
+      max-width: 250px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 }

@@ -14,7 +14,7 @@ export default class GroupTab extends React.Component {
     return {
       groups: arrayOf(groupShape).isRequired,
       assigningGroups: bool.isRequired,
-
+      querying: bool.isRequired,
       showModal: func.isRequired,
       assignGroups: func.isRequired,
       getAllGroups: func.isRequired,
@@ -32,36 +32,40 @@ export default class GroupTab extends React.Component {
       assigningGroups,
       assignGroups,
       selectGroup,
+      querying,
     } = this.props;
-    const groupList = groups.length === 0
-    ? <h2>No groups listed</h2>
-    : (
-      <div>
-        <table className={[bs.table, bs.tableHover].join(' ')}>
-          <thead>
-            <tr>
-              {groupProps.map(prop => <th key={prop.name}>{prop.header}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {groups.map(group => (
-              // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-              <tr
-                key={group.id}
-                className={styles.pointer}
-                onClick={() => selectGroup(group)}
-              >
-                {groupProps.map(prop => (
-                  <td key={prop.name}>
-                    {group[prop.name]}
-                  </td>
-                ))}
+    const groupList = (() => {
+      if (querying) return null;
+      return groups.length === 0
+      ? <h2>No groups listed</h2>
+      : (
+        <div>
+          <table className={[bs.table, bs.tableHover].join(' ')}>
+            <thead>
+              <tr>
+                {groupProps.map(prop => <th key={prop.name}>{prop.header}</th>)}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
+            </thead>
+            <tbody>
+              {groups.map(group => (
+                // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+                <tr
+                  key={group.id}
+                  className={styles.pointer}
+                  onClick={() => selectGroup(group)}
+                >
+                  {groupProps.map(prop => (
+                    <td key={prop.name}>
+                      {group[prop.name]}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    })();
     const buttons = (
       <div className={bs.btnToolbar}>
         <button

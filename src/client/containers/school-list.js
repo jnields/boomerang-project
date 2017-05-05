@@ -1,24 +1,18 @@
 import { connect } from 'react-redux';
 import { denormalize } from 'normalizr';
 
-import SchoolList from '../components/school-list';
+import PropertyList from '../components/property-list';
 import { school } from '../helpers/schema';
-import { goToPage, selectSchool } from '../actions/schools';
-import { showModal } from '../actions/modal';
+import * as actions from '../actions/schools';
 
 export default connect(
-  (state) => {
-    const slice = state.schools;
-    return {
-      pageLength: slice.query.$limit,
-      schools: denormalize(
-        slice.items,
-        [school],
-        state.entities,
-      ),
-      itemCount: slice.count,
-      offset: slice.query.$offset,
-    };
-  },
-  { showModal, goToPage, selectSchool },
-)(SchoolList);
+  state => ({
+    ...state.lists.schools,
+    items: denormalize(
+      state.lists.schools.items,
+      [school],
+      state.entities,
+    ),
+  }),
+  actions,
+)(PropertyList);

@@ -9,6 +9,7 @@ const initialState = {
     $offset: 0,
     $limit: 10,
   },
+  querying: true,
 };
 
 export default function (state = initialState, action) {
@@ -19,16 +20,19 @@ export default function (state = initialState, action) {
           return {
             ...state,
             query: action.query,
+            querying: true,
           };
         case ERROR:
           return {
             ...state,
             items: [],
+            querying: false,
           };
         case COMPLETE:
           return {
             ...state,
             items: action.result,
+            querying: false,
           };
         default: throw new TypeError(`unhandled case: ${action.status}`);
       }

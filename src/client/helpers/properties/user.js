@@ -3,18 +3,18 @@ import emailRegex from './email-pattern';
 
 export default [
   {
-    header: 'First Name',
-    name: 'firstName',
-    test: /first\s*name/i,
+    header: 'Last Name',
+    name: 'lastName',
+    test: /last\s*name/i,
     type: 'text',
     validate,
     maxLength: 255,
     required: true,
   },
   {
-    header: 'Last Name',
-    name: 'lastName',
-    test: /last\s*name/i,
+    header: 'First Name',
+    name: 'firstName',
+    test: /first\s*name/i,
     type: 'text',
     validate,
     maxLength: 255,

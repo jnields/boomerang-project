@@ -1,19 +1,14 @@
 import React from 'react';
 import {
-  string, bool, func,
+  string, bool, func, arrayOf,
 } from 'prop-types';
 import PropertyField from './property-field';
 import Spinner from './spinner';
 
-import groupName from '../helpers/properties/group-name';
 import bs from '../styles/bootstrap';
+import { fieldsetShape } from '../helpers/properties';
 
-import {
-  student as studentProps,
-  address as addressProps,
-} from '../helpers/properties';
-
-export default function StudentForm(props) {
+export default function PropertyForm(props) {
   const {
     form,
     valid,
@@ -21,45 +16,28 @@ export default function StudentForm(props) {
     submitting,
     cancel,
     deleting,
-    delete: del,
-    deletable,
+    del,
+    fieldsets,
   } = props;
   return (
     <form className={bs.formHorizontal} onSubmit={handleSubmit}>
-      <fieldset>
-        <legend>Group</legend>
-        <PropertyField
-          valid
-          form={form}
-          property={groupName}
-        />
-      </fieldset>
-      <fieldset>
-        <legend>Info</legend>
-        {studentProps.map(prop => (
-          <PropertyField
-            valid
-            form="student"
-            property={prop}
-            key={prop.name}
-          />
-        ))}
-      </fieldset>
-      <fieldset>
-        <legend>Address</legend>
-        {addressProps.map(prop => (
-          <PropertyField
-            valid
-            form="student"
-            property={prop}
-            key={prop.name}
-          />
-        ))}
-      </fieldset>
+      {fieldsets.map(fs => (
+        <fieldset key={fs.key}>
+          <legend>{fs.legend}</legend>
+          {fs.properties.map(prop => (
+            <PropertyField
+              valid
+              key={prop.name}
+              form={form}
+              property={prop}
+            />
+          ))}
+        </fieldset>
+      ))}
       <div className={bs.formGroup}>
         <div className={[bs.colSmOffset3, bs.colSm9].join(' ')}>
           <div className={bs.btnToolbar}>
-            { !deletable ? null : (
+            { !del ? null : (
               <button
                 type="button"
                 disabled={submitting || deleting}
@@ -99,13 +77,16 @@ export default function StudentForm(props) {
   );
 }
 
-StudentForm.propTypes = {
+PropertyForm.propTypes = {
   valid: bool.isRequired,
   form: string.isRequired,
   handleSubmit: func.isRequired,
   submitting: bool.isRequired,
-  deleting: bool.isRequired,
-  deletable: bool.isRequired,
   cancel: func.isRequired,
-  delete: func.isRequired,
+  del: func,
+  deleting: bool.isRequired,
+  fieldsets: arrayOf(fieldsetShape).isRequired,
+};
+PropertyForm.defaultProps = {
+  del: null,
 };

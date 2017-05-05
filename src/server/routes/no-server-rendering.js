@@ -1,7 +1,10 @@
 import { normalize } from 'normalizr';
 import { user as userSchema } from '../../client/helpers/schema';
 
+const prod = process.env.NODE_ENV === 'production';
+const port = process.env.PORT || 3000;
 const proxyPort = process.env.PROXY_PORT || 35612;
+const bundlePort = prod ? port : proxyPort;
 
 export default (req, res) => {
   const user = req.user ? req.user.toJSON() : null;
@@ -21,7 +24,7 @@ export default (req, res) => {
   const options = {
     title: 'Express',
     lang: 'en',
-    bundlePath: `http://localhost:${proxyPort}/hot-reload-server/bundle.js`,
+    bundlePath: `http://localhost:${bundlePort}/hot-reload-server/bundle.js`,
     markup: '',
     initialState: JSON
       .stringify(initialState)

@@ -1,12 +1,22 @@
 import React from 'react';
 import { arrayOf, func, bool, shape } from 'prop-types';
-import { shape as propertyShape } from '../helpers/properties';
+import { fieldsetShape } from '../helpers/properties';
 import bs from '../styles/bootstrap';
 import styles from '../styles/helpers';
 
 import Spinner from './spinner';
 
-export default function UploadPreview(props) {
+export default function UploadPreview({
+  items,
+  fieldsets,
+  isSaving,
+  save,
+  cancel,
+}) {
+  const properties = fieldsets.reduce(
+    (mapped, fieldset) => [...mapped, ...fieldset.properties],
+    [],
+  );
   return (
     <div>
       <h3>Preview:</h3>
@@ -14,7 +24,7 @@ export default function UploadPreview(props) {
         <table className={bs.table}>
           <thead>
             <tr>
-              {props.properties.map(prop => (
+              {properties.map(prop => (
                 <th key={prop.name}>
                   {prop.header}
                 </th>
@@ -22,12 +32,12 @@ export default function UploadPreview(props) {
             </tr>
           </thead>
           <tbody>
-            {props.items.map((item, ix) => (
+            {items.map((item, ix) => (
               // eslint-disable-next-line react/no-array-index-key
               <tr key={ix}>
-                {props.properties.map(prop => (
+                {properties.map(prop => (
                   <td key={prop.name}>
-                    {item[prop.name]}
+                    {prop.getValue ? prop.getValue(item) : item[prop.name]}
                   </td>
                 ))}
               </tr>
@@ -38,17 +48,17 @@ export default function UploadPreview(props) {
       <div className={bs.btnToolbar}>
         <button
           className={[bs.btn, bs.btnPrimary].join(' ')}
-          onClick={props.cancel}
-          disabled={props.isSaving}
+          onClick={cancel}
+          disabled={isSaving}
         >
           Cancel
         </button>
         <button
           className={[bs.btn, bs.btnDefault].join(' ')}
-          onClick={() => props.save(props.items)}
-          disabled={props.isSaving}
+          onClick={() => save(items)}
+          disabled={isSaving}
         >
-          {props.isSaving ? <Spinner /> : null}
+          {isSaving ? <Spinner /> : null}
           Save
         </button>
       </div>
@@ -57,7 +67,7 @@ export default function UploadPreview(props) {
 }
 
 UploadPreview.propTypes = {
-  properties: arrayOf(propertyShape).isRequired,
+  fieldsets: arrayOf(fieldsetShape).isRequired,
   items: arrayOf(shape({})).isRequired,
   isSaving: bool.isRequired,
   save: func.isRequired,
