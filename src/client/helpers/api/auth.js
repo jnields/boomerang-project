@@ -26,6 +26,9 @@ export default {
     document.cookie = 'SID=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   },
   patch: (id, body) => new Promise((resolve, reject) => {
+    if (typeof id !== 'number') {
+      throw new TypeError('id must be of type number');
+    }
     xhr.patch(
       `api/auth/login/${id}`,
       {

@@ -25,7 +25,7 @@ export default {
     handleAbort({ abort, cancel, resolve });
   }),
   get: (id, abort) => new Promise((resolve, reject) => {
-    if (isNaN(parseInt(id, 10))) {
+    if (typeof id !== 'number') {
       throw new TypeError('id must be of type number');
     }
     let cancel;
@@ -44,7 +44,7 @@ export default {
     handleAbort({ abort, cancel, resolve });
   }),
   del: (id, abort) => new Promise((resolve, reject) => {
-    if (isNaN(parseInt(id, 10))) {
+    if (typeof id !== 'number') {
       throw new TypeError('id must be of type number');
     }
     let cancel;
@@ -75,8 +75,8 @@ export default {
     }
     if (!correctType) {
       throw new TypeError(
-                  'POST body must be plain object or array of plain objects',
-              );
+        'POST body must be plain object or array of plain objects',
+      );
     }
     let cancel;
     const req = xhr.post(
@@ -97,7 +97,7 @@ export default {
     handleAbort({ abort, cancel, resolve });
   }),
   patch: (id, patch, abort) => new Promise((resolve, reject) => {
-    if (isNaN(parseInt(id, 10))) {
+    if (typeof id !== 'number') {
       throw new TypeError('id must be of type number');
     }
     if (!isObject(patch)) {

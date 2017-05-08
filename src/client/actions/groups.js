@@ -10,7 +10,7 @@ const config = {
   schemaName: 'groups',
   post: api.groups.post,
   query: api.groups.query,
-  put: api.groups.put,
+  patch: api.groups.patch,
   del: api.groups.del,
   fieldsets,
 };

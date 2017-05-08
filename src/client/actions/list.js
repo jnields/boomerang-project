@@ -153,13 +153,13 @@ async (dispatch) => {
 };
 
 export const update =
-({ name, put, schema }, id, patch) =>
+({ name, patch: sendPatch, schema }, id, patch) =>
 async (dispatch) => {
   const type = UPDATE;
   dispatch({ type, name, status: PENDING, id, patch });
   let response;
   try {
-    response = await put(await patch);
+    response = await sendPatch(id, await patch);
   } catch (error) {
     dispatch({ type, name, status: UNSENT, id, patch });
     throw error;

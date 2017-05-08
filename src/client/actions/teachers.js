@@ -10,16 +10,32 @@ const config = {
   schemaName: 'users',
   post: api.users.post,
   query: api.users.query,
-  put: api.users.put,
+  patch: api.users.patch,
   del: api.users.del,
   fieldsets,
 };
 
+async function getTeacher(item) {
+  return {
+    ...item,
+    type: 'TEACHER',
+  };
+}
+
 export const selectItem = listActions.selectItem.bind(null, config);
 export const clearParsed = listActions.clearParsed.bind(null, config);
 export const query = listActions.query.bind(null, config);
-export const save = listActions.save.bind(null, config);
-export const upload = listActions.upload.bind(null, config);
+
+export const save =
+item =>
+dispatch =>
+dispatch(listActions.save(config, getTeacher(item)));
+
+export const upload =
+items =>
+dispatch =>
+dispatch(listActions.upload(config, items.map(getTeacher)));
+
 export const update = listActions.update.bind(null, config);
 export const del = listActions.del.bind(null, config);
 export const parse = listActions.parse.bind(null, config);

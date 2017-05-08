@@ -214,7 +214,10 @@ export default class PropertyList extends Component {
                             cancel={closeModal}
                             initialValues={getValuesFromItem(item, this.properties)}
                             onSubmit={async (values) => {
-                              await update(getItemFromValues(values));
+                              await update(
+                                item.id,
+                                getItemFromValues(values, this.properties),
+                              );
                               return closeModal();
                             }}
                           />

@@ -10,7 +10,7 @@ const config = {
   schemaName: 'schools',
   post: api.schools.post,
   query: api.schools.query,
-  put: api.schools.put,
+  patch: api.schools.patch,
   del: api.schools.del,
   properties,
 };

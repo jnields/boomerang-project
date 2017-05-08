@@ -10,7 +10,7 @@ const config = {
   schemaName: 'users',
   post: api.users.post,
   query: api.users.query,
-  put: api.users.put,
+  patch: api.users.patch,
   del: api.users.del,
   fieldsets,
 };
