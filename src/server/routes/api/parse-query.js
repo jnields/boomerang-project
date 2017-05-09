@@ -10,7 +10,6 @@ function parseValue(attribute, rawValue, operator) {
     if (isObject(value)) {
       throw new BadQueryError(`Object passed to operand${operator}`);
     }
-    console.log(attribute);
     const validate = attribute.validate;
     const nullable = attribute.allowNull !== false
       && !(validate && validate.allowNull !== false);

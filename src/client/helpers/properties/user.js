@@ -3,15 +3,6 @@ import emailRegex from './email-pattern';
 
 export default [
   {
-    header: 'Last Name',
-    name: 'lastName',
-    test: /last\s*name/i,
-    type: 'text',
-    validate,
-    maxLength: 255,
-    required: true,
-  },
-  {
     header: 'First Name',
     name: 'firstName',
     test: /first\s*name/i,
@@ -27,6 +18,15 @@ export default [
     type: 'text',
     validate,
     maxLength: 255,
+  },
+  {
+    header: 'Last Name',
+    name: 'lastName',
+    test: /last\s*name/i,
+    type: 'text',
+    validate,
+    maxLength: 255,
+    required: true,
   },
   {
     header: 'Phone Number',
@@ -85,10 +85,10 @@ export default [
       },
     ],
   },
-  {
-    header: 'Birthday',
-    name: 'dob',
-    test: /(birthday|dob)/i,
-    type: 'date',
-  },
+  // {
+  //   header: 'Birthday',
+  //   name: 'dob',
+  //   test: /(birthday|dob)/i,
+  //   type: 'date',
+  // },
 ];

@@ -29,13 +29,15 @@ export const clearParsed =
 
 const abort = {};
 export const query =
-(config, params = {}) =>
+(config, params = {}, reset = false) =>
 async (dispatch) => {
   const { name, query: sendQuery, schema } = config;
-  if (abort[name]) abort(true);
+  if (abort[name]) {
+    abort[name](true);
+    abort[name] = null;
+  }
   const type = QUERY;
-  dispatch({ type, name, status: PENDING, params });
-
+  dispatch({ type, name, status: PENDING, params, reset });
   let response;
   try {
     response = await sendQuery(

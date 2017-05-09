@@ -1,4 +1,13 @@
 import validate from './validate';
+import states from '../states';
+
+const inverse = Object.keys(states).reduce(
+  (accumulated, abbr) => ({
+    ...accumulated,
+    [states[abbr]]: abbr,
+  }),
+  {},
+);
 
 export default [
   {
@@ -29,7 +38,21 @@ export default [
     header: 'State',
     name: 'state',
     test: /state/i,
-    type: 'text',
+    type: 'select',
+    options: Object.keys(inverse).map(state => ({
+      key: inverse[state],
+      value: inverse[state],
+      label: state,
+    })),
+    setValue: (obj, value) => {
+      if (inverse[value]) {
+        return { ...obj, state: inverse[value] };
+      }
+      if (states[value]) {
+        return { ...obj, state: value };
+      }
+      return obj;
+    },
     validate,
     maxLength: 255,
   },

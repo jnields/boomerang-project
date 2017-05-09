@@ -4,7 +4,9 @@ import api from '../helpers/api';
 import { GET, SAVE, DELETE } from '../actions/types';
 import { COMPLETE, PENDING, ERROR } from '../actions/xhr-statuses';
 
-async function deleteOld(oldGroup, userId, dispatch) {
+const deleteOld =
+(oldGroup, userId) =>
+async (dispatch) => {
   if (oldGroup == null) return false;
   const type = DELETE;
   const name = 'groups';
@@ -14,8 +16,8 @@ async function deleteOld(oldGroup, userId, dispatch) {
     id: { $ne: userId },
     group: {
       name: oldGroup.name,
-      notes: null,
-      roomNumber: null,
+      notes: { $ne: null },
+      roomNumber: { $ne: null },
     },
     $limit: 1,
   });
@@ -23,15 +25,17 @@ async function deleteOld(oldGroup, userId, dispatch) {
   const id = oldGroup.id;
   dispatch({ type, name, status: PENDING, id });
   try {
-    const response = await api.groups.delete(oldGroup.id);
+    const response = await api.groups.del(oldGroup.id);
     dispatch({ type, name, status: COMPLETE, id, response });
   } catch (error) {
     dispatch({ type, name, status: ERROR, error });
   }
   return true;
-}
+};
 
-async function saveNew(name, dispatch) {
+const saveNew =
+name =>
+async (dispatch) => {
   if (!name) return null;
   const {
     body: {
@@ -58,12 +62,20 @@ async function saveNew(name, dispatch) {
     ...normalized,
   });
   return normalized.result;
+};
+
+
+const queue = {};
+function waitInQueue(name, cb) {
+  queue[name] = Promise.resolve(queue[name]).then(() => cb());
+  return queue[name];
 }
 
-export default (name, oldGroup, userId) => async (dispatch) => {
+export default (name, oldGroup, userId) =>
+dispatch => waitInQueue(name, async () => {
   const [/* deleted */, result] = await Promise.all([
-    deleteOld(oldGroup, userId, dispatch),
-    saveNew(name, dispatch),
+    dispatch(deleteOld(oldGroup, userId)),
+    dispatch(saveNew(name, dispatch)),
   ]);
   return result;
-};
+});

@@ -15,9 +15,10 @@ const config = {
   fieldsets,
 };
 
-async function getTeacher(item) {
+async function getTeacher(schoolId, item) {
   return {
     ...item,
+    schoolId,
     type: 'TEACHER',
   };
 }
@@ -28,13 +29,17 @@ export const query = listActions.query.bind(null, config);
 
 export const save =
 item =>
-dispatch =>
-dispatch(listActions.save(config, getTeacher(item)));
+(dispatch, getState) => {
+  const schoolId = getState().lists.schools.selectedItem;
+  return dispatch(listActions.save(config, getTeacher(schoolId, item)));
+};
 
 export const upload =
 items =>
-dispatch =>
-dispatch(listActions.upload(config, items.map(getTeacher)));
+(dispatch, getState) => {
+  const schoolId = getState().lists.schools.selectedItem;
+  return dispatch(listActions.upload(config, items.map(getTeacher.bind(null, schoolId))));
+};
 
 export const update = listActions.update.bind(null, config);
 export const del = listActions.del.bind(null, config);

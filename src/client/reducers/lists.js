@@ -82,6 +82,7 @@ const subReducer = (name, params = { $offset: 0, $limit: 10 }, fieldsets) =>
             querying: true,
             queryError: null,
             params: action.params,
+            items: action.reset ? [] : state.items,
           };
         case COMPLETE:
           return {

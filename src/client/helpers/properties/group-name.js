@@ -6,5 +6,6 @@ export default {
   test: /group\s*name/i,
   type: 'text',
   maxLength: 255,
+  getValue: obj => (obj.group ? obj.group.name : undefined),
   validate,
 };

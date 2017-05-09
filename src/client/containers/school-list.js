@@ -8,6 +8,7 @@ import * as actions from '../actions/schools';
 export default connect(
   state => ({
     ...state.lists.schools,
+    showModalOnDoubleClick: true,
     items: denormalize(
       state.lists.schools.items,
       [school],

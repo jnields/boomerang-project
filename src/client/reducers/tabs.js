@@ -8,14 +8,14 @@ import ReportTab from '../containers/report-tab';
 
 const initialState = {
   schoolTabs: [
-    { name: 'Students', path: '/students' },
+    { name: 'Students', path: '/' },
     { name: 'Leaders', path: '/leaders' },
     { name: 'Groups', path: '/groups' },
     { name: 'Reports', path: '/reports' },
   ],
   schoolRoutes: (
     <div>
-      <Route path="/students" component={StudentTab} />
+      <Route path="/" exact strict component={StudentTab} />
       <Route path="/leaders" component={LeaderTab} />
       <Route path="/groups" component={GroupTab} />
       <Route path="/reports" component={ReportTab} />

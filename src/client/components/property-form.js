@@ -8,6 +8,26 @@ import Spinner from './spinner';
 import bs from '../styles/bootstrap';
 import { fieldsetShape } from '../helpers/properties';
 
+function getProperties(form, { properties }) {
+  return properties.map(prop => (
+    <PropertyField
+      valid
+      key={prop.name}
+      form={form}
+      property={prop}
+    />
+  ));
+}
+
+function getFieldsets(form, fieldsets) {
+  return fieldsets.map(fs => (
+    <fieldset key={fs.key}>
+      <legend>{fs.legend}</legend>
+      {getProperties(form, fs)}
+    </fieldset>
+  ));
+}
+
 export default function PropertyForm(props) {
   const {
     form,
@@ -21,19 +41,10 @@ export default function PropertyForm(props) {
   } = props;
   return (
     <form className={bs.formHorizontal} onSubmit={handleSubmit}>
-      {fieldsets.map(fs => (
-        <fieldset key={fs.key}>
-          <legend>{fs.legend}</legend>
-          {fs.properties.map(prop => (
-            <PropertyField
-              valid
-              key={prop.name}
-              form={form}
-              property={prop}
-            />
-          ))}
-        </fieldset>
-      ))}
+      { fieldsets.length === 1
+          ? getProperties(form, fieldsets[0])
+          : getFieldsets(form, fieldsets)
+      }
       <div className={bs.formGroup}>
         <div className={[bs.colSmOffset3, bs.colSm9].join(' ')}>
           <div className={bs.btnToolbar}>

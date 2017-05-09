@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { denormalize } from 'normalizr';
 import { school } from '../helpers/schema';
 // import { showModal } from '../actions/modal';
-// import { goToPage, selectSchool } from '../actions/schools';
+import { query as queryTeachers } from '../actions/teachers';
 import AdminHome from '../components/admin-home';
 
 export default connect(
@@ -12,5 +12,7 @@ export default connect(
       school,
       state.entities,
     ),
+    teacherParams: state.lists.teachers.params,
   }),
+  { queryTeachers },
 )(AdminHome);

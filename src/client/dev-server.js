@@ -7,8 +7,9 @@ import { createStore, applyMiddleware } from 'redux';
 
 import App from './containers/app';
 import reducers from './reducers';
+import api from './helpers/api';
 
-window.api = require('./helpers/api').default;
+window.api = api;
 
 const store = createStore(
   reducers,
@@ -17,6 +18,7 @@ const store = createStore(
 );
 
 window.store = store;
+
 function renderApp(Component) {
   render(
     <Provider store={store}>
@@ -33,6 +35,7 @@ renderApp(App);
 if (module.hot) {
   module.hot.accept('./reducers', () => {
     try {
+      delete require.cache[require.resolve('./reducers')];
       // eslint-disable-next-line global-require
       const nextReducer = require('./reducers').default;
       if (nextReducer) {
@@ -44,6 +47,7 @@ if (module.hot) {
   });
   module.hot.accept('./containers/app', () => {
     try {
+      delete require.cache[require.resolve('./containers/app')];
       // eslint-disable-next-line global-require
       const nextApp = require('./containers/app').default;
       if (nextApp) {

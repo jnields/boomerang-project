@@ -12,9 +12,12 @@ import Spinner from './spinner';
 import Paginator from './paginator';
 import UploadPreview from './upload-preview';
 import PropertyForm from '../containers/property-form';
+import cs from '../helpers/join-classes';
 
 import bs from '../styles/bootstrap';
-import styles from '../styles/helpers';
+import styles from '../styles/property-list';
+import helperClasses from '../styles/helpers';
+
 import {
   fieldsetShape,
   getItemFromValues,
@@ -41,7 +44,7 @@ export default class PropertyList extends Component {
 
       items: arrayOf(shape({})).isRequired,
       count: number.isRequired,
-      // selectedItem: shape({ id: number.isRequired }),
+      selectedItem: number,
       parsedItems: arrayOf(shape({})).isRequired,
       params: shape({
         $limit: number,
@@ -62,6 +65,8 @@ export default class PropertyList extends Component {
 
       showModal: func.isRequired,
       closeModal: func.isRequired,
+
+      showModalOnDoubleClick: bool,
     };
   }
 
@@ -71,6 +76,7 @@ export default class PropertyList extends Component {
       parse: undefined,
       clearParsed: undefined,
       upload: undefined,
+      showModalOnDoubleClick: false,
     };
   }
 
@@ -140,7 +146,7 @@ export default class PropertyList extends Component {
 
       items,
       count,
-      // selectedItem,
+      selectedItem,
       parsedItems,
       params,
 
@@ -157,7 +163,9 @@ export default class PropertyList extends Component {
       upload,
       showModal,
       closeModal,
+      showModalOnDoubleClick,
     } = this.props;
+
     if (querying && items.length === 0) return null;
 
     const pagination = count <= (params.$limit || Infinity)
@@ -186,7 +194,6 @@ export default class PropertyList extends Component {
             >
               <thead>
                 <tr>
-                  <th>Group</th>
                   {this.properties.map(prop => (
                     <th key={prop.name}>{prop.header}</th>
                   ))}
@@ -197,9 +204,15 @@ export default class PropertyList extends Component {
                   // eslint-disable-next-line jsx-a11y/no-static-element-interactions
                   <tr
                     key={item.id}
-                    className={styles.pointer}
+                    className={cs({
+                      [helperClasses.pointer]: true,
+                      [styles.selected]: showModalOnDoubleClick && selectedItem === item.id,
+                    })}
                     onClick={() => {
                       selectItem(item);
+                      if (showModalOnDoubleClick && selectedItem !== item.id) {
+                        return false;
+                      }
                       showModal({
                         title: `Edit: ${name}`,
                         content: (
@@ -223,6 +236,7 @@ export default class PropertyList extends Component {
                           />
                         ),
                       });
+                      return false;
                     }}
                   >
                     {this.properties.map(prop => (
@@ -298,7 +312,7 @@ export default class PropertyList extends Component {
     );
 
     return (
-      <div className={bs.row}>
+      <div className={[bs.row, styles.default].join(' ')}>
         <div className={bs.colSm12}>
           {itemContent}
         </div>

@@ -46,10 +46,12 @@ export default [
       getValue: obj => (obj.address || {})[prop.name],
       setValue: (obj, value) => ({
         ...obj,
-        address: !value ? obj.address : {
-          ...obj.address,
-          [prop.name]: value,
-        },
+        address: (() => {
+          if (!value) return obj.address;
+          return prop.setValue
+            ? prop.setValue(obj.address, value)
+            : value;
+        })(),
       }),
     })),
   },
