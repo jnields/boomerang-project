@@ -85,10 +85,17 @@ export default [
       },
     ],
   },
-  // {
-  //   header: 'Birthday',
-  //   name: 'dob',
-  //   test: /(birthday|dob)/i,
-  //   type: 'date',
-  // },
+  {
+    header: 'Birthday',
+    name: 'dob',
+    test: /(birthday|dob)/i,
+    type: 'date',
+    getValue: obj => obj.dob,
+    setValue: (obj, value) => ({
+      ...obj,
+      dob: value && value.constructor === Date
+        ? value
+        : new Date(value),
+    }),
+  },
 ];

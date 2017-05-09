@@ -2,17 +2,29 @@ function isDate(obj) {
   return Object.prototype.toString.call(obj) === '[object Date]';
 }
 
-export function parseUTCDate(...args) {
-  const date = new Date(...args);
-  if (isNaN(date)) {
-    throw new TypeError('invalid date');
-  }
+function utcFromDate(date) {
+  console.log(date);
   const hasTime =
     +new Date(date.getFullYear(), date.getMonth(), date.getDate())
     - date;
   if (hasTime) throw new TypeError('date provided with time');
   const utc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
   return new Date(utc);
+}
+
+function utcFromArgs(arg) {
+  console.log(arg);
+  const date = new Date(arg);
+  if (isNaN(date)) {
+    throw new TypeError('invalid date');
+  }
+  return utcFromDate(date);
+}
+
+export function getUTCDate(arg) {
+  return arg && arg.constructor === Date
+    ? utcFromDate(arg)
+    : utcFromArgs(arg);
 }
 
 export function addTimeZoneOffset(utc) {

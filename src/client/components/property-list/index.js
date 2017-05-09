@@ -8,21 +8,22 @@ import {
   // string,
  } from 'prop-types';
 
-import Spinner from './spinner';
-import Paginator from './paginator';
-import UploadPreview from './upload-preview';
-import PropertyForm from '../containers/property-form';
-import cs from '../helpers/join-classes';
+import Spinner from '../spinner';
+import Paginator from '../paginator';
+import UploadPreview from '../upload-preview';
+import PropertyForm from '../../containers/property-form';
+import cs from '../../helpers/join-classes';
+import format from './format';
 
-import bs from '../styles/bootstrap';
-import styles from '../styles/property-list';
-import helperClasses from '../styles/helpers';
+import bs from '../../styles/bootstrap';
+import styles from '../../styles/property-list';
+import helperClasses from '../../styles/helpers';
 
 import {
   fieldsetShape,
   getItemFromValues,
   getValuesFromItem,
-} from '../helpers/properties';
+} from '../../helpers/properties';
 
 export default class PropertyList extends Component {
 
@@ -241,7 +242,7 @@ export default class PropertyList extends Component {
                   >
                     {this.properties.map(prop => (
                       <td key={prop.name}>
-                        {prop.getValue ? prop.getValue(item) : item[prop.name]}
+                        {format(prop.getValue ? prop.getValue(item) : item[prop.name])}
                       </td>
                     ))}
                   </tr>

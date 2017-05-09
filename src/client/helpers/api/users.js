@@ -14,6 +14,22 @@ export default {
         if (error) {
           return reject(error);
         }
+        if (response
+            && response.body
+            && response.body.results
+            && Array.isArray(response.body.results)
+        ) {
+          return resolve({
+            ...response,
+            body: {
+              ...response.body,
+              results: response.body.results.map(user => ({
+                ...user,
+                dob: new Date(user.dob),
+              })),
+            },
+          });
+        }
         return resolve(response);
       },
     );
@@ -32,6 +48,15 @@ export default {
         cancel = null;
         if (error) {
           return reject(error);
+        }
+        if (response && response.body) {
+          return resolve({
+            ...response,
+            body: {
+              ...response.body,
+              dob: new Date(response.body.dob),
+            },
+          });
         }
         return resolve(response);
       },
@@ -86,6 +111,15 @@ export default {
         if (error) {
           return reject(error);
         }
+        if (response && response.body) {
+          return resolve({
+            ...response,
+            body: {
+              ...response.body,
+              dob: new Date(response.body.dob),
+            },
+          });
+        }
         return resolve(response);
       },
     );
@@ -110,6 +144,15 @@ export default {
         cancel = null;
         if (error) {
           return reject(error);
+        }
+        if (response && response.body) {
+          return resolve({
+            ...response,
+            body: {
+              ...response.body,
+              dob: new Date(response.body.dob),
+            },
+          });
         }
         return resolve(response);
       },

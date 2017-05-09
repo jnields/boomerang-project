@@ -4,6 +4,7 @@ import {
 
 export default async function patchUser(req, res) {
   const updates = req.body;
+  if (updates && updates.dob) updates.dob = new Date(updates.dob);
   const transaction = req.transaction;
   const id = req.params.id;
 
