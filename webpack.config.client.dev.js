@@ -1,5 +1,5 @@
-const proxyPort = process.env.PROXY_PORT || 35612;
-const port = process.env.PORT || 3000;
+const proxyPort = process.env.PROXY_PORT;
+const port = process.env.BOOMERANG_PORT;
 const autoprefixer = require('autoprefixer');
 const webpack = require('webpack');
 const path = require('path');

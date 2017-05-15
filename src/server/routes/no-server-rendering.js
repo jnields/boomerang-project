@@ -2,9 +2,9 @@ import { normalize } from 'normalizr';
 import { user as userSchema } from '../../client/helpers/schema';
 
 const prod = process.env.NODE_ENV === 'production';
-const port = process.env.PORT || 3000;
-const proxyPort = process.env.PROXY_PORT || 35612;
-const bundlePort = prod ? port : proxyPort;
+const bundlePort = prod
+  ? process.env.BOOMERANG_PORT
+  : process.env.PROXY_PORT;
 
 export default (req, res) => {
   const user = req.user ? req.user.toJSON() : null;

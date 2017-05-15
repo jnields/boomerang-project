@@ -1,11 +1,9 @@
 import debug from 'debug';
 import http from 'http';
-import https from 'https';
-import fs from 'fs';
 import cluster from 'cluster';
 import os from 'os';
 
-const port = process.env.PORT || 3000;
+const port = process.env.BOOMERANG_PORT;
 const cpus = os.cpus().length;
 const debugLog = debug('mern:server');
 
@@ -44,18 +42,7 @@ function onError(error) {
 function startServer(app) {
   app.set('port', port);
 
-  let server;
-  if (process.env.NODE_ENV === 'production') {
-    server = https.createServer(
-      {
-        cert: fs.readFileSync(process.env.CERT_FILE),
-        key: fs.readFileSync(process.env.KEY_FILE),
-      },
-      app,
-    );
-  } else {
-    server = http.createServer(app);
-  }
+  const server = http.createServer(app);
 
   server.listen(port);
   server.on('error', onError);

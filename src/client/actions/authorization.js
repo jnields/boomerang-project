@@ -7,6 +7,7 @@ import {
   COMPLETE,
   PENDING,
   ERROR,
+  UNSENT,
 } from './xhr-statuses';
 
 import * as schemas from '../helpers/schema';
@@ -32,10 +33,10 @@ export const logIn = (username, password) => (dispatch) => {
       return dispatch({
         ...normalize(response.body, schemas.user),
         type: LOG_IN,
-        status: COMPLETE,
+        status: ERROR,
         response,
       });
     },
-    error => dispatch({ type: LOG_IN, error, status: ERROR }),
+    error => dispatch({ type: LOG_IN, error, status: UNSENT }),
   );
 };
