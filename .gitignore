@@ -3,7 +3,7 @@ node_modules
 public
 /scripts
 server-bundle.js*
-.git # required for eslint
+.git 
 
 # Logs
 logs
