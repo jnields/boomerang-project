@@ -48,9 +48,11 @@ export default [
         ...obj,
         address: (() => {
           if (!value) return obj.address;
-          return prop.setValue
-            ? prop.setValue(obj.address, value)
-            : value;
+          if (prop.setValue) return prop.setValue(obj.address, value);
+          return {
+            ...obj.address,
+            [prop.name]: value,
+          };
         })(),
       }),
     })),

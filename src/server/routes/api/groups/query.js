@@ -19,6 +19,11 @@ export default async function (req, res) {
   await transaction.commit();
   return res.send({
     count,
-    results: rows.map(group => group.toJSON()),
+    results: rows.map((group) => {
+      const result = group.toJSON();
+      delete result.school;
+      delete result.schoolId;
+      return result;
+    }),
   });
 }

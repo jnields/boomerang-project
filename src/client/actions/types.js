@@ -15,3 +15,6 @@ export const UPLOAD = 'UPLOAD';
 export const PARSE = 'PARSE';
 export const SELECT_ITEM = 'SELECT_ITEM';
 export const CLEAR_PARSED = 'CLEAR_PARSED';
+
+export const LOAD_REPORT = 'LOAD_REPORT';
+export const LEAVE_REPORT = 'LEAVE_REPORT';

@@ -3,7 +3,6 @@ function isDate(obj) {
 }
 
 function utcFromDate(date) {
-  console.log(date);
   const hasTime =
     +new Date(date.getFullYear(), date.getMonth(), date.getDate())
     - date;
@@ -13,7 +12,6 @@ function utcFromDate(date) {
 }
 
 function utcFromArgs(arg) {
-  console.log(arg);
   const date = new Date(arg);
   if (isNaN(date)) {
     throw new TypeError('invalid date');

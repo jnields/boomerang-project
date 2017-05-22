@@ -5,7 +5,7 @@ import resetLogin from './reset-login';
 import patchLogin from './patch-login';
 import eh from '../catch-decorator';
 import hasRole from '../has-role';
-import authenticated from '../authentication-required';
+import authenticated from '../../authentication-required';
 
 const router = Router();
 

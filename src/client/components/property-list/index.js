@@ -8,8 +8,8 @@ import {
   // string,
  } from 'prop-types';
 
-import Spinner from '../spinner';
-import Paginator from '../paginator';
+import Buttons from './buttons';
+import Pagination from './pagination';
 import UploadPreview from '../upload-preview';
 import PropertyForm from '../../containers/property-form';
 import cs from '../../helpers/join-classes';
@@ -29,20 +29,9 @@ export default class PropertyList extends Component {
 
   static get propTypes() {
     return {
-      // saving: bool.isRequired,
       querying: bool.isRequired,
-      // updating: bool.isRequired,
       deleting: bool.isRequired,
-      parsing: bool.isRequired,
       uploading: bool.isRequired,
-
-      // saveError: string,
-      // queryError: string,
-      // updateError: string,
-      // deleteError: string,
-      // parseError: string,
-      // uploadError: string,
-
       items: arrayOf(shape({})).isRequired,
       count: number.isRequired,
       selectedItem: number,
@@ -60,7 +49,6 @@ export default class PropertyList extends Component {
       del: func.isRequired,
       selectItem: func.isRequired,
 
-      parse: func,
       clearParsed: func,
       upload: func,
 
@@ -74,9 +62,9 @@ export default class PropertyList extends Component {
   static get defaultProps() {
     return {
       selectedItem: null,
-      parse: undefined,
       clearParsed: undefined,
       upload: undefined,
+      assigningGroups: false,
       showModalOnDoubleClick: false,
     };
   }
@@ -96,7 +84,6 @@ export default class PropertyList extends Component {
       (mapped, fieldset) => [...mapped, ...fieldset.properties],
       [],
     );
-    this.state = { fileId: null };
     this.goToPage = i => query({
       ...params,
       $offset: (i - 1) * (params.$limit || Infinity),
@@ -120,13 +107,10 @@ export default class PropertyList extends Component {
     };
   }
 
-  componentDidMount() {
-    this.goToPage(1);
-    const u8 = new Uint8Array(16);
-    window.crypto.getRandomValues(u8);
-    const fileId = window.btoa(String.fromCharCode.apply(null, u8));
-    // eslint-disable-next-line react/no-did-mount-set-state
-    this.setState({ fileId });
+  componentWillMount() {
+    if (window !== undefined) {
+      this.goToPage(1);
+    }
   }
 
   render() {
@@ -135,7 +119,6 @@ export default class PropertyList extends Component {
       querying,
       // updating,
       deleting,
-      parsing,
       uploading,
 
       // saveError,
@@ -159,7 +142,6 @@ export default class PropertyList extends Component {
       update,
       del,
 
-      parse,
       clearParsed,
       upload,
       showModal,
@@ -171,16 +153,7 @@ export default class PropertyList extends Component {
 
     const pagination = count <= (params.$limit || Infinity)
       ? null
-      : (
-        <div className={[bs.textCenter].join(' ')}>
-          <Paginator
-            length={5}
-            currentPage={1 + ((params.$offset || 0) / params.$limit)}
-            totalPages={Math.ceil(count / params.$limit)}
-            goToPage={this.goToPage}
-          />
-        </div>
-      );
+      : <Pagination {...this.props} goToPage={this.goToPage} />;
 
     const itemContent = items.length === 0
       ? <h2>None Listed</h2>
@@ -253,72 +226,13 @@ export default class PropertyList extends Component {
           {pagination}
         </div>
       );
-
-    const canUpload = (parse && upload && clearParsed);
-    const uploadButton = !canUpload
-      ? null
-      : (
-        <label
-          htmlFor={this.state.fileId}
-          className={[
-            bs.btn,
-            bs.btnDefault,
-          ].join(' ')}
-          disabled={uploading || parsing}
-          style={{ cursor: 'pointer', marginBottom: 0 }}
-        >
-          {
-            parsing
-              ? <Spinner />
-              : <span
-                className={[
-                  bs.glyphicon,
-                  bs.glyphiconUpload,
-                ].join(' ')}
-              />
-          }
-          {parsing ? ' reading file…' : ' Upload via Excel File'}
-          <input
-            id={this.state.fileId}
-            style={{ display: 'none' }}
-            type="file"
-            accept=".xlsx"
-            disabled={uploading || parsing}
-            ref={() => {}}
-            onChange={e => parse(e.target.files)}
-            onClick={(e) => {
-              e.target.value = null;
-            }}
-          />
-        </label>
-    );
-    const buttons = (
-      <div className={bs.btnToolbar}>
-        <button
-          className={[
-            bs.btn,
-            bs.btnDefault,
-          ].join(' ')}
-          onClick={this.addItem}
-        >
-          <span
-            className={[
-              bs.glyphicon,
-              bs.glyphiconPlus,
-            ].join(' ')}
-          /> Add
-        </button>
-        {uploadButton}
-      </div>
-    );
-
     return (
       <div className={[bs.row, styles.default].join(' ')}>
         <div className={bs.colSm12}>
           {itemContent}
         </div>
         <div className={bs.colSm12}>
-          {buttons}
+          <Buttons {...this.props} addItem={this.addItem} />
         </div>
         { parsedItems.length === 0 ? null : (
           <div className={bs.colSm12}>

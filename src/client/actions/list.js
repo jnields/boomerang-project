@@ -65,7 +65,7 @@ async (dispatch) => {
       config,
       {
         ...params,
-        $offset: count - (count % params.$limit),
+        $offset: (count - 1) - ((count - 1) % params.$limit),
       },
     )(dispatch);
   } else {

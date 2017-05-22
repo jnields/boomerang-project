@@ -3,17 +3,20 @@ import { reducer as form } from 'redux-form';
 
 import authorization from './authorization';
 import entities from './entities';
-import tabs from './tabs';
-import modal from './modal';
 import lists from './lists';
+import modal from './modal';
+import reportItems from './report-items';
 import reports from './reports';
+import tabs from './tabs';
 
 export default combineReducers({
+  form,
+
   authorization,
   entities,
-  form,
-  tabs,
-  modal,
-  reports,
   lists,
+  modal,
+  reportItems,
+  reports,
+  tabs,
 });

@@ -1,9 +1,13 @@
+import { normalize, denormalize } from 'normalizr';
+import * as listActions from './list';
+import getOrCreateGroup from './get-or-create-group';
+import { ASSIGN_GROUPS } from './types';
+import { PENDING, COMPLETE, ERROR, UNSENT } from './xhr-statuses';
+
 import api from '../helpers/api';
 import { user as userSchema } from '../helpers/schema';
 import { student as fieldsets } from '../helpers/properties';
-import getOrCreateGroup from './get-or-create-group';
 
-import * as listActions from './list';
 
 const config = {
   name: 'students',
@@ -17,12 +21,20 @@ const config = {
 };
 
 const getStudent =
-item =>
-async (dispatch) => {
+(item, id) =>
+async (dispatch, getState) => {
+  let oldGroup;
+  if (id) {
+    oldGroup = denormalize(
+      id,
+      userSchema,
+      getState().entities,
+    ).group;
+  }
   const result = { ...item, type: 'STUDENT' };
-  result.groupId = await dispatch(getOrCreateGroup(item.groupName));
+  result.groupId = await dispatch(getOrCreateGroup(item.groupName, oldGroup, id));
   delete result.groupName;
-  return item;
+  return result;
 };
 
 const getStudents =
@@ -55,7 +67,49 @@ items =>
 dispatch =>
 dispatch(listActions.upload(config, dispatch(getStudents(items))));
 
-export const update = listActions.update.bind(null, config);
+export const update =
+(id, patch) =>
+dispatch =>
+dispatch(listActions.update(config, id, dispatch(getStudent(patch, id))));
+
+export const assignGroups =
+() =>
+async (dispatch) => {
+  const type = ASSIGN_GROUPS;
+  dispatch({ type, name: 'students', status: PENDING });
+  const [
+    groupResponse,
+    studentResponse,
+  ] = await Promise.all([
+    api.reports.groups(),
+    api.reports.students({ $order: 'gender' }),
+  ]);
+  const allGroups = [...groupResponse.body];
+  const allStudents = [...studentResponse.body];
+  const patches = [];
+  for (
+    let i = 0, group = allGroups[i], student = allStudents.pop();
+    group && student;
+    i = (i + 1) === allGroups.length ? 0 : i + 1, group = allGroups[i], student = allStudents.pop()
+  ) {
+    patches.push({ id: student.id, groupId: group.id });
+  }
+  try {
+    const response = await api.users.patchAll(patches);
+    if (response.statusCode < 400) {
+      const normalized = normalize(
+        response.body,
+        [userSchema],
+      );
+      dispatch({ type, name: 'students', status: COMPLETE, ...normalized });
+    } else {
+      dispatch({ type, name: 'students', status: ERROR });
+    }
+  } catch (error) {
+    dispatch({ type, name: 'students', error, status: UNSENT });
+  }
+};
+
 export const del = listActions.del.bind(null, config);
 export const parse = listActions.parse.bind(null, config);
 export { showModal, closeModal } from './modal';

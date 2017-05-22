@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import del from './delete';
-import get from './get';
+import gets from './get';
 import patch from './patch';
 import post from './post';
 import query from './query';
@@ -10,11 +10,12 @@ const router = Router();
 
 router.route('/')
   .get(eh(query))
-  .post(eh(post));
+  .post(eh(post))
+  .patch(eh(patch));
 
 router.route('/:id')
   .delete(eh(del))
-  .get(eh(get))
+  .get(eh(gets))
   .patch(eh(patch));
 
 export default router;

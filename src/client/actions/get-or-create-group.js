@@ -16,8 +16,6 @@ async (dispatch) => {
     id: { $ne: userId },
     group: {
       name: oldGroup.name,
-      notes: { $ne: null },
-      roomNumber: { $ne: null },
     },
     $limit: 1,
   });

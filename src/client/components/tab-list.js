@@ -2,25 +2,35 @@ import React from 'react';
 import { arrayOf, string, node, shape } from 'prop-types';
 import { Link, matchPath } from 'react-router-dom';
 
+
 import bs from '../styles/bootstrap';
 
 export default function TabList(props) {
   const { location: { pathname: path }, tabs, content } = props;
-  return (<div>
-    <ul className={[bs.nav, bs.navTabs].join(' ')}>
-      {tabs.map(tab => (
-        <li
-          className={matchPath(tab.path, { path, exact: true }) ? bs.active : ''}
-          key={tab.name}
-        >
-          <Link to={tab.path}>
-            {tab.name}
-          </Link>
-        </li>
-        ))}
-    </ul>
-    {content}
-  </div>);
+  let anyMatch = false;
+  const tabItems = tabs.map((tab) => {
+    const isMatch = matchPath(path, { path: tab.path, exact: true }) !== null;
+    if (isMatch) anyMatch = true;
+    return (
+      <li
+        className={isMatch ? bs.active : ''}
+        key={tab.name}
+      >
+        <Link replace to={tab.path}>
+          {tab.name}
+        </Link>
+      </li>
+    );
+  });
+  if (!anyMatch) return null;
+  return (
+    <div>
+      <ul className={[bs.nav, bs.navTabs, bs.hiddenPrint].join(' ')}>
+        {tabItems}
+      </ul>
+      {content}
+    </div>
+  );
 }
 
 TabList.propTypes = {

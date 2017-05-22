@@ -2,6 +2,7 @@ import {
   shape,
   string,
   oneOf,
+  oneOfType,
   bool,
   instanceOf,
 } from 'prop-types';
@@ -38,7 +39,10 @@ export const user = shape({
   languageNeeds: string,
   notes: string,
   gender: oneOf(['M', 'F']),
-  dob: instanceOf(Date),
+  dob: oneOfType([
+    instanceOf(Date),
+    string,
+  ]),
 
   homeRoom: string,
   teacher: string,

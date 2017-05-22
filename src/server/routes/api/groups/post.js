@@ -24,7 +24,10 @@ export default async function (req, res) {
     },
   );
   await transaction.commit();
-  return res.set('Location', `/groups/${created.id}`)
+  const result = created.toJSON();
+  delete result.school;
+  delete result.schoolId;
+  return res.set('Location', `/groups/${result.id}`)
     .status(201)
-    .send(created.toJSON());
+    .send(result);
 }

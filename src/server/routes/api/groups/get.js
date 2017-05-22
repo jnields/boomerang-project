@@ -18,7 +18,10 @@ export default async function (req, res) {
   });
   if (group) {
     await transaction.commit();
-    res.json(group.toJSON());
+    const result = group.toJSON();
+    delete result.school;
+    delete result.schoolId;
+    res.json(group);
   } else {
     await transaction.rollback();
     res.status(404).send({ error: 'not  found' });

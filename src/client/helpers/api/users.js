@@ -25,7 +25,7 @@ export default {
               ...response.body,
               results: response.body.results.map(user => ({
                 ...user,
-                dob: new Date(user.dob),
+                dob: user.dob ? new Date(user.dob) : null,
               })),
             },
           });
@@ -54,7 +54,7 @@ export default {
             ...response,
             body: {
               ...response.body,
-              dob: new Date(response.body.dob),
+              dob: response.body.dob ? new Date(response.body.dob) : null,
             },
           });
         }
@@ -116,8 +116,40 @@ export default {
             ...response,
             body: {
               ...response.body,
-              dob: new Date(response.body.dob),
+              dob: response.body.dob ? new Date(response.body.dob) : null,
             },
+          });
+        }
+        return resolve(response);
+      },
+    );
+    cancel = req.abort.bind(req);
+    handleAbort({ abort, cancel, resolve });
+  }),
+  patchAll: (patches, abort) => new Promise((resolve, reject) => {
+    if (!Array.isArray(patches)) throw new TypeError();
+    patches.forEach((patch) => {
+      if (patch == null && patch.id == null) throw new TypeError();
+    });
+    let cancel;
+    const req = xhr.patch(
+      '/api/users',
+      {
+        ...config,
+        body: patches,
+      },
+      (error, response) => {
+        cancel = null;
+        if (error) {
+          return reject(error);
+        }
+        if (response && response.body && Array.isArray(response.body)) {
+          return resolve({
+            ...response,
+            body: response.body.map(ur => ({
+              ...ur,
+              dob: ur.dob ? new Date(ur.dob) : null,
+            })),
           });
         }
         return resolve(response);
@@ -150,7 +182,7 @@ export default {
             ...response,
             body: {
               ...response.body,
-              dob: new Date(response.body.dob),
+              dob: response.body.dob ? new Date(response.body.dob) : null,
             },
           });
         }

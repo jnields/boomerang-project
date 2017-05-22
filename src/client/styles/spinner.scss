@@ -1,3 +1,7 @@
-.default {
+.shown, .hidden {
   margin-right: 7px;
+}
+
+.hidden {
+  color: transparent;
 }

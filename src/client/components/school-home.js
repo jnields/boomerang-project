@@ -1,10 +1,34 @@
 import React from 'react';
-import { string, arrayOf, node, shape } from 'prop-types';
+import { string, arrayOf, node, shape, func } from 'prop-types';
+import { Route } from 'react-router-dom';
 import TabList from './tab-list';
+import Report from '../containers/reports/report';
 
-export default function SchoolHome({ tabs, content, location }) {
+export default function SchoolHome({
+  tabs,
+  content,
+  location,
+  reports,
+  leaveReport,
+}) {
   return (
-    <TabList tabs={tabs} location={location} content={content} />
+    <div>
+      <TabList tabs={tabs} location={location} content={content} leaveReport={leaveReport} />
+      {reports.map(report => (
+        <Route
+          key={report.href}
+          path={report.href}
+          render={() => {
+            const Component = report.component;
+            return (
+              <Report>
+                <Component />
+              </Report>
+            );
+          }}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -19,4 +43,9 @@ SchoolHome.propTypes = {
   location: shape({
     pathname: string.isRequired,
   }).isRequired,
+  reports: arrayOf(shape({
+    component: func.isRequired,
+    href: string.isRequired,
+  })).isRequired,
+  leaveReport: func.isRequired,
 };

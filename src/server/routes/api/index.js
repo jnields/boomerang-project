@@ -2,12 +2,13 @@ import { Router } from 'express';
 import orm from '../../helpers/orm';
 import handleError from './handle-error';
 import hasRole from './has-role';
-import authenticated from './authentication-required';
+import authenticated from '../authentication-required';
 
 import auth from './auth';
 import schools from './schools';
 import users from './users';
 import groups from './groups';
+import reports from './reports';
 
 const router = Router();
 
@@ -51,6 +52,12 @@ router.use(
   authenticated,
   hasRole('ADMIN', 'TEACHER'),
   groups,
+);
+router.use(
+  '/reports',
+  authenticated,
+  hasRole('TEACHER'),
+  reports,
 );
 
 router.use(handleError);

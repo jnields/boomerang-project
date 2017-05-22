@@ -1,15 +1,28 @@
 import React from 'react';
-import { arrayOf } from 'prop-types';
-import { user as userModel } from '../../helpers/models';
-
+import { arrayOf, string, shape } from 'prop-types';
 import MailingLabel from './mailing-label';
+import getChunks from './get-chunks';
+import bs from '../../styles/bootstrap';
 
-export default function MailingLabels({ users }) {
+export default function MailingLabels({ items, title }) {
   return (
     <div>
-      {users.map(user => <MailingLabel user={user} />)}
+      <h1>{title}</h1>
+      {getChunks(items, 3).map((chunk, ix) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <div key={ix} className={bs.row}>
+          {chunk.map(student => (
+            <div key={student.id} className={bs.colSm4}>
+              <MailingLabel user={student} />
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
 
-MailingLabels.propTypes = { users: arrayOf(userModel).isRequired };
+MailingLabels.propTypes = {
+  items: arrayOf(shape({})).isRequired,
+  title: string.isRequired,
+};

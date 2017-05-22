@@ -68,6 +68,7 @@ export const update =
 (id, patch) =>
 dispatch =>
 dispatch(listActions.update(config, id, dispatch(getLeader(patch, id))));
+
 export const del = listActions.del.bind(null, config);
 export const parse = listActions.parse.bind(null, config);
 export { showModal, closeModal } from './modal';

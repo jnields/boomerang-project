@@ -26,6 +26,12 @@ export function InsecurePasswordError(...args) {
 export function BadQueryError(...args) {
   constructError.bind(this)(args);
 }
+export function NotFoundError(...args) {
+  constructError.call(this, ...args);
+}
+export function BadRequestError(...args) {
+  constructError.bind(this)(args);
+}
 
 [
   InsecurePasswordError,

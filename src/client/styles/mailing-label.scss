@@ -1,0 +1,23 @@
+.default {
+  outline: 1px dashed #bbb;
+  margin: 15px 10px;
+  padding: 40px 20px;
+  .name {
+    font-weight: 400;
+  }
+  .address {
+
+  }
+}
+
+@media print {
+  html, body {
+    height: 99%;
+  }
+  .default {
+    width: 30%;
+    float: left;
+    box-sizing: border-box;
+    page-break-inside: avoid;
+  }
+}

@@ -22,5 +22,8 @@ export default async function (req, res) {
     { transaction },
   );
   await transaction.commit();
-  return res.json(updated.toJSON());
+  const result = updated.toJSON();
+  delete result.school;
+  delete result.schoolId;
+  return res.json(result);
 }

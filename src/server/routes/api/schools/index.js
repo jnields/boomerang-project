@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import eh from '../catch-decorator';
 import del from './delete';
-import get from './get';
+import gets from './get';
 import patch from './patch';
 import post from './post';
 import query from './query';
@@ -13,7 +13,7 @@ router.route('/')
   .post(eh(post));
 router.route('/:id')
   .delete(eh(del))
-  .get(eh(get))
+  .get(eh(gets))
   .patch(eh(patch));
 
 export default router;

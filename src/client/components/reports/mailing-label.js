@@ -1,32 +1,21 @@
 import React from 'react';
-
-import { user as userShape } from '../../helpers/models';
-
-function formatAddress(address) {
-  const {
-    line1,
-    line2,
-    line3,
-    city,
-    state,
-    zip,
-    country,
-  } = address;
-  return <div />;
-}
+import { shape } from 'prop-types';
+import formatAddress from './format-address';
+import styles from '../../styles/mailing-label';
 
 export default function MailingLabel({ user }) {
-  const {
-    firstName,
-    middleName,
-    lastName,
-    address,
-  } = user;
-
   return (
-    <div>
+    <div className={styles.default}>
+      <div className={styles.name}>
+        {`${user.firstName} ${user.lastName}`.trim()}
+      </div>
+      <div className={styles.address}>
+        {formatAddress(user.address)}
+      </div>
     </div>
   );
 }
 
-MailingLabel.propTypes = { user: userShape.isRequired };
+MailingLabel.propTypes = {
+  user: shape({}).isRequired,
+};

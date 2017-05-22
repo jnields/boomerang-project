@@ -11,25 +11,27 @@ export default function NavBar({ logOut, user }) {
   if (user == null) return <div className={styles.default} />;
   const { firstName, lastName } = user;
 
-  return (<div className={styles.default}>
-    <div>
-      <div className={styles.floatRight}>
-        <span className={[bs.glyphicon, bs.glyphiconUser, styles.userIcon].join(' ')} />
-        <span className={styles.name}>
-          {`${firstName || ''} ${lastName || ''}`}
-        </span>
-        <Link
-          className={styles.logOut}
-          onClick={() => {
-            logOut();
-          }}
-          to="/login"
-        >
+  return (
+    <div className={[styles.default, bs.hiddenPrint].join(' ')}>
+      <div>
+        <div className={styles.floatRight}>
+          <span className={[bs.glyphicon, bs.glyphiconUser, styles.userIcon].join(' ')} />
+          <span className={styles.name}>
+            {`${firstName || ''} ${lastName || ''}`}
+          </span>
+          <Link
+            className={styles.logOut}
+            onClick={() => {
+              logOut();
+            }}
+            to="/login"
+          >
           Log Out
         </Link>
-      </div>
-    </div>);
-  </div>);
+        </div>
+      </div>);
+  </div>
+  );
 }
 
 const {

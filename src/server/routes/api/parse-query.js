@@ -165,6 +165,36 @@ export default function parseQuery(query, base, model) {
       }
 
       switch (param) {
+        case '$order':
+          return {
+            ...accumulator,
+            order: (
+              Array.isArray(query[param])
+                ? query[param]
+                : [query[param]]
+            ).map((name) => {
+              if (model.attributes[name] === undefined) {
+                throw new BadQueryError(`no such property: ${name}`);
+              }
+              return name;
+            }),
+          };
+        case '$attributes':
+          return {
+            ...accumulator,
+            attributes: (
+              Array.isArray(query[param])
+                ? query[param]
+                : [query[param]]
+            ).map((name) => {
+              const attribute = model.attributes[name];
+              console.log(model.attributes);
+              if (attribute === undefined || attribute.references) {
+                throw new BadQueryError(`no such property: ${name}`);
+              }
+              return name;
+            }),
+          };
         case '$limit':
           return {
             ...accumulator,

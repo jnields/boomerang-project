@@ -11,6 +11,7 @@ import {
   PARSE,
   SELECT_ITEM,
   CLEAR_PARSED,
+  ASSIGN_GROUPS,
 } from '../actions/types';
 
 import {
@@ -33,6 +34,8 @@ const initialState = {
   parseError: null,
   uploading: false,
   uploadError: null,
+  assigningGroups: false,
+  assignGroupsError: null,
 
   items: [],
   count: 0,
@@ -72,7 +75,7 @@ const subReducer = (name, params = { $offset: 0, $limit: 10 }, fieldsets) =>
             saveError: connectionError,
           };
         default:
-          throw new TypeError(`unhandled type: ${action.status}`);
+          throw new TypeError(`unhandled status: ${action.status}`);
       }
     case QUERY:
       switch (action.status) {
@@ -106,7 +109,7 @@ const subReducer = (name, params = { $offset: 0, $limit: 10 }, fieldsets) =>
             items: [],
           };
         default:
-          throw new TypeError(`unhandled type: ${action.status}`);
+          throw new TypeError(`unhandled status: ${action.status}`);
       }
     case UPDATE:
       switch (action.status) {
@@ -134,7 +137,7 @@ const subReducer = (name, params = { $offset: 0, $limit: 10 }, fieldsets) =>
             updateError: connectionError,
           };
         default:
-          throw new TypeError(`unhandled type: ${action.status}`);
+          throw new TypeError(`unhandled status: ${action.status}`);
       }
     case DELETE:
       switch (action.status) {
@@ -168,7 +171,7 @@ const subReducer = (name, params = { $offset: 0, $limit: 10 }, fieldsets) =>
             deleteError: connectionError,
           };
         default:
-          throw new TypeError(`unhandled type: ${action.status}`);
+          throw new TypeError(`unhandled status: ${action.status}`);
       }
     case SELECT_ITEM:
       return {
@@ -197,7 +200,7 @@ const subReducer = (name, params = { $offset: 0, $limit: 10 }, fieldsets) =>
             parseError: action.error,
           };
         default:
-          throw new TypeError(`unhandled type: ${action.status}`);
+          throw new TypeError(`unhandled status: ${action.status}`);
       }
     case UPLOAD:
       switch (action.status) {
@@ -235,6 +238,29 @@ const subReducer = (name, params = { $offset: 0, $limit: 10 }, fieldsets) =>
         parseError: null,
         uploadError: null,
       };
+    case ASSIGN_GROUPS:
+      switch (action.status) {
+        case PENDING:
+          return {
+            ...state,
+            assigningGroups: true,
+            assignGroupsError: null,
+          };
+        case COMPLETE:
+          return {
+            ...state,
+            assigningGroups: false,
+          };
+        case ERROR:
+        case UNSENT:
+          return {
+            ...state,
+            assigningGroups: false,
+            assignGroupsError: action.error,
+          };
+        default:
+          throw new TypeError(`unhandled status: ${action.status}`);
+      }
     default:
       return state;
   }
@@ -249,7 +275,7 @@ export default combineReducers({
   ),
   groups: subReducer(
     'groups',
-    { $limit: Infinity },
+    paged,
     group,
   ),
   teachers: subReducer(

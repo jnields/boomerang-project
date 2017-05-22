@@ -12,6 +12,7 @@ export default (req, res) => {
     ? normalize(user, userSchema)
     : ({ entities: {}, result: null });
   const initialState = {
+    ...res.initialState,
     entities: normalized.entities,
     authorization: {
       loggingIn: false,
