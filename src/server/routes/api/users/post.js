@@ -95,11 +95,13 @@ async function postUsers(req, res, next) {
     const result = { ...ur };
     if (ur.address) {
       result.addressId = addressId;
-      addressMap[addressId] = insertedAddresses.pop().toJSON();
+      addressMap[addressId] = insertedAddresses.shift().toJSON();
+      addressMap[addressId].id = addressId;
       addressId += 1;
     }
     return result;
   });
+
   const results = await User.bulkCreate(records, { transaction });
   const [[{ userId }]] = await orm.query(
     'SELECT LAST_INSERT_ID() userId;',

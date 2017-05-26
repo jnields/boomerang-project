@@ -1,10 +1,10 @@
 import React from 'react';
 import { arrayOf } from 'prop-types';
-import alpha from './alpha';
 import joinLeaders from '../join-leaders';
 import ReportList from '../report-list';
 import { group as groupShape } from '../../../helpers/models';
 import alphaNum from '../../../helpers/alpha-num-sort';
+import alpha from '../../../helpers/user-alpha-sort';
 
 const properties = [
   {

@@ -13,6 +13,6 @@ function joinList(items = []) {
 
 export default function (leaders = []) {
   return joinList(leaders.map(
-    leader => `${leader.firstName || ''} ${leader.lastName || ''}`.trim(),
+    (leader = {}) => `${leader.firstName || ''} ${leader.lastName || ''}`.trim(),
   ));
 }

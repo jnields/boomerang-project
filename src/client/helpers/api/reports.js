@@ -1,5 +1,6 @@
 import xhr from 'xhr';
 import cf from './config';
+import alpha from '../user-alpha-sort';
 
 const config = { ...cf, timeout: 30000 };
 
@@ -29,7 +30,21 @@ const mapUser = user => ({
 });
 
 export default {
-  students: () => makeRequest('students', users => users.map(mapUser)),
+  students: () => makeRequest('groups', groups => groups.reduce(
+    (students, group) => [
+      ...students,
+      ...group.users
+        .filter(ur => ur.type === 'STUDENT')
+        .map(ur => mapUser({
+          ...ur,
+          group: {
+            ...group,
+            leaders: group.users.filter(u => u.type === 'LEADER'),
+          },
+        })),
+    ],
+    [],
+  ).sort(alpha)),
   leaders: () => makeRequest('leaders', users => users.map(mapUser)),
   groups: () => makeRequest('groups', groups => groups.map(group => ({
     ...group,

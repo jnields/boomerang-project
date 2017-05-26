@@ -112,6 +112,15 @@ export default {
           return reject(error);
         }
         if (response && response.body) {
+          if (Array.isArray(response.body)) {
+            return resolve({
+              ...response,
+              body: response.body.map(ur => ({
+                ...ur,
+                dob: ur.dob ? new Date(ur.dob) : null,
+              })),
+            });
+          }
           return resolve({
             ...response,
             body: {

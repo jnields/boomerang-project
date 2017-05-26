@@ -12,6 +12,7 @@ import mailConfig from '../../../mail.config';
 const transporter = createTransport(mailConfig);
 
 export default async function requestReset(req, res) {
+  res.status(202).send();
   const {
     transaction,
     body = {},
@@ -33,7 +34,6 @@ export default async function requestReset(req, res) {
 
   if (user == null) {
     await transaction.rollback();
-    return res.status(204).send();
   }
 
   await authMech.update(
@@ -59,9 +59,7 @@ export default async function requestReset(req, res) {
       ),
     });
     console.log(info);
-    return res.status(204).send();
   } catch (error) {
     console.log(error);
-    return res.status(500).send();
   }
 }

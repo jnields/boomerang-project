@@ -10,7 +10,6 @@ export default function PasswordResetTemplate({ host, authMechanism }) {
     </head>
     <body>
       <header />
-      <h1>Boomerang Project Password Reset</h1>
       <p>
         Somebody recently requested that your password for
         boomerang-project.com be reset. To choose a new one,

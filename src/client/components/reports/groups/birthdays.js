@@ -4,7 +4,7 @@ import joinLeaders from '../join-leaders';
 import ReportList from '../report-list';
 import { group as groupShape } from '../../../helpers/models';
 import formatValue from '../../../helpers/format-item';
-import alpha from './alpha';
+import alpha from '../../../helpers/user-alpha-sort';
 import alphaNum from '../../../helpers/alpha-num-sort';
 
 const properties = [
