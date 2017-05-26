@@ -4,8 +4,11 @@ import {
     Group,
     Address,
 } from '../../../models';
+import orm from '../../../helpers/orm';
 
 async function createUser(user, transaction) {
+  const mapped = { ...user };
+  delete mapped.group;
   const created = await User.create(
     user,
     {
@@ -55,10 +58,11 @@ function validateUser(user, req, res, next) {
 }
 
 async function postUsers(req, res, next) {
-  console.log('posting several');
   const users = req.body;
   const transaction = req.transaction;
   let thrown;
+  const groups = {};
+  const addresses = [];
   for (
     let i = 0, user = users[i];
     i < users.length;
@@ -68,32 +72,46 @@ async function postUsers(req, res, next) {
       thrown = true; break;
     }
     if (user.dob) user.dob = new Date(user.dob);
+
     if (req.user.school) {
-      user.schoolId = req.user.school.id;
+      user.schoolId = req.user.schoolId;
     }
+    const groupId = user.groupId || (user.group || {}).id;
+    if (groupId) groups[groupId] = true;
+    if (user.address) addresses.push(user.address);
+    delete user.group;
   }
   if (thrown) {
     await transaction.rollback();
     return;
   }
-  const promises = users.reduce(
-    (acc, user) => [
-      ...acc,
-      createUser(user, transaction).then(
-        created => created.reload({
-          transaction: req.transaction,
-          include: [
-              { model: Group },
-              { model: Address },
-          ],
-        }),
-      ),
-    ],
-    [],
+  const insertedAddresses = await Address.bulkCreate(addresses, { transaction });
+  let [[{ addressId }]] = await orm.query(
+    'SELECT LAST_INSERT_ID() addressId;',
+    { transaction },
   );
-  const results = await Promise.all(promises);
+  const addressMap = {};
+  const records = users.map((ur) => {
+    const result = { ...ur };
+    if (ur.address) {
+      result.addressId = addressId;
+      addressMap[addressId] = insertedAddresses.pop().toJSON();
+      addressId += 1;
+    }
+    return result;
+  });
+  const results = await User.bulkCreate(records, { transaction });
+  const [[{ userId }]] = await orm.query(
+    'SELECT LAST_INSERT_ID() userId;',
+    { transaction },
+  );
   await transaction.commit();
-  res.send(results.map(result => result.toJSON()));
+  res.send(results.map((user, ix) => ({
+    ...user.toJSON(),
+    id: userId + ix,
+    address: addressMap[user.addressId],
+    group: groups[user.groupId],
+  })));
 }
 
 async function postUser(req, res, next) {

@@ -83,9 +83,9 @@ module.exports = {
         test: /\.json$/,
         use: 'json-loader',
       },
-      // fonts - do not emit files - server emits in css bundle
+      // fonts and images - do not emit files - server emits in css bundle
       {
-        test: /\.(eot|svg|ttf|woff|woff2)(\?.*)?$/,
+        test: /\.(eot|svg|ttf|woff|woff2|png|gif|jpeg|bmp)(\?.*)?$/,
         use: [
           {
             loader: 'file-loader',

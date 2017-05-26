@@ -1,5 +1,5 @@
 export default {
   json: true,
   withCredentials: true,
-  timeout: 10000,
+  timeout: 30000,
 };

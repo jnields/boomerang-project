@@ -16,6 +16,7 @@ export default new Router()
             include: [{ model: Address }],
           },
         ],
+        order: ['name'],
       }))
         .map((item) => {
           const json = item.toJSON();

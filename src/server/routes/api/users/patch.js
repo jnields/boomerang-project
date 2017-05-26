@@ -1,33 +1,30 @@
 import {
-  User, School, Address, Group,
+  User, School, Address, Group, AuthMechanism,
 } from '../../../models';
 import { NotFoundError, BadRequestError } from '../../../helpers/errors';
 
-const patchOne = async (req, res) => {
-  const id = req.params.id;
-  const transaction = req.transaction;
-  const updates = req.body;
-  if (updates && updates.dob) updates.dob = new Date(updates.dob);
-  if (updates == null || (updates.id && `${updates.id}` !== id)) {
-    throw new BadRequestError();
+const patchUser = async (transaction, schoolId, id, updates, groups) => {
+  if (!id) throw new BadRequestError();
+  const parsedUpdates = { ...updates };
+  if (parsedUpdates.dob) parsedUpdates.dob = new Date(parsedUpdates.dob);
+  delete parsedUpdates.type;
+  delete parsedUpdates.school;
+  delete parsedUpdates.schoolId;
+  delete parsedUpdates.addressId;
+
+  const groupId = parsedUpdates.groupId || (parsedUpdates.group || {}).id;
+  if (groupId) {
+    parsedUpdates.groupId = groupId;
+  } else if ('groupId' in parsedUpdates
+      || ('group' in parsedUpdates && parsedUpdates.group == null)) {
+    parsedUpdates.groupId = null;
   }
-  delete updates.type;
-  delete updates.school;
-  delete updates.schoolId;
-  delete updates.addressId;
-  delete updates.email;
+  delete parsedUpdates.group;
 
-  const schoolInclude = {
-    model: School,
-    where: req.user.school ? { id: req.user.school.id } : undefined,
-  };
-
-  const groupInclude = { model: Group };
-  const addressInclude = { model: Address };
-
+  const where = { id };
+  if (schoolId) where.schoolId = schoolId;
   const existing = await User.findOne({
-    where: { id: req.params.id },
-    include: [schoolInclude],
+    where,
     transaction,
   });
 
@@ -35,27 +32,38 @@ const patchOne = async (req, res) => {
     throw new NotFoundError();
   }
 
-  const updated = await existing.update(updates, { transaction });
-
-  async function updateGroup() {
-    if (updates.group || updates.groupId) {
-      const groupId = updates.groupId || updates.group.id;
-      const group = await Group.findOne(
-        {
-          where: { id: groupId },
-          include: [schoolInclude],
-          transaction,
-        },
-      );
-      return updated.setGroup(group, { transaction });
-    } else if ('group' in updates || 'groupId' in updates) {
-      return updated.setGroup(null, { transaction });
+  async function updateAuthMechanism() {
+    if (['TEACHER', 'ADMIN'].indexOf(existing.type) === -1
+        || !('email' in parsedUpdates)) return;
+    if (!parsedUpdates.email) throw new BadRequestError();
+    const authMech = await AuthMechanism.findOne({
+      where: { username: existing.email },
+      transaction,
+    });
+    if (authMech != null) {
+      await authMech.update({ email: parsedUpdates.email }, { transaction });
     }
-    return null;
+  }
+
+  async function validateGroup() {
+    if (!groupId) return;
+    if (groups && groups[groupId]) return;
+    const promise = Group.findOne({
+      where: { id: groupId },
+      include: [{
+        model: School,
+        where: { id: existing.schoolId },
+      }],
+      transaction,
+    });
+    // eslint-disable-next-line no-param-reassign
+    if (groups) groups[groupId] = promise;
+    const group = await promise;
+    if (group == null) throw new NotFoundError();
   }
 
   async function updateAddress() {
-    if (updates.address) {
+    if (parsedUpdates.address) {
       const existingAddress = await existing.getAddress({ transaction });
       if (existingAddress) {
         return existingAddress.update(updates.address, { transaction });
@@ -67,11 +75,34 @@ const patchOne = async (req, res) => {
     return null;
   }
 
-  await Promise.all([updateGroup(), updateAddress()]);
-  await existing.reload({
-    transaction,
-    include: [groupInclude, addressInclude],
-  });
+  await Promise.all([
+    validateGroup(),
+    updateAddress(),
+    updateAuthMechanism(),
+  ]);
+  return existing.update(
+    parsedUpdates,
+    {
+      transaction,
+      include: [
+        { model: Address },
+        { model: Group },
+      ],
+    },
+  );
+};
+
+const patchOne = async (req, res) => {
+  const id = req.params.id;
+  const updates = req.body;
+  if (updates.id && `${updates.id}` !== id) throw new BadRequestError();
+  const transaction = req.transaction;
+  const updated = await patchUser(
+    req.transaction,
+    req.user.schoolId,
+    id,
+    updates,
+  );
   await transaction.commit();
   return res.send(updated);
 };
@@ -82,76 +113,21 @@ const patchMany = async (req, res) => {
   if (!Array.isArray(updates)) {
     throw new BadRequestError('id not specified');
   }
-  const schoolInclude = {
-    model: School,
-    where: req.user.school ? { id: req.user.school.id } : undefined,
-  };
-  const groupInclude = { model: Group };
-  const addressInclude = { model: Address };
-
+  const groups = {};
   const results = await Promise.all(updates.map(
-    async (update) => {
-      const patch = { ...update };
-      delete patch.type;
-      delete patch.school;
-      delete patch.schoolId;
-      delete patch.addressId;
-      delete patch.email;
-      const existing = await User.findOne({
-        where: { id: patch.id },
-        include: [schoolInclude],
-        transaction,
-      });
-
-      if (existing == null) {
-        throw new NotFoundError();
-      }
-
-      const updated = await existing.update(patch, { transaction });
-
-      const groups = {};
-      async function updateGroup() {
-        if (patch.group || patch.groupId) {
-          const groupId = patch.groupId || patch.group.id;
-          groups[groupId] = groups[groupId] || Group.findOne(
-            {
-              where: { id: groupId },
-              include: [schoolInclude],
-              transaction,
-            },
-          );
-          return updated.setGroup(await groups[groupId], { transaction });
-        } else if ('group' in patch || 'groupId' in patch) {
-          return updated.setGroup(null, { transaction });
-        }
-        return null;
-      }
-
-      async function updateAddress() {
-        if (patch.address) {
-          const existingAddress = await existing.getAddress({ transaction });
-          if (existingAddress) {
-            return existingAddress.update(patch.address, { transaction });
-          }
-          return existing.createAddress(patch.address, { transaction });
-        } else if ('address' in patch) {
-          return existing.setAddress(null, { transaction });
-        }
-        return null;
-      }
-
-      await Promise.all([updateGroup(), updateAddress()]);
-      return existing.reload({
-        transaction,
-        include: [groupInclude, addressInclude],
-      });
-    },
+    update => patchUser(
+      transaction,
+      req.user.schoolId,
+      (update || {}).id,
+      update || {},
+      groups,
+    ),
   ));
-  await req.transaction.commit();
+  await transaction.commit();
   return res.send(results.map(result => result.toJSON()));
 };
 
-export default async function patchUser(req, res) {
+export default async function patch(req, res) {
   const id = req.params.id;
   if (id) return patchOne(req, res);
   return patchMany(req, res);

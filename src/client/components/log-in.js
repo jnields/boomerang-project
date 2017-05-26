@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Field } from 'redux-form';
 
@@ -16,39 +16,43 @@ export default class LogIn extends Component {
       handleSubmit: func.isRequired,
       submitting: bool.isRequired,
       user: number,
+      logInFailed: bool.isRequired,
+      resetAuth: func.isRequired,
     };
   }
 
   static get defaultProps() {
-    return {
-      user: null,
-    };
+    return { user: null };
   }
 
-  constructor(props) {
-    super(props);
-    this.state = {};
+  componentWillMount() {
+    this.props.resetAuth();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.user && (this.props.user !== nextProps.user)) {
-      this.setState({ redirect: '/' });
-    }
-  }
   render() {
-    if (this.state.redirect != null) {
-      return <Redirect to={this.state.redirect} />;
+    if (this.props.user != null) {
+      return <Redirect to="/" />;
     }
-    const { handleSubmit, submitting, form, valid } = this.props;
+    const { handleSubmit, submitting, form, valid, logInFailed } = this.props;
     return (
       <div className={styles.default}>
         <h2 className={bs.textCenter}>
-        Please Log in to Continue
-      </h2>
+          Please Log in to Continue
+        </h2>
+        <div
+          style={{ display: logInFailed ? undefined : 'none' }}
+          className={[bs.colSmOffset2, bs.colSm10].join(' ')}
+        >
+          <span
+            className={[bs.helpBlock].join(' ')}
+          >
+            { 'Incorrect username or password'}
+          </span>
+        </div>
         <form onSubmit={handleSubmit} className={bs.formHorizontal}>
           <div className={bs.formGroup}>
             <label className={[bs.controlLabel, bs.colSm2].join(' ')} htmlFor={`${form}-un`}>
-            Username:
+            Email:
            </label>
             <div className={bs.colSm10}>
               <Field
@@ -77,6 +81,13 @@ export default class LogIn extends Component {
                 validate={value => (value ? undefined : 'required')}
                 className={bs.formControl}
               />
+            </div>
+          </div>
+          <div className={bs.formGroup}>
+            <div className={[bs.colSmOffset2, bs.colSm10].join(' ')}>
+              <Link to="/reset">
+                Forgot password?
+              </Link>
             </div>
           </div>
           <div className={bs.formGroup}>

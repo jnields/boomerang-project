@@ -93,7 +93,7 @@ export default class Buttons extends Component {
           id={this.state.fileId}
           style={{ display: 'none' }}
           type="file"
-          accept=".xlsx"
+          accept=".xlsx,.xml"
           disabled={anyPending}
           ref={() => {}}
           onChange={e => parse(e.target.files)}

@@ -1,6 +1,7 @@
 import React from 'react';
-import { arrayOf, func, bool, shape } from 'prop-types';
+import { arrayOf, func, bool, shape, number } from 'prop-types';
 import { fieldsetShape } from '../helpers/properties';
+import formatItem from '../helpers/format-item';
 import bs from '../styles/bootstrap';
 import styles from '../styles/helpers';
 
@@ -12,6 +13,9 @@ export default function UploadPreview({
   isSaving,
   save,
   cancel,
+  query,
+  params,
+  querying,
 }) {
   const properties = fieldsets.reduce(
     (mapped, fieldset) => [...mapped, ...fieldset.properties],
@@ -37,7 +41,9 @@ export default function UploadPreview({
               <tr key={ix}>
                 {properties.map(prop => (
                   <td key={prop.name}>
-                    {prop.getValue ? prop.getValue(item) : item[prop.name]}
+                    {formatItem(
+                      (prop.getValue ? prop.getValue(item) : item[prop.name]),
+                    )}
                   </td>
                 ))}
               </tr>
@@ -55,10 +61,13 @@ export default function UploadPreview({
         </button>
         <button
           className={[bs.btn, bs.btnDefault].join(' ')}
-          onClick={() => save(items)}
-          disabled={isSaving}
+          onClick={async () => {
+            await save(items);
+            await query(params);
+          }}
+          disabled={isSaving || querying}
         >
-          {isSaving ? <Spinner /> : null}
+          {isSaving || querying ? <Spinner /> : null}
           Save
         </button>
       </div>
@@ -72,4 +81,10 @@ UploadPreview.propTypes = {
   isSaving: bool.isRequired,
   save: func.isRequired,
   cancel: func.isRequired,
+  params: shape({
+    $limit: number,
+    $offset: number,
+  }).isRequired,
+  querying: bool.isRequired,
+  query: func.isRequired,
 };

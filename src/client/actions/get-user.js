@@ -1,5 +1,5 @@
-import { normalize } from 'normalizr';
-import { group as groupSchema } from '../helpers/schema';
+import { normalize, denormalize } from 'normalizr';
+import { group as groupSchema, user as userSchema } from '../helpers/schema';
 import api from '../helpers/api';
 import { GET, SAVE, DELETE } from '../actions/types';
 import { COMPLETE, PENDING, ERROR } from '../actions/xhr-statuses';
@@ -32,15 +32,15 @@ async (dispatch) => {
 };
 
 const saveNew =
-name =>
+group =>
 async (dispatch) => {
-  if (!name) return null;
+  if (!group || !group.name) return null;
   const {
     body: {
       count,
       results,
     },
-  } = await api.groups.query({ name, $limit: 1 });
+  } = await api.groups.query({ name: group.name, $limit: 1 });
   if (count) {
     const normalized = normalize(results[0], groupSchema);
     dispatch({
@@ -51,7 +51,7 @@ async (dispatch) => {
     });
     return results[0].id;
   }
-  const { body } = await api.groups.post({ name });
+  const { body } = await api.groups.post({ name: group.name });
   const normalized = normalize(body, groupSchema);
   dispatch({
     type: SAVE,
@@ -69,11 +69,28 @@ function waitInQueue(name, cb) {
   return queue[name];
 }
 
-export default (name, oldGroup, userId) =>
-dispatch => waitInQueue(name, async () => {
+const getOrCreateGroup = (group, oldGroup, userId) =>
+dispatch =>
+waitInQueue(name, async () => {
   const [/* deleted */, result] = await Promise.all([
     dispatch(deleteOld(oldGroup, userId)),
-    dispatch(saveNew(name, dispatch)),
+    dispatch(saveNew(group, dispatch)),
   ]);
   return result;
 });
+
+export default (item, type, id) =>
+async (dispatch, getState) => {
+  let oldGroup;
+  if (id) {
+    oldGroup = denormalize(
+      id,
+      userSchema,
+      getState().entities,
+    ).group;
+  }
+  const result = { ...item, type };
+  result.groupId = await dispatch(getOrCreateGroup(item.group, oldGroup, id));
+  delete result.group;
+  return result;
+};

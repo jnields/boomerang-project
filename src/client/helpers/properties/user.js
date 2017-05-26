@@ -1,5 +1,5 @@
 import validate from './validate';
-import emailRegex from './email-pattern';
+import emailRegex from '../email-pattern';
 
 export default [
   {
@@ -84,6 +84,15 @@ export default [
         value: 'M',
       },
     ],
+    setValue: (obj, value) => {
+      if (/^m(ale)?/i.test(value)) {
+        return { ...obj, gender: 'M' };
+      }
+      if (/^f(emale)?/i.test(value)) {
+        return { ...obj, gender: 'F' };
+      }
+      return { ...obj, gender: null };
+    },
   },
   {
     header: 'Birthday',

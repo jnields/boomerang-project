@@ -1,13 +1,13 @@
-import { normalize, denormalize } from 'normalizr';
+import { normalize } from 'normalizr';
 import * as listActions from './list';
-import getOrCreateGroup from './get-or-create-group';
 import { ASSIGN_GROUPS } from './types';
 import { PENDING, COMPLETE, ERROR, UNSENT } from './xhr-statuses';
 
 import api from '../helpers/api';
 import { user as userSchema } from '../helpers/schema';
 import { student as fieldsets } from '../helpers/properties';
-
+import getUsers from './get-users';
+import getUser from './get-user';
 
 const config = {
   name: 'students',
@@ -20,57 +20,22 @@ const config = {
   fieldsets,
 };
 
-const getStudent =
-(item, id) =>
-async (dispatch, getState) => {
-  let oldGroup;
-  if (id) {
-    oldGroup = denormalize(
-      id,
-      userSchema,
-      getState().entities,
-    ).group;
-  }
-  const result = { ...item, type: 'STUDENT' };
-  result.groupId = await dispatch(getOrCreateGroup(item.groupName, oldGroup, id));
-  delete result.groupName;
-  return result;
-};
-
-const getStudents =
-items =>
-async (dispatch) => {
-  const groups = {};
-  items.forEach(({ groupName }) => {
-    groups[groupName] = groups[groupName] || dispatch(getOrCreateGroup(groupName));
-  });
-  return items.map(async (item) => {
-    const result = { ...item, type: 'STUDENT' };
-    result.groupId = await groups[item.groupName];
-    delete result.groupName;
-    return result;
-  });
-};
-
-
 export const selectItem = listActions.selectItem.bind(null, config);
 export const clearParsed = listActions.clearParsed.bind(null, config);
 export const query = listActions.query.bind(null, config);
 
 export const save =
 item =>
-dispatch =>
-dispatch(listActions.save(config, dispatch(getStudent(item))));
+dispatch => dispatch(listActions.save(config, dispatch(getUser(item, 'STUDENT'))));
 
 export const upload =
 items =>
-dispatch =>
-dispatch(listActions.upload(config, dispatch(getStudents(items))));
+dispatch => dispatch(listActions.upload(config, getUsers(items, 'STUDENT')));
 
 export const update =
 (id, patch) =>
 dispatch =>
-dispatch(listActions.update(config, id, dispatch(getStudent(patch, id))));
+dispatch(listActions.update(config, id, dispatch(getUser(patch, 'STUDENT', id))));
 
 export const assignGroups =
 () =>
@@ -101,15 +66,17 @@ async (dispatch) => {
         response.body,
         [userSchema],
       );
-      dispatch({ type, name: 'students', status: COMPLETE, ...normalized });
-    } else {
-      dispatch({ type, name: 'students', status: ERROR });
+      return dispatch({ type, name: 'students', status: COMPLETE, ...normalized });
     }
+    return dispatch({ type, name: 'students', status: ERROR });
   } catch (error) {
-    dispatch({ type, name: 'students', error, status: UNSENT });
+    return dispatch({ type, name: 'students', error, status: UNSENT });
   }
 };
 
-export const del = listActions.del.bind(null, config);
+export const del =
+(...args) =>
+dispatch => dispatch(listActions.del(config, ...args));
+
 export const parse = listActions.parse.bind(null, config);
 export { showModal, closeModal } from './modal';

@@ -4,12 +4,33 @@
 }
 
 table {
+  width: 100%;
+  overflow: scroll;
   tr {
     th, td {
       white-space: nowrap;
       max-width: 250px;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+  }
+}
+
+@media print {
+  table {
+    width: 100%;
+    table-layout: fixed;
+    font-size: 10px;
+    // border-collapse: collapse;
+    tr {
+      width: 100%;
+      th, td {
+        white-space: normal;
+        // word-wrap: break-word;
+        // max-width: 250px;
+        overflow: visible;
+        text-overflow: clip;
+      }
     }
   }
 }

@@ -1,5 +1,9 @@
 export const LOG_IN = 'LOG_IN';
 export const LOG_OUT = 'LOG_OUT';
+export const REQUEST_RESET = 'REQUEST_RESET';
+export const RESET_PASSWORD = 'RESET_PASSWORD';
+export const RESET_AUTH = 'RESET_AUTH';
+
 export const SHOW_MODAL = 'SHOW_MODAL';
 export const HIDE_MODAL = 'HIDE_MODAL';
 export const ASSIGN_GROUPS = 'ASSIGN_GROUPS';

@@ -57,9 +57,9 @@ module.exports = {
         test: /\.json$/,
         use: 'json-loader',
       },
-      // fonts - get path but do not emit file
+      // fonts and images - get path but do not emit file
       {
-        test: /\.(eot|svg|ttf|woff|woff2)(\?.*)?$/,
+        test: /\.(eot|svg|ttf|woff|woff2|png|gif|jpeg|bmp)(\?.*)?$/,
         use: {
           loader: 'file-loader',
           options: {

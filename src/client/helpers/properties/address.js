@@ -28,7 +28,7 @@ export default [
   },
   {
     header: 'City',
-    name: 'City',
+    name: 'city',
     test: /city/i,
     type: 'text',
     validate,

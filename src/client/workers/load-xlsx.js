@@ -49,6 +49,7 @@ function mapObject(properties, raw) {
       }
     });
   });
+  // console.log(result);
   return result;
 }
 

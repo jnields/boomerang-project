@@ -1,6 +1,6 @@
 import { reduxForm } from 'redux-form';
 import { connect } from 'react-redux';
-import { logIn } from '../actions/authorization';
+import { logIn, resetAuth } from '../actions/authorization';
 import LogIn from '../components/log-in';
 
 const formDecorated = reduxForm(
@@ -14,6 +14,6 @@ const formDecorated = reduxForm(
 )(LogIn);
 
 export default connect(
-  state => ({ user: state.authorization.user }),
-  null,
+  state => (state.authorization),
+  { resetAuth },
 )(formDecorated);

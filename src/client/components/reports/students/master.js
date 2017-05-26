@@ -7,7 +7,7 @@ import { user as userShape } from '../../../helpers/models';
 const properties = [
   {
     name: 'Name',
-    getValue: student => `${student.firstName} ${student.lastName}`.trim(),
+    getValue: student => `${student.firstName || ''} ${student.lastName || ''}`.trim(),
   },
   {
     name: 'Gender',
@@ -31,7 +31,7 @@ const properties = [
   },
   {
     name: 'Language Needs',
-    getValue: student => student.languageNeeds || 'None listed',
+    getValue: student => student.languageNeeds,
   },
   {
     name: 'Attended Orientation',

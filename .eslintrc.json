@@ -10,16 +10,15 @@
         "import/resolver": {
             "node": {
                 "extensions": [
-                    ".js",
-                    ".jsx",
+                    ".gif", ".png", ".jpeg", ".bmp",
+                    ".js", ".jsx",
                     ".json",
-                    ".scss",
-                    ".sass",
-                    ".css"
+                    ".scss", ".sass", ".css"
                 ]
             }
         },
         "import/ignore": [
+            "\\.gif", "\\.png", "\\.jpeg", "\\.bmp",
             "\\.sass",
             "\\.scss",
             "\\.css",

@@ -5,6 +5,8 @@ import {
 } from 'prop-types';
 import bs from '../../styles/bootstrap';
 import styles from '../../styles/report-list';
+import helpers from '../../styles/helpers';
+import formatValue from '../../helpers/format-item';
 
 export default function ReportList({
   title,
@@ -14,26 +16,32 @@ export default function ReportList({
 }) {
   return (
     <div className={styles.default}>
-      <table className={bs.table}>
-        <thead>
-          <tr>
-            <th colSpan={properties.length}>
-              <h1>{title}</h1>
-              {aside ? <aside>{aside}</aside> : null}
-            </th>
-          </tr>
-          <tr>
-            {properties.map(prop => <th key={prop.name}>{prop.name}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map(item => (
-            <tr key={item.id}>
-              {properties.map(prop => <td key={prop.name}>{prop.getValue(item)}</td>)}
+      <div className={helpers.scrollBox}>
+        <table className={bs.table}>
+          <thead>
+            <tr>
+              <th colSpan={properties.length}>
+                <h1>{title}</h1>
+                {aside ? <aside>{aside}</aside> : null}
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+            <tr>
+              {properties.map(prop => <th key={prop.name}>{prop.name}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {items.map(item => (
+              <tr key={item.id}>
+                {properties.map(prop => (
+                  <td key={prop.name}>
+                    {formatValue(prop.getValue(item))}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

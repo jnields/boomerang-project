@@ -6,7 +6,7 @@ import ReportList from './report-list';
 const properties = [
   {
     name: 'Name',
-    getValue: student => `${student.firstName} ${student.lastName}`.trim(),
+    getValue: student => `${student.firstName || ''} ${student.lastName || ''}`.trim(),
   },
   {
     name: 'Address',

@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export default function PasswordResetTemplate({ host, authMechanism }) {
-  const resetLink =
-        `${host}/login/reset?sid=${authMechanism.sessionId}`;
+  const resetId = Buffer.from(authMechanism.resetId, 'base64').toString('hex');
+  const resetLink = `http://${host}/reset/${resetId}`;
   return (<html lang="en">
     <head>
       <style />
@@ -14,13 +14,16 @@ export default function PasswordResetTemplate({ host, authMechanism }) {
       <p>
         Somebody recently requested that your password for
         boomerang-project.com be reset. To choose a new one,
-        please click this button.
+        please visit the following link:
       </p>
-      <a href={resetLink}>Reset password</a>
+      <a href={resetLink}>{resetLink}</a>
       <p>
-                If this was a mistake, simply ignore this e-mail.
-            </p>
-      <footer />
+        If this was a mistake, simply ignore this e-mail.
+      </p>
+      <footer>
+        Thanks,
+        Your friends at the Boomerang Project
+      </footer>
     </body>
   </html>);
 }
@@ -31,7 +34,7 @@ const {
 PasswordResetTemplate.propTypes = {
   host: string.isRequired,
   authMechanism: shape({
-    sessionId: string.isRequired,
+    resetId: string.isRequired,
     user: shape({
       firstName: string,
       lastName: string,

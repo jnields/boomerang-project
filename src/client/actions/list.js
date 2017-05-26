@@ -1,5 +1,6 @@
 import { normalize } from 'normalizr';
 import LoadXlsxWorker from '../workers/load-xlsx';
+import getChunks from '../helpers/get-chunks';
 
 import {
   SAVE,
@@ -122,35 +123,55 @@ export const upload =
 async (dispatch) => {
   const type = UPLOAD;
   dispatch({ type, name, status: PENDING });
-  let response;
-  try {
-    response = await post(await Promise.all(items));
-  } catch (error) {
-    dispatch({ type, name, status: UNSENT, error });
-    throw error;
-  }
-  const { statusCode = 500, body = [] } = (response || {});
-  if (statusCode >= 400) {
-    const { error } = body;
-    dispatch({
-      type,
-      status: ERROR,
-      statusCode,
-      response,
-      error,
-    });
-    return;
-  }
-  const normalized = normalize(
-    body,
-    [schema],
-  );
+  const normalized = await Promise.all(getChunks(await items, 200).map(async (chunk) => {
+    let response;
+    try {
+      response = await post(chunk);
+    } catch (error) {
+      throw dispatch({ type, name, status: UNSENT, error });
+    }
+    const { statusCode = 500, body = [] } = (response || {});
+    if (statusCode >= 400) {
+      const { error } = body;
+      throw dispatch({
+        type,
+        status: ERROR,
+        statusCode,
+        response,
+        error,
+      });
+    }
+    return normalize(
+      body,
+      [schema],
+    );
+  }));
   dispatch({
     type,
     name,
     status: COMPLETE,
-    response,
-    ...normalized,
+    ...normalized.reduce(
+      (acc, item) => ({
+        entities: {
+          users: {
+            ...acc.entities.users,
+            ...item.entities.users,
+          },
+          groups: {
+            ...acc.entities.groups,
+            ...item.entities.groups,
+          },
+        },
+        result: [...acc.result, ...item.result],
+      }),
+      {
+        entities: {
+          users: {},
+          groups: {},
+        },
+        result: [],
+      },
+    ),
   });
 };
 
@@ -212,16 +233,27 @@ async (dispatch) => {
   });
 };
 
+
 export const parse =
 ({ name, fieldsets }, files) =>
 async (dispatch) => {
   const worker = new LoadXlsxWorker();
   const type = PARSE;
+
+  const propMap = {};
+  const translate = value => Object.keys(value).reduce((acc, key) => (
+    propMap[key].setValue
+      ? propMap[key].setValue(acc, value[key])
+      : { ...acc, [key]: value[key] }
+    ),
+    {},
+  );
+
   worker.onmessage = ({ data: { results, error } }) => {
     if (error) {
       dispatch({ type, name, status: ERROR, error });
     } else {
-      dispatch({ type, name, status: COMPLETE, results });
+      dispatch({ type, name, status: COMPLETE, results: results.map(translate) });
     }
   };
   dispatch({ type, name, status: PENDING });
@@ -230,9 +262,12 @@ async (dispatch) => {
     properties: fieldsets.reduce(
       (flattened, fieldset) => [...flattened, ...fieldset.properties],
       [],
-    ).map(prop => ({
-      test: prop.test,
-      name: prop.name,
-    })),
+    ).map((prop) => {
+      propMap[prop.name] = prop;
+      return {
+        test: prop.test,
+        name: prop.name,
+      };
+    }),
   });
 };

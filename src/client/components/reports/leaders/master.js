@@ -7,7 +7,7 @@ import { user as userShape } from '../../../helpers/models';
 const properties = [
   {
     name: 'Name',
-    getValue: student => `${student.firstName} ${student.lastName}`.trim(),
+    getValue: student => `${student.firstName || ''} ${student.lastName || ''}`.trim(),
   },
   {
     name: 'E-Mail',

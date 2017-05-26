@@ -1,5 +1,8 @@
 @media print {
   .default {
-    page-break-after: always;
+    &:first-child {
+      page-break-before: avoid !important;
+    }
+    page-break-before: always;
   }
 }

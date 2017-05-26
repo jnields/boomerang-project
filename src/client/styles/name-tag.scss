@@ -1,3 +1,69 @@
-.default {
+$height: 200px;
+$padding: 20px;
 
+@media print {
+  .default {
+    width: 45%;
+    box-sizing: border-box;
+    break-inside: avoid;
+    float: left;
+    &:nth-child(even) {
+      margin-right: 2.5%;
+    }
+    &:nth-child(odd) {
+      margin-left: 2.5%;
+    }
+    margin-bottom: 2.5%;
+  }
+}
+.default {
+  height: $height;
+  border: 3px solid #eee;
+  background-color: white;
+  position: relative;
+  padding: 10px;
+  margin-bottom: 30px;
+  .logo {
+    position: absolute;
+    top: $padding;
+    left: $padding;
+    width: 125px;
+  }
+  .orientation {
+    position: absolute;
+    top: $padding;
+    right: $padding;
+    text-align: right;
+  }
+  .name {
+    position: absolute;
+    top: $height/2;
+    width: 100%;
+    text-align: center;
+    transform: translateY(-45%);
+    .first {
+      font-size: 50px;
+      font-weight: 500;
+      &::after {
+        content: '\A';
+        white-space: pre;
+      }
+    }
+    .last {
+      position: relative;
+      top: -10px;
+      font-weight: 300;
+      font-size: 30px;
+    }
+  }
+  .group {
+    position: absolute;
+    bottom: $padding;
+    left: $padding;
+  }
+  .room {
+    position: absolute;
+    bottom: $padding;
+    right: $padding;
+  }
 }

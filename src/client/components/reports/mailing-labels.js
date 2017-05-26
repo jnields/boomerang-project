@@ -1,7 +1,7 @@
 import React from 'react';
 import { arrayOf, string, shape } from 'prop-types';
 import MailingLabel from './mailing-label';
-import getChunks from './get-chunks';
+import getChunks from '../../helpers/get-chunks';
 import bs from '../../styles/bootstrap';
 
 export default function MailingLabels({ items, title }) {

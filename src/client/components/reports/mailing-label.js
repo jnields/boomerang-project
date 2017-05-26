@@ -6,12 +6,10 @@ import styles from '../../styles/mailing-label';
 export default function MailingLabel({ user }) {
   return (
     <div className={styles.default}>
-      <div className={styles.name}>
-        {`${user.firstName} ${user.lastName}`.trim()}
-      </div>
-      <div className={styles.address}>
-        {formatAddress(user.address)}
-      </div>
+      {formatAddress(
+        user.address,
+        `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+      )}
     </div>
   );
 }

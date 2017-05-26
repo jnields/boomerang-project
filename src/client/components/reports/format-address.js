@@ -1,4 +1,6 @@
-export default function formatAddress(address) {
+import React from 'react';
+
+export default function formatAddress(address, name) {
   if (address == null) return null;
   const lines = [];
   if (address.line1) lines.push(address.line1);
@@ -12,5 +14,26 @@ export default function formatAddress(address) {
     cityLine += `${cityLine ? ' ' : ''}${address.zip}`;
   }
   if (cityLine) lines.push(cityLine);
-  return lines.join('\n');
+  return (
+    <address>
+      { name ? [<strong key={0}>{name}</strong>, <br key={1} />] : null }
+      {lines.reduce(
+        (prev, current, ix) => {
+          if (prev.length === 0) {
+            return [
+              <span key={0}>{current}</span>,
+            ];
+          }
+          return [
+            ...prev,
+            // eslint-disable-next-line react/no-array-index-key
+            <br key={(ix * 2) - 1} />,
+            // eslint-disable-next-line react/no-array-index-key
+            <span key={ix * 2}>{current}</span>,
+          ];
+        },
+        [],
+      )}
+    </address>
+  );
 }

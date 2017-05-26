@@ -15,10 +15,17 @@ const router = Router();
 function startTransaction(req, res, next) {
   orm.transaction({
     autocommit: false,
-    isolationLevel: 'READ COMMITTED',
+    isolationLevel: 'READ UNCOMMITTED',
   }).then(
     (transaction) => {
       req.transaction = transaction;
+      req.on('close', () => {
+        try {
+          transaction.rollback();
+        } catch (e) {
+          // ignored
+        }
+      });
       next();
     },
     (error) => {

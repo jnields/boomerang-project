@@ -17,9 +17,7 @@ router.route('/login/:id')
   .patch(eh(patchLogin));
 
 router.route('/reset')
-  .post(eh(resetLogin));
-
-router.route('/reset/:username')
-  .get(eh(requestReset));
+  .put(eh(resetLogin))
+  .post(eh(requestReset));
 
 export default router;

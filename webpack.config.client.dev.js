@@ -96,9 +96,9 @@ module.exports = {
         test: /\.json$/,
         use: 'json-loader',
       },
-      // fonts
+      // fonts and images
       {
-        test: /\.(eot|svg|ttf|woff|woff2)(\?.*)?$/,
+        test: /\.(eot|svg|ttf|woff|woff2|png|gif|jpeg|bmp)(\?.*)?$/,
         use: {
           loader: 'file-loader',
           options: {

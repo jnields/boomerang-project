@@ -5,7 +5,7 @@ import {
   number,
   func,
   shape,
-  // string,
+  string,
  } from 'prop-types';
 
 import Buttons from './buttons';
@@ -13,7 +13,7 @@ import Pagination from './pagination';
 import UploadPreview from '../upload-preview';
 import PropertyForm from '../../containers/property-form';
 import cs from '../../helpers/join-classes';
-import format from './format';
+import formatItem from '../../helpers/format-item';
 
 import bs from '../../styles/bootstrap';
 import styles from '../../styles/property-list';
@@ -41,6 +41,8 @@ export default class PropertyList extends Component {
         $offset: number,
       }).isRequired,
 
+      asyncValidate: func,
+      asyncBlurFields: arrayOf(string),
       fieldsets: arrayOf(fieldsetShape).isRequired,
 
       save: func.isRequired,
@@ -64,6 +66,8 @@ export default class PropertyList extends Component {
       selectedItem: null,
       clearParsed: undefined,
       upload: undefined,
+      asyncBlurFields: undefined,
+      asyncValidate: undefined,
       assigningGroups: false,
       showModalOnDoubleClick: false,
     };
@@ -79,6 +83,8 @@ export default class PropertyList extends Component {
       closeModal,
       fieldsets,
       deleting,
+      asyncBlurFields,
+      asyncValidate,
     } = props;
     this.properties = fieldsets.reduce(
       (mapped, fieldset) => [...mapped, ...fieldset.properties],
@@ -96,6 +102,8 @@ export default class PropertyList extends Component {
             fieldsets={fieldsets}
             cancel={closeModal}
             deleting={deleting}
+            asyncBlurFields={asyncBlurFields}
+            asyncValidate={asyncValidate}
             onSubmit={async (values) => {
               await save(getItemFromValues(values, this.properties));
               await query(params);
@@ -142,6 +150,8 @@ export default class PropertyList extends Component {
       update,
       del,
 
+      asyncBlurFields,
+      asyncValidate,
       clearParsed,
       upload,
       showModal,
@@ -187,6 +197,7 @@ export default class PropertyList extends Component {
                       if (showModalOnDoubleClick && selectedItem !== item.id) {
                         return false;
                       }
+                      const initialValues = getValuesFromItem(item, this.properties);
                       showModal({
                         title: `Edit: ${name}`,
                         content: (
@@ -199,7 +210,14 @@ export default class PropertyList extends Component {
                             deleting={deleting}
                             fieldsets={fieldsets}
                             cancel={closeModal}
-                            initialValues={getValuesFromItem(item, this.properties)}
+                            asyncBlurFields={asyncBlurFields}
+                            asyncValidate={
+                              async (values, dispatch) =>
+                              (asyncValidate
+                                ? asyncValidate(values, dispatch, initialValues)
+                                : null)
+                            }
+                            initialValues={initialValues}
                             onSubmit={async (values) => {
                               await update(
                                 item.id,
@@ -215,7 +233,7 @@ export default class PropertyList extends Component {
                   >
                     {this.properties.map(prop => (
                       <td key={prop.name}>
-                        {format(prop.getValue ? prop.getValue(item) : item[prop.name])}
+                        {formatItem(prop.getValue ? prop.getValue(item) : item[prop.name])}
                       </td>
                     ))}
                   </tr>
@@ -239,6 +257,9 @@ export default class PropertyList extends Component {
             <UploadPreview
               items={parsedItems}
               isSaving={uploading}
+              query={query}
+              querying={querying}
+              params={params}
               cancel={clearParsed}
               fieldsets={fieldsets}
               save={upload}

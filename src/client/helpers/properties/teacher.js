@@ -1,5 +1,5 @@
 import validate from './validate';
-import pattern from './email-pattern';
+import pattern from '../email-pattern';
 
 export default [{
   key: 'info',

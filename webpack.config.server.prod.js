@@ -82,9 +82,9 @@ module.exports = {
         test: /\.json$/,
         use: 'json-loader',
       },
-      // fonts - emit file - client build does not resolve
+      // fonts and images - emit file - client build does not resolve
       {
-        test: /\.(eot|svg|ttf|woff|woff2)(\?.*)?$/,
+        test: /\.(eot|svg|ttf|woff|woff2|png|gif|jpeg|bmp)(\?.*)?$/,
         use: {
           loader: 'file-loader',
           options: {

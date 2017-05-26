@@ -1,20 +1,25 @@
 import React from 'react';
 import { user as userShape } from '../../helpers/models';
 import s from '../../styles/name-tag';
+import logo from '../../assets/logo.png';
 
 const year = new Date().getFullYear();
 
 export default function NameTag({ user }) {
   return (
     <div className={s.default}>
-      {/* img */}
+      <img className={s.logo} src={logo} alt="Boomerang Project" />
       <span className={s.orientation}>
-        {`${year}`}
-        <strong>WEB</strong>
-        Group Orientation
+        {`${year} `}<strong>WEB</strong>{' Group'}<br />
+        {`Orientation ${user.type === 'LEADER' ? 'Leader' : ''}`}
       </span>
       <span className={s.name}>
-        {`${user.firstName} ${user.lastName}`.trim()}
+        <span className={s.first}>
+          {user.firstName}
+        </span>
+        <span className={s.last}>
+          {user.lastName}
+        </span>
       </span>
       {user.group == null
         ? null

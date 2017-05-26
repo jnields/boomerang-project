@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { ENUM, CHAR, STRING } from 'sequelize';
+import { ENUM, CHAR, STRING, DATE } from 'sequelize';
 import orm from '../helpers/orm';
 import { InsecurePasswordError } from '../helpers/errors';
 
@@ -18,7 +18,7 @@ function saltHashPassword(password) {
   return sha512(
     crypto.randomBytes(16).toString('base64'),
     password,
-    );
+  );
 }
 
 
@@ -43,17 +43,13 @@ export default orm.define(
     username: {
       type: STRING,
       unique: true,
-      allowNull: true,
-    },
-    salt: {
-      type: CHAR(24),
       allowNull: false,
     },
-    hash: {
-      type: CHAR(88),
-      allowNull: false,
-    },
+    salt: CHAR(24),
+    hash: CHAR(88),
     sessionId: CHAR(88),
+    resetId: CHAR(88),
+    resetAt: DATE,
   },
   {
     instanceMethods: {

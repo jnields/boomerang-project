@@ -3,7 +3,7 @@ import cf from './config';
 
 const config = { ...cf, timeout: 30000 };
 
-function makeRequest(slice) {
+function makeRequest(slice, transform) {
   return new Promise((resolve, reject) => {
     xhr.get(
       `/api/reports/${slice}`,
@@ -12,30 +12,27 @@ function makeRequest(slice) {
         if (error) {
           return reject(error);
         }
-        if (response
-            && response.body
-            && response.body.results
-            && Array.isArray(response.body.results)
-        ) {
-          return resolve({
-            ...response,
-            body: {
-              ...response.body,
-              results: response.body.results.map(user => ({
-                ...user,
-                dob: user.dob ? new Date(user.dob) : null,
-              })),
-            },
-          });
-        }
-        return resolve(response);
+        return resolve({
+          ...response,
+          body: transform(response.body),
+        });
       },
     );
   });
 }
 
+const mapUser = user => ({
+  ...user,
+  dob: user.dob && !isNaN(new Date(user.dob))
+    ? new Date(user.dob)
+    : null,
+});
+
 export default {
-  students: () => makeRequest('students'),
-  leaders: () => makeRequest('leaders'),
-  groups: () => makeRequest('groups'),
+  students: () => makeRequest('students', users => users.map(mapUser)),
+  leaders: () => makeRequest('leaders', users => users.map(mapUser)),
+  groups: () => makeRequest('groups', groups => groups.map(group => ({
+    ...group,
+    users: group.users.map(mapUser),
+  }))),
 };

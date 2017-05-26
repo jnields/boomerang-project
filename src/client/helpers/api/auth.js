@@ -40,9 +40,12 @@ export default {
   }),
   requestReset: (username, abort) => new Promise((resolve, reject) => {
     let cancel;
-    const req = xhr.put(
-      `/api/auth/reset/${username}`,
-      config,
+    const req = xhr.post(
+      '/api/auth/reset',
+      {
+        ...config,
+        body: { username },
+      },
       (error, response) => {
         cancel = null;
         if (error) {
@@ -54,13 +57,13 @@ export default {
     cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
-  reset: (sessionId, password, abort) => new Promise((resolve, reject) => {
+  reset: ({ resetId, password }, abort) => new Promise((resolve, reject) => {
     let cancel;
     const req = xhr.put(
       '/api/auth/reset',
       {
         ...config,
-        body: { sessionId, password },
+        body: { resetId, password },
       },
       (error, response) => {
         cancel = null;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { arrayOf, string } from 'prop-types';
 import NameTag from './name-tag';
-import getChunks from './get-chunks';
+import getChunks from '../../helpers/get-chunks';
 import bs from '../../styles/bootstrap';
 import { user as userShape } from '../../helpers/models';
 

@@ -1,11 +1,14 @@
 import {
     LOG_IN,
     LOG_OUT,
+    RESET_PASSWORD,
+    RESET_AUTH,
 } from '../actions/types';
 import {
   PENDING,
   COMPLETE,
   ERROR,
+  UNSENT,
 } from '../actions/xhr-statuses';
 
 const initialState = {
@@ -21,34 +24,25 @@ function logIn(state, action) {
       return {
         ...state,
         loggingIn: true,
-        logInFailed: false,
-        logInUnsent: false,
         user: null,
       };
     case COMPLETE:
-      switch (action.response.statusCode) {
-        case 200:
-        case 304: {
-          return {
-            ...state,
-            loggingIn: false,
-            logInFailed: false,
-            logInUnsent: false,
-            user: action.result,
-          };
-        }
-        case 422:
-        case 500:
-        default:
-          return {
-            ...state,
-            loggingIn: false,
-            logInFailed: true,
-            logInUnsent: false,
-            user: null,
-          };
-      }
+      return {
+        ...state,
+        loggingIn: false,
+        logInFailed: false,
+        logInUnsent: false,
+        user: action.result,
+      };
     case ERROR:
+      return {
+        ...state,
+        loggingIn: false,
+        logInFailed: true,
+        logInUnsent: false,
+        user: null,
+      };
+    case UNSENT:
       return {
         ...state,
         loggingIn: false,
@@ -66,9 +60,17 @@ export default function (state = initialState, action) {
   }
   switch (action.type) {
     case LOG_IN:
+    case RESET_PASSWORD:
       return logIn(state, action);
     case LOG_OUT:
       return initialState;
+    case RESET_AUTH:
+      return {
+        ...state,
+        loggingIn: false,
+        logInFailed: false,
+        logInUnsent: false,
+      };
     default: break;
   }
   return state;
