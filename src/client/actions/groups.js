@@ -8,10 +8,7 @@ const config = {
   name: 'groups',
   schema: groupSchema,
   schemaName: 'groups',
-  post: api.groups.post,
-  query: api.groups.query,
-  patch: api.groups.patch,
-  del: api.groups.del,
+  ...api.groups,
   fieldsets,
 };
 
@@ -22,5 +19,6 @@ export const save = listActions.save.bind(null, config);
 export const upload = listActions.upload.bind(null, config);
 export const update = listActions.update.bind(null, config);
 export const del = listActions.del.bind(null, config);
+export const delAll = listActions.delAll.bind(null, config);
 export const parse = listActions.parse.bind(null, config);
 export { showModal, closeModal } from './modal';

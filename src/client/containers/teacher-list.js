@@ -9,6 +9,7 @@ import * as actions from '../actions/teachers';
 export default connect(
   state => ({
     ...state.lists.teachers,
+    params: state.lists.teachers.params,
     items: denormalize(
       state.lists.teachers.items,
       [user],

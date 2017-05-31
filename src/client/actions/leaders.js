@@ -14,6 +14,7 @@ const config = {
   query: api.users.query,
   patch: api.users.patch,
   del: api.users.del,
+  delAll: api.users.delAll,
   fieldsets,
 };
 
@@ -35,6 +36,10 @@ export const update =
 (id, patch) =>
 dispatch =>
 dispatch(listActions.update(config, id, dispatch(getUser(patch, 'LEADER', id))));
+
+export const delAll =
+() =>
+dispatch => dispatch(listActions.delAll(config, { type: 'LEADER' }));
 
 export const del = listActions.del.bind(null, config);
 export const parse = listActions.parse.bind(null, config);

@@ -6,6 +6,7 @@ import {
   SAVE,
   UPDATE,
   DELETE,
+  DELETE_ALL,
   QUERY,
   PARSE,
   UPLOAD,
@@ -18,6 +19,7 @@ import {
   COMPLETE,
   ERROR,
   UNSENT,
+  CANCELLED,
 } from './xhr-statuses';
 
 export const selectItem =
@@ -48,16 +50,20 @@ async (dispatch) => {
       }),
     );
     abort[name] = null;
+    if (response === undefined) {
+      dispatch({ type, status: CANCELLED, name });
+    }
   } catch (error) {
     abort[name] = null;
-    dispatch({ type, status: UNSENT, error });
-    throw error;
+    dispatch({ type, name, status: UNSENT, error, params });
+    return;
   }
-  const { statusCode = 500, body = {} } = (response || {});
+
+  const { statusCode, body = {} } = (response || {});
   const { results = [], count = 0, error } = body;
 
   if (statusCode >= 400) {
-    dispatch({ type, name, status: ERROR, statusCode, error });
+    dispatch({ type, name, status: ERROR, params, statusCode, error });
     return;
   }
 
@@ -73,6 +79,7 @@ async (dispatch) => {
     dispatch({
       type,
       name,
+      params,
       status: COMPLETE,
       response,
       count,
@@ -233,6 +240,31 @@ async (dispatch) => {
   });
 };
 
+export const delAll =
+({ name, delAll: sendDelAll, schemaName }, params) =>
+async (dispatch) => {
+  const type = DELETE_ALL;
+  dispatch({ type, name, status: PENDING });
+  let response;
+  try {
+    response = await sendDelAll(params);
+  } catch (error) {
+    dispatch({ type, name, status: UNSENT, error, query });
+    throw error;
+  }
+  const { statusCode = 500, body = {} } = (response || {});
+  if (statusCode >= 400) {
+    dispatch({ type, name, status: ERROR, statusCode, error: body.error });
+  }
+  dispatch({
+    type,
+    name,
+    status: COMPLETE,
+    entities: {
+      [schemaName]: {},
+    },
+  });
+};
 
 export const parse =
 ({ name, fieldsets }, files) =>

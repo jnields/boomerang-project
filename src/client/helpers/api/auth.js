@@ -1,5 +1,6 @@
 import xhr from 'xhr';
 import config from './config';
+import getQuery from './get-query';
 import handleAbort from './handle-abort';
 
 export default {
@@ -65,6 +66,22 @@ export default {
         ...config,
         body: { resetId, password },
       },
+      (error, response) => {
+        cancel = null;
+        if (error) {
+          return reject(error);
+        }
+        return resolve(response);
+      },
+    );
+    cancel = req.abort.bind(req);
+    handleAbort({ abort, cancel, resolve });
+  }),
+  activate: (query, abort) => new Promise((resolve, reject) => {
+    let cancel;
+    const req = xhr.post(
+      `/api/auth/activate${getQuery(query)}`,
+      config,
       (error, response) => {
         cancel = null;
         if (error) {

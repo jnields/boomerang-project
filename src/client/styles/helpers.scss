@@ -1,3 +1,4 @@
+@import './variables';
 .pointer{
   cursor: pointer;
 }
@@ -8,7 +9,7 @@
 
 .scroll-box {
     overflow: auto;
-    $bgc: white;            // background color
+    $bgc: $background;            // background color
     $cto: transparent;      // cover to color
     $sto: 40%;              // shadow percentage $sc
     $sc: rgba(0,0,0,0.1);   // shadow color
@@ -47,4 +48,8 @@
         scroll, scroll,
         scroll, scroll
     ;
+}
+
+.secondary-color {
+  color: $secondary;
 }

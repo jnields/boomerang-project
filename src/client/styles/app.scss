@@ -1,6 +1,12 @@
+@import './variables';
+
 .app {
-    margin-top: 70px;
+    margin-top: $nav-height + 12;
     margin-bottom: 100px;
+}
+
+html {
+  font-size: 16px !important;
 }
 
 table {
@@ -15,7 +21,6 @@ table {
     }
   }
 }
-
 @media print {
   table {
     width: 100%;

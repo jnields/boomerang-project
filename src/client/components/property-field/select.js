@@ -1,5 +1,5 @@
 import React from 'react';
-import { shape, string, bool } from 'prop-types';
+import { shape, bool, string } from 'prop-types';
 import bs from '../../styles/bootstrap';
 import { propertyShape } from '../../helpers/properties';
 
@@ -28,12 +28,13 @@ export default function Select(props) {
     <div className={groupClasses.join(' ')}>
       <label
         className={labelClasses.join(' ')}
-        htmlFor={props.input.id}
+        htmlFor={props.id}
       >
         {props.property.header}
       </label>
       <div className={bs.colSm9}>
         <select
+          id={props.id}
           {...props.input}
           className={fieldClasses.join(' ')}
         >
@@ -58,5 +59,6 @@ Select.propTypes = {
   meta: shape({ valid: bool.isRequired }).isRequired,
   property: propertyShape.isRequired,
   id: string.isRequired,
-  input: shape({}).isRequired,
+  input: shape({
+  }).isRequired,
 };

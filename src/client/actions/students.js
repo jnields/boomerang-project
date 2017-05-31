@@ -1,6 +1,5 @@
-import { normalize } from 'normalizr';
 import * as listActions from './list';
-import { ASSIGN_GROUPS } from './types';
+import { EXTRA_LIST_ACTION } from './types';
 import { PENDING, COMPLETE, ERROR, UNSENT } from './xhr-statuses';
 
 import api from '../helpers/api';
@@ -17,6 +16,7 @@ const config = {
   query: api.users.query,
   patch: api.users.patch,
   del: api.users.del,
+  delAll: api.users.delAll,
   fieldsets,
 };
 
@@ -37,10 +37,10 @@ export const update =
 dispatch =>
 dispatch(listActions.update(config, id, dispatch(getUser(patch, 'STUDENT', id))));
 
-export const assignGroups =
+export const extraAction =
 () =>
-async (dispatch) => {
-  const type = ASSIGN_GROUPS;
+async (dispatch, getState) => {
+  const type = EXTRA_LIST_ACTION;
   dispatch({ type, name: 'students', status: PENDING });
   const [
     groupResponse,
@@ -62,11 +62,8 @@ async (dispatch) => {
   try {
     const response = await api.users.patchAll(patches);
     if (response.statusCode < 400) {
-      const normalized = normalize(
-        response.body,
-        [userSchema],
-      );
-      return dispatch({ type, name: 'students', status: COMPLETE, ...normalized });
+      await dispatch(query(getState().lists.students.params));
+      return dispatch({ type, name: 'students', status: COMPLETE });
     }
     return dispatch({ type, name: 'students', status: ERROR });
   } catch (error) {
@@ -77,6 +74,10 @@ async (dispatch) => {
 export const del =
 (...args) =>
 dispatch => dispatch(listActions.del(config, ...args));
+
+export const delAll =
+() =>
+dispatch => dispatch(listActions.delAll(config, { type: 'STUDENT' }));
 
 export const parse = listActions.parse.bind(null, config);
 export { showModal, closeModal } from './modal';

@@ -1,8 +1,11 @@
+import { normalize } from 'normalizr';
+import { EXTRA_LIST_ACTION } from './types';
+import * as listActions from './list';
+import { PENDING, COMPLETE, ERROR, UNSENT } from './xhr-statuses';
+
 import api from '../helpers/api';
 import { user as userSchema } from '../helpers/schema';
 import { teacher as fieldsets } from '../helpers/properties';
-
-import * as listActions from './list';
 
 const config = {
   name: 'teachers',
@@ -45,3 +48,26 @@ export const update = listActions.update.bind(null, config);
 export const del = listActions.del.bind(null, config);
 export const parse = listActions.parse.bind(null, config);
 export { showModal, closeModal } from './modal';
+
+export const extraAction =
+() =>
+async (dispatch, getState) => {
+  const type = EXTRA_LIST_ACTION;
+  dispatch({ type, name: 'teachers', status: PENDING });
+  try {
+    const response = await api.auth.activate({
+      type: 'TEACHER',
+      schoolId: getState().lists.schools.selectedItem,
+    });
+    if (response.statusCode < 400) {
+      const normalized = normalize(
+        response.body,
+        [userSchema],
+      );
+      return dispatch({ type, name: 'teachers', status: COMPLETE, ...normalized });
+    }
+    return dispatch({ type, name: 'teachers', status: ERROR });
+  } catch (error) {
+    return dispatch({ type, name: 'teachers', error, status: UNSENT });
+  }
+};

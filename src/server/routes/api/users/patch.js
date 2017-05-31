@@ -11,6 +11,7 @@ const patchUser = async (transaction, schoolId, id, updates, groups) => {
   delete parsedUpdates.school;
   delete parsedUpdates.schoolId;
   delete parsedUpdates.addressId;
+  delete parsedUpdates.activationSent;
 
   const groupId = parsedUpdates.groupId || (parsedUpdates.group || {}).id;
   if (groupId) {
@@ -128,7 +129,6 @@ const patchMany = async (req, res) => {
 };
 
 export default async function patch(req, res) {
-  const id = req.params.id;
-  if (id) return patchOne(req, res);
+  if ('id' in req.params) return patchOne(req, res);
   return patchMany(req, res);
 }

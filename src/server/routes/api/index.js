@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import orm from '../../helpers/orm';
+import getTransaction from '../../helpers/get-transaction';
 import handleError from './handle-error';
 import hasRole from './has-role';
 import authenticated from '../authentication-required';
@@ -13,10 +13,7 @@ import reports from './reports';
 const router = Router();
 
 function startTransaction(req, res, next) {
-  orm.transaction({
-    autocommit: false,
-    isolationLevel: 'READ UNCOMMITTED',
-  }).then(
+  getTransaction().then(
     (transaction) => {
       req.transaction = transaction;
       req.on('close', () => {

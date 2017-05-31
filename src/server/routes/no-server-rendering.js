@@ -3,7 +3,7 @@ import { user as userSchema } from '../../client/helpers/schema';
 
 const prod = process.env.NODE_ENV === 'production';
 const bundlePort = prod
-  ? process.env.BOOMERANG_PORT
+  ? process.env.PORT
   : process.env.PROXY_PORT;
 
 export default (req, res) => {

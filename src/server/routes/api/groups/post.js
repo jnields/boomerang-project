@@ -69,8 +69,9 @@ const postOne = async (req, res) => {
     .send(result);
 };
 
-export default async function (req, res) {
+export default function (req, res) {
   if (Array.isArray(req.body)) {
-    postMany(req, res);
-  } else postOne(req, res);
+    return postMany(req, res);
+  }
+  return postOne(req, res);
 }

@@ -30,21 +30,46 @@ const mapUser = user => ({
 });
 
 export default {
-  students: () => makeRequest('groups', groups => groups.reduce(
-    (students, group) => [
-      ...students,
-      ...group.users
-        .filter(ur => ur.type === 'STUDENT')
-        .map(ur => mapUser({
-          ...ur,
-          group: {
-            ...group,
-            leaders: group.users.filter(u => u.type === 'LEADER'),
+  students: async () => {
+    const [withGroup, withoutGroup] = await Promise.all([
+      makeRequest('groups', groups => groups.reduce(
+        (students, group) => [
+          ...students,
+          ...group.users
+            .filter(ur => ur.type === 'STUDENT')
+            .map(ur => mapUser({
+              ...ur,
+              group: {
+                ...group,
+                leaders: group.users.filter(u => u.type === 'LEADER'),
+              },
+            })),
+        ],
+        [],
+      )),
+      new Promise((resolve, reject) => {
+        xhr.get(
+          '/api/users?group=\u0000&$limit=10000&type=STUDENT',
+          config,
+          (error, response) => {
+            if (error) return reject(error);
+            const { results } = response.body;
+            return resolve({
+              ...response,
+              body: results.map(mapUser),
+            });
           },
-        })),
-    ],
-    [],
-  ).sort(alpha)),
+        );
+      }),
+    ]);
+    return {
+      statusCode: Math.max(withGroup.statusCode, withoutGroup.statusCode),
+      body: [
+        ...withGroup.body,
+        ...withoutGroup.body,
+      ].sort(alpha),
+    };
+  },
   leaders: () => makeRequest('leaders', users => users.map(mapUser)),
   groups: () => makeRequest('groups', groups => groups.map(group => ({
     ...group,

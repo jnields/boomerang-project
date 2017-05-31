@@ -75,6 +75,32 @@ export default class PropertyList extends Component {
 
   constructor(props) {
     super(props);
+    this.addItem = this.addItem.bind(this);
+    this.goToPage = this.goToPage.bind(this);
+  }
+
+  componentWillMount() {
+    if (window !== undefined) {
+      this.goToPage(1);
+    }
+  }
+
+  get properties() {
+    return this.props.fieldsets.reduce(
+      (mapped, fieldset) => [...mapped, ...fieldset.properties],
+      [],
+    );
+  }
+
+  goToPage(i) {
+    const { params, query } = this.props;
+    query({
+      ...params,
+      $offset: (i - 1) * (params.$limit || Infinity),
+    });
+  }
+
+  addItem() {
     const {
       params,
       query,
@@ -85,40 +111,24 @@ export default class PropertyList extends Component {
       deleting,
       asyncBlurFields,
       asyncValidate,
-    } = props;
-    this.properties = fieldsets.reduce(
-      (mapped, fieldset) => [...mapped, ...fieldset.properties],
-      [],
-    );
-    this.goToPage = i => query({
-      ...params,
-      $offset: (i - 1) * (params.$limit || Infinity),
+    } = this.props;
+    showModal({
+      title: `Add ${name}`,
+      content: (
+        <PropertyForm
+          fieldsets={fieldsets}
+          cancel={closeModal}
+          deleting={deleting}
+          asyncBlurFields={asyncBlurFields}
+          asyncValidate={asyncValidate}
+          onSubmit={async (values) => {
+            await save(getItemFromValues(values, this.properties));
+            await query(params);
+            return closeModal();
+          }}
+        />
+      ),
     });
-    this.addItem = () => {
-      showModal({
-        title: `Add ${name}`,
-        content: (
-          <PropertyForm
-            fieldsets={fieldsets}
-            cancel={closeModal}
-            deleting={deleting}
-            asyncBlurFields={asyncBlurFields}
-            asyncValidate={asyncValidate}
-            onSubmit={async (values) => {
-              await save(getItemFromValues(values, this.properties));
-              await query(params);
-              return closeModal();
-            }}
-          />
-        ),
-      });
-    };
-  }
-
-  componentWillMount() {
-    if (window !== undefined) {
-      this.goToPage(1);
-    }
   }
 
   render() {
@@ -169,7 +179,7 @@ export default class PropertyList extends Component {
       ? <h2>None Listed</h2>
       : (
         <div>
-          <div className={styles.scrollBox}>
+          <div className={helperClasses.scrollBox}>
             <table
               className={[
                 bs.table,

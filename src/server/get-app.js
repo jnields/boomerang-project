@@ -10,8 +10,9 @@ import authentication from './helpers/authentication';
 
 (function validateEnvironment() {
   const envVars = [
-    'BOOMERANG_PASSWORD',
-    'BOOMERANG_PORT',
+    'DB_PASSWORD',
+    'PORT',
+    'HOST',
   ];
   if (process.env.NODE_ENV !== 'production') {
     envVars.push('PROXY_PORT');

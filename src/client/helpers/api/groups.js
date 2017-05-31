@@ -62,6 +62,25 @@ export default {
     cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
+  delAll: (query, abort) => new Promise((resolve, reject) => {
+    if (query && typeof query !== 'object') {
+      throw new TypeError('invalid query object');
+    }
+    let cancel;
+    const req = xhr.del(
+      `/api/groups${query ? getQuery(query) : ''}`,
+      config,
+      (error, response) => {
+        cancel = null;
+        if (error) {
+          return reject(error);
+        }
+        return resolve(response);
+      },
+    );
+    cancel = req.abort.bind(req);
+    handleAbort({ abort, cancel, resolve });
+  }),
   post: (obj, abort) => new Promise((resolve, reject) => {
     const type = Object.prototype.toString.call(obj);
     let correctType = type === '[object Object]';

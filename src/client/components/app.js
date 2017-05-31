@@ -10,6 +10,7 @@ import LogIn from '../containers/log-in';
 import Home from '../containers/home';
 import RequestReset from '../containers/request-reset';
 import Reset from '../containers/reset';
+import Activate from '../containers/activate';
 import ModalBackdrop from '../containers/modal-backdrop';
 import Modal from '../containers/modal';
 
@@ -41,6 +42,7 @@ export default class App extends Component {
           <Route path="/login" component={LogIn} />
           <Route path="/reset/:resetId" exact component={Reset} />
           <Route path="/reset" exact component={RequestReset} />
+          <Route path="/activate/:resetId" exact component={Activate} />
           <Route path="/" component={Home} />
         </Switch>
       </div>

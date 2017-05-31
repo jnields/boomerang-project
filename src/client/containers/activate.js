@@ -5,9 +5,9 @@ import * as actions from '../actions/authorization';
 export default connect(
   state => ({
     ...state.authorization,
-    title: 'Reset Password',
-    successTitle: 'Password Successfully Reset',
-    errorTitle: 'Password Not Changed',
+    title: 'Activate Account',
+    successTitle: 'Account Activated',
+    errorTitle: 'Link expired: account not activated',
   }),
   actions,
 )(Reset);

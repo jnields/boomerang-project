@@ -3,7 +3,7 @@ import http from 'http';
 import cluster from 'cluster';
 import os from 'os';
 
-const port = process.env.BOOMERANG_PORT;
+const port = process.env.PORT;
 const cpus = os.cpus().length;
 const debugLog = debug('mern:server');
 

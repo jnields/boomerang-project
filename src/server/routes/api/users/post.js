@@ -9,6 +9,7 @@ import orm from '../../../helpers/orm';
 async function createUser(user, transaction) {
   const mapped = { ...user };
   delete mapped.group;
+  delete mapped.activationSent;
   const created = await User.create(
     user,
     {
@@ -80,6 +81,7 @@ async function postUsers(req, res, next) {
     if (groupId) groups[groupId] = true;
     if (user.address) addresses.push(user.address);
     delete user.group;
+    delete user.activationSent;
   }
   if (thrown) {
     await transaction.rollback();
@@ -143,8 +145,7 @@ async function postUser(req, res, next) {
 
 export default function post(req, res, next) {
   if (Array.isArray(req.body)) {
-    postUsers(req, res, next);
-  } else {
-    postUser(req, res, next);
+    return postUsers(req, res, next);
   }
+  return postUser(req, res, next);
 }

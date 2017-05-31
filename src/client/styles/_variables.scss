@@ -1,0 +1,20 @@
+$background: #FEFEFE;
+$primary: #602A51;
+$secondary: #F36D0B;
+$nav-height: 70px;
+
+$brand-primary: $primary;
+$gray-base: darken($primary, 20%);
+$gray-lighter: desaturate(lighten($gray-base, 93.5%), 25%);
+$gray-light: desaturate(lighten($gray-base, 46.7%), 25%);
+$gray-dark: desaturate(lighten($gray-base, 20%), 10%);
+$gray-darker: desaturate(lighten($gray-base, 13.5%), 5%);
+
+$brand-danger: #F36D0B;
+$body-bg: $background;
+$btn-default-color: $gray-dark;
+$list-group-hover-bg: darken($background, 4%);
+$list-group-link-color: $gray-dark;
+$panel-default-heading-bg: $gray-dark;
+$panel-default-text: white;
+$panel-default-border: $gray-dark;

@@ -2,6 +2,7 @@ import React from 'react';
 import { Field } from 'redux-form';
 import { string } from 'prop-types';
 
+import DatePicker from './date';
 import Input from './input';
 import Select from './select';
 import Textarea from './textarea';
@@ -47,9 +48,15 @@ export default function PropertyField(props) {
           component={Textarea}
         />
       );
+    case 'date':
+      return (
+        <Field
+          {...fieldProps}
+          component={DatePicker}
+        />
+      );
     case 'text':
     case 'number':
-    case 'date':
     case 'password':
       return (
         <Field

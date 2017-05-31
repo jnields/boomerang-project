@@ -140,9 +140,6 @@ module.exports = {
   },
   plugins: [
     new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }),
-    new webpack.DefinePlugin({
-      'process.env': JSON.stringify(process.env),
-    }),
     new ExtractTextPlugin({
       filename: 'bundle.css',
       allChunks: true,

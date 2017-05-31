@@ -4,6 +4,7 @@ import Spinner from '../spinner';
 import styles from '../../styles/report';
 import getQuery from '../../helpers/get-reports-query';
 import bs from '../../styles/bootstrap';
+import helpers from '../../styles/helpers';
 
 export default class ReportBase extends Component {
 
@@ -38,13 +39,24 @@ export default class ReportBase extends Component {
     if (loading || items == null) {
       return (
         <div className={styles.wrapper}>
-          <Spinner className={styles.spinner} />
+          <Spinner
+            className={[
+              styles.spinner,
+              helpers.secondaryColor,
+            ].join(' ')}
+          />
         </div>
       );
     }
     return (
       <div>
-        <div className={bs.clearfix}>
+        <div
+          style={{ marginTop: 28 }}
+          className={[
+            bs.clearfix,
+            bs.hiddenPrint,
+          ].join(' ')}
+        >
           <button
             onClick={() => history.back()}
             className={[

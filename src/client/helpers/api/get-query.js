@@ -64,13 +64,19 @@ function stringifyParams(params) {
     }
     [].push.apply(
       queryParams,
-      arrayParams[key].map(
-        (param) => {
-          const toEncode = isDate(param)
+      arrayParams[key].reduce(
+        (acc, param) => {
+          if (param === undefined) return acc;
+          let toEncode = isDate(param)
             ? JSON.parse(JSON.stringify(param))
             : param;
-          return `${encodeURIComponent(key)}=${encodeURIComponent(toEncode || '')}`;
+          if (param === null) toEncode = '\u0000';
+          return [
+            ...acc,
+            `${encodeURIComponent(key)}=${encodeURIComponent(toEncode)}`,
+          ];
         },
+        [],
       ),
     );
   });

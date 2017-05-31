@@ -9,7 +9,7 @@ import bs from '../styles/bootstrap';
 import { fieldsetShape } from '../helpers/properties';
 
 function getProperties(form, { properties }) {
-  return properties.map(prop => (
+  return properties.filter(prop => !prop.exclude).map(prop => (
     <PropertyField
       valid
       key={prop.name}
@@ -52,7 +52,11 @@ export default function PropertyForm(props) {
               <button
                 type="button"
                 disabled={submitting || deleting}
-                className={[bs.btn, bs.btnDanger].join(' ')}
+                className={[
+                  bs.btn,
+                  bs.btnDanger,
+                  bs.pullRight,
+                ].join(' ')}
                 tabIndex={-1}
                 onClick={del}
               >

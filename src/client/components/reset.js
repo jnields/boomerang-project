@@ -1,6 +1,14 @@
 import React, { Component } from 'react';
-import { shape, func, string, number } from 'prop-types';
-import { Link, Redirect } from 'react-router-dom';
+import {
+  shape,
+  func,
+  string,
+  // number,
+} from 'prop-types';
+import {
+  Link,
+  // Redirect,
+} from 'react-router-dom';
 import Spinner from './spinner';
 import bs from '../styles/bootstrap';
 import styles from '../styles/reset';
@@ -10,13 +18,16 @@ export default class Reset extends Component {
 
   static get propTypes() {
     return {
-      user: number,
+      // user: number,
       match: shape({
         params: shape({
           resetId: string.isRequired,
         }).isRequired,
       }).isRequired,
       resetPassword: func.isRequired,
+      successTitle: string.isRequired,
+      errorTitle: string.isRequired,
+      title: string.isRequired,
     };
   }
 
@@ -35,9 +46,9 @@ export default class Reset extends Component {
   }
 
   render() {
-    if (this.props.user != null) {
-      return <Redirect to="/" />;
-    }
+    // if (this.props.user != null) {
+    //   return <Redirect to="/" />;
+    // }
 
     const thus = this;
     const {
@@ -64,6 +75,7 @@ export default class Reset extends Component {
           }
         }}
       >
+        <h1>{this.props.title}</h1>
         <div
           className={cs({
             [bs.formGroup]: true,
@@ -87,7 +99,7 @@ export default class Reset extends Component {
                 this.setState({
                   pw1,
                   pw1valid: pw1.length >= 8,
-                  pw2valid: pw2 && pw1 === pw2,
+                  pw2valid: pw1.length >= 8 && pw1 === pw2,
                   pw1touched: true,
                 });
               }}
@@ -123,7 +135,7 @@ export default class Reset extends Component {
                 const pw1 = this.state.pw1;
                 this.setState({
                   pw2,
-                  pw2valid: pw2 && pw1 === pw2,
+                  pw2valid: pw1.length >= 8 && pw1 === pw2,
                   pw2touched: true,
                 });
               }}
@@ -158,18 +170,18 @@ export default class Reset extends Component {
     );
     const resetSuccess = (
       <div>
-        <h2>Password successfully reset</h2>
+        <h2>{this.props.successTitle}</h2>
         <Link to="/">Continue</Link>
       </div>
     );
     const expired = (
       <div>
-        <h2>Password Not Changed</h2>
+        <h2>{this.props.errorTitle}</h2>
         <p>
           Whoops! Looks like this link has expired.
         </p>
         <p>
-          Vists <Link to="/reset">here</Link> to request a new link.
+          Click <Link to="/reset">here</Link> to request a new link.
         </p>
       </div>
     );
@@ -184,7 +196,6 @@ export default class Reset extends Component {
 
     return (
       <div className={styles.default}>
-        <h1>Password Reset</h1>
         {content}
       </div>
     );

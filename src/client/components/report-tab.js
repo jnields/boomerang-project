@@ -15,7 +15,7 @@ export default function ReportTab({ panels }) {
             {panels.map((panel, ix1) => (
               // eslint-disable-next-line react/no-array-index-key
               <div className={bs.colSm3} key={ix1}>
-                <div className={[bs.panel, bs.panelDefault].join(' ')}>
+                <div className={[bs.panelDefault].join(' ')}>
                   <div className={bs.panelHeading}>
                     <h3 className={bs.panelTitle}>{panel.name}</h3>
                   </div>

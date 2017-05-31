@@ -25,6 +25,12 @@ export default orm.define(
     teacher: STRING,
     oriented: BOOLEAN,
 
+    activationSent: {
+      type: BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
     type: {
       type: ENUM(
         'STUDENT',

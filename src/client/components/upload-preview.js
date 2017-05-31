@@ -24,7 +24,10 @@ export default function UploadPreview({
   return (
     <div>
       <h3>Preview:</h3>
-      <div className={styles.scrollBox} style={{ maxHeight: '50vh' }}>
+      <div
+        className={styles.scrollBox}
+        style={{ maxHeight: '50vh', marginBottom: 10 }}
+      >
         <table className={bs.table}>
           <thead>
             <tr>

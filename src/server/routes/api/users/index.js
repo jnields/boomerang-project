@@ -11,7 +11,8 @@ const router = Router();
 router.route('/')
   .get(eh(query))
   .post(eh(post))
-  .patch(eh(patch));
+  .patch(eh(patch))
+  .delete(eh(del));
 
 router.route('/:id')
   .delete(eh(del))

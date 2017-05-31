@@ -10,7 +10,9 @@ const router = Router();
 
 router.route('/')
   .get(cd(query))
-  .post(cd(post));
+  .post(cd(post))
+  .delete(cd(del));
+
 router.route('/:id')
   .delete(cd(del))
   .get(cd(gett))

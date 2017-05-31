@@ -11,9 +11,9 @@ import {
 // eslint-disable-next-line no-unused-vars
 export default async function (err, req, res, next) {
   try {
-    await req.transaction.rollback();
+    if (!req.transaction.finished) await req.transaction.rollback();
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
   switch (err.constructor) {
     case UniqueConstraintError:
@@ -28,7 +28,7 @@ export default async function (err, req, res, next) {
         error: 'password does not meet length requirements',
       });
     default:
-      console.log(err);
+      console.error(err);
       return res.status(500).send({ error: 'server error' });
   }
 }

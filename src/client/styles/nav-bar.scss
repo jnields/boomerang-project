@@ -1,23 +1,47 @@
+@import './variables';
 .default {
     position: fixed;
-    height: 50px;
-    background-color: #333;
+    height: $nav-height;
+    background-color: white;
     width: 100vw;
     top: 0;
+    padding: 0 10px;
     left: 0;
     z-index: 1000000;
+    border-radius: 5px;
+    border-bottom: 1px solid #bbb;
 
     .float-right {
         float: right;
     }
 
+    .logo {
+      height: $nav-height - 2px;
+      top: 0;
+      padding: 5px;
+      position: absolute;
+    }
+
     .user-icon, .name, .log-out {
         position: inline-block;
-        height: 50px;
-        line-height: 50px;
+        height: $nav-height;
+        line-height: $nav-height;
         vertical-align: middle;
-        color: #eee;
+        color: $gray-dark;
         margin-right: 10px;
+        font-weight: bold;
+    }
+
+    .name::after {
+      content: '|';
+      display: inline-block;
+      margin-left: 11px;
+      font-size: 16px;
+      font-weight: 200;
+    }
+
+    .log-out {
+      font-weight: 400;
     }
 
     .user-icon {

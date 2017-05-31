@@ -1,15 +1,9 @@
-import React from 'react';
-import { renderToString } from 'react-dom/server';
-import { createTransport } from 'nodemailer';
 import crypto from 'crypto';
-import PasswordResetTemplate from './password-reset-template';
 import {
     User,
     AuthMechanism,
 } from '../../../models';
-import mailConfig from '../../../mail.config';
-
-const transporter = createTransport(mailConfig);
+import transporter from '../../../mail-transporter';
 
 export default async function requestReset(req, res) {
   res.status(202).send();
@@ -35,28 +29,32 @@ export default async function requestReset(req, res) {
   if (user == null) {
     await transaction.rollback();
   }
-
+  const newId = crypto.randomBytes(64);
   await authMech.update(
     {
       userId: user.id,
-      resetId: crypto.randomBytes(64).toString('base64'),
+      resetId: newId.toString('base64'),
       resetAt: new Date(),
     },
     { transaction },
   );
   await transaction.commit();
-
   try {
     const info = await transporter.sendMail({
-      from: mailConfig.auth.user,
+      from: process.env.MAIL_USER,
       to: user.email,
-      subject: 'Boomerang password reset',
-      html: renderToString(
-        <PasswordResetTemplate
-          host={req.headers.host}
-          authMechanism={authMech}
-        />,
-      ),
+      subject: 'Boomerang Project Password Reset',
+      text:
+`Somebody recently requested that your password for boomerangproject.com be reset.
+
+To choose a new one, please visit the following link:
+
+${process.env.HOST}/reset/${newId.toString('hex')}
+
+If this was a mistake, simply ignore this e-mail.
+
+Thanks,
+Your friends at the Boomerang Project`,
     });
     console.log(info);
   } catch (error) {

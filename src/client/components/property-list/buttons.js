@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { bool, func } from 'prop-types';
+import { bool, func, string } from 'prop-types';
 import Spinner from '../spinner';
 import bs from '../../styles/bootstrap';
 
@@ -8,20 +8,28 @@ export default class Buttons extends Component {
     return {
       addItem: func.isRequired,
       parsing: bool.isRequired,
-      assigningGroups: bool.isRequired,
+      extraActionPending: bool.isRequired,
       uploading: bool.isRequired,
       parse: func,
-      assignGroups: func,
+      extraAction: func,
+      extraActionText: string,
       upload: func,
       clearParsed: func,
+      delAll: func,
+      showModal: func,
+      closeModal: func,
     };
   }
   static get defaultProps() {
     return {
       parse: null,
-      assignGroups: null,
+      extraAction: null,
       upload: null,
       clearParsed: null,
+      extraActionText: null,
+      delAll: null,
+      showModal: null,
+      closeModal: null,
     };
   }
 
@@ -42,26 +50,30 @@ export default class Buttons extends Component {
   render() {
     const {
       addItem,
-      assignGroups,
-      assigningGroups,
+      extraAction,
+      extraActionPending,
+      extraActionText,
       parse,
       upload,
       clearParsed,
       uploading,
       parsing,
+      delAll,
+      showModal,
+      closeModal,
     } = this.props;
-    const anyPending = parsing || uploading || assigningGroups;
-    const assignButton = assignGroups == null ? null : (
+    const anyPending = parsing || uploading || extraActionPending;
+    const assignButton = extraAction == null ? null : (
       <button
         disabled={anyPending}
-        onClick={() => assignGroups()}
+        onClick={() => extraAction()}
         className={[
-          bs.btn, bs.btnDefault, bs.pullRight,
+          bs.btn, bs.btnDefault,
         ].join(' ')}
       >
-        {assigningGroups ?
+        {extraActionPending ?
           [<Spinner key={1} />, <span key={2}>Please wait…</span>]
-          : 'Assign Students to Groups'
+          : extraActionText
         }
       </button>
   );
@@ -93,7 +105,7 @@ export default class Buttons extends Component {
           id={this.state.fileId}
           style={{ display: 'none' }}
           type="file"
-          accept=".xlsx,.xml"
+          accept=".xlsx"
           disabled={anyPending}
           ref={() => {}}
           onChange={e => parse(e.target.files)}
@@ -102,7 +114,65 @@ export default class Buttons extends Component {
           }}
         />
       </label>
-  );
+    );
+
+    const delAllButton = delAll && (
+      <button
+        disabled={anyPending}
+        className={[bs.btn, bs.btnDanger, bs.pullRight].join(' ')}
+        onClick={() => {
+          showModal({
+            title: 'Permanently delete all records?',
+            content: (
+              <div>
+                <div className={bs.modalBody}>This action cannot be undone.</div>
+                <div className={bs.modalFooter}>
+                  <div
+                    className={[
+                      bs.btnPanel,
+                      bs.textCenter,
+                    ].join(' ')}
+                  >
+                    <button
+                      className={[
+                        bs.btn,
+                        bs.btnPrimary,
+                      ].join(' ')}
+                      onClick={() => closeModal()}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      tabIndex={-1}
+                      style={{
+                        marginLeft: '50px',
+                      }}
+                      onClick={() => {
+                        delAll().then(closeModal);
+                      }}
+                      className={[
+                        bs.btn,
+                        bs.btnDanger,
+                      ].join(' ')}
+                    >
+                      Delete all
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ),
+          });
+        }}
+      >
+        <span
+          className={[
+            bs.glyphicon,
+            bs.glyphiconTrash,
+          ].join(' ')}
+        />
+        {' Delete All'}
+      </button>
+    );
     return (
       <div className={bs.btnToolbar}>
         <button
@@ -122,6 +192,7 @@ export default class Buttons extends Component {
       </button>
         {uploadButton}
         {assignButton}
+        {delAllButton}
       </div>
     );
   }

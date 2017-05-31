@@ -33,5 +33,12 @@ export default [{
       maxLength: 255,
       required: true,
     },
+    {
+      header: 'Activation Email Sent?',
+      exclude: true,
+      name: 'activationSent',
+      test: /(?!.*)/,
+      type: 'checkbox',
+    },
   ],
 }];

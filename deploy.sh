@@ -1,15 +1,28 @@
+exit 1;
+# not intended to be ran directly, just here for reference
+
 apt-get update
 apt-get install mysql-server nginx nodejs npm certbot
+
+mysql_secure_installation
+
+read -s -p 'Enter mysql password for boomerang user:' db_pw
+
+cat <<-EOF | mysql -u root -p
+CREATE DATABASE boomerang;
+CREATE USER 'boomerang'@'localhost' IDENTIFIED BY '$db_pw';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `boomerang`.* TO 'boomerang'@'localhost';
+EOF
 
 local_port=29170
 domain="db.boomerang-project.com"
 repo='https://github.com/jnields/boomerang-project'
-npm install --prefix /usr/local/src/ $repo 
+npm install --prefix /usr/local/src/ $repo
 
 cat <<-EOF > /etc/nginx/sites-available/default
 server {
   listen 80;
-  server name ${domains};
+  server name ${domain};
   root /var/www/html;
   location /.well-known {
     allow all;
@@ -50,31 +63,31 @@ EOF
 
 cat <<-EOF > /etc/nginx/sites-available/default
 server {
-        listen 80;
-        listen [::]:80;
-        server_name ${domain};
+    listen 80;
+    listen [::]:80;
+    server_name ${domain};
 
-        root /var/www/html;
-        location /.well-known {
-                allow all;
-        }
+    root /var/www/html;
+    location /.well-known {
+        allow all;
+    }
 
-        # Redirect all HTTP requests to HTTPS with a 301 Moved Permanently response
-        location / {
-                return 301 https://\$host\$request_uri;
-        }
+    # Redirect all HTTP requests to HTTPS with a 301 Moved Permanently response
+    location / {
+        return 301 https://\$host\$request_uri;
+    }
 }
 
 server {
-        include /etc/nginx/snippets/ssl.conf;
-        server_name $domain;
-        # certs sent to the client in SERVER HELLO are concatenated in ssl_certificate
-        ssl_certificate /etc/letsencrypt/live/${domain}/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/${domain}/privkey.pem;
-        location / {
-                proxy_pass http://localhost:${local_port};
-                proxy_set_header Host \$host;
-        }
+    include /etc/nginx/snippets/ssl.conf;
+    server_name $domain;
+    # certs sent to the client in SERVER HELLO are concatenated in ssl_certificate
+    ssl_certificate /etc/letsencrypt/live/${domain}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${domain}/privkey.pem;
+    location / {
+        proxy_pass http://localhost:${local_port};
+        proxy_set_header Host \$host;
+    }
 }
 EOF
 

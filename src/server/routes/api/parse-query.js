@@ -10,10 +10,8 @@ function parseValue(attribute, rawValue, operator) {
     if (isObject(value)) {
       throw new BadQueryError(`Object passed to operand${operator}`);
     }
-    const validate = attribute.validate;
-    const nullable = attribute.allowNull !== false
-      && !(validate && validate.allowNull !== false);
-    if (nullable && value === '') return null;
+    if (value === '\u0000') return null;
+
     switch (attribute.type.constructor.key) {
       case 'STRING':
       case 'CHAR':
@@ -150,17 +148,26 @@ export default function parseQuery(query, base, model) {
   const result = Object.keys(query).reduce(
     (accumulator, param) => {
       if (included[param]) {
-        if (!isObject(query[param])) {
+        if (query[param] === '\u0000') {
+          return {
+            ...accumulator,
+            where: {
+              [`${param}Id`]: null,
+              ...accumulator.where,
+            },
+          };
+        } else if (!isObject(query[param])) {
           throw new BadQueryError(`cannot query ${param}, query properties instead`);
+        } else {
+          included[param].where = parseQuery(
+            query[param],
+            {
+              where: included[param].where,
+              include: included[param].include,
+            },
+            included[param].model,
+          ).where;
         }
-        included[param].where = parseQuery(
-          query[param],
-          {
-            where: included[param].where,
-            include: included[param].include,
-          },
-          included[param].model,
-        ).where;
         return accumulator;
       }
 
@@ -208,7 +215,6 @@ export default function parseQuery(query, base, model) {
             ...accumulator,
             offset: parseInt(query.$offset, 10) || 0,
           };
-        // case '$include':
         default:
           return {
             ...accumulator,

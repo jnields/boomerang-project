@@ -64,6 +64,28 @@ export default {
     cancel = req.abort.bind(req);
     handleAbort({ abort, cancel, resolve });
   }),
+  delAll: (query, abort) => new Promise((resolve, reject) => {
+    if (query == null
+        || typeof query !== 'object'
+        || Object.keys(query).length === 0
+    ) {
+      throw new TypeError('cannot delete all without query parameters');
+    }
+    let cancel;
+    const req = xhr.del(
+      `/api/users${getQuery(query)}`,
+      config,
+      (error, response) => {
+        cancel = null;
+        if (error) {
+          return reject(error);
+        }
+        return resolve(response);
+      },
+    );
+    cancel = req.abort.bind(req);
+    handleAbort({ abort, cancel, resolve });
+  }),
   del: (id, abort) => new Promise((resolve, reject) => {
     if (typeof id !== 'number') {
       throw new TypeError('id must be of type number');
