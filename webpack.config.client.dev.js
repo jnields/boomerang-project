@@ -4,11 +4,6 @@ const autoprefixer = require('autoprefixer');
 const webpack = require('webpack');
 const path = require('path');
 
-if (process.env.NODE_ENV === 'production') {
-  console.log('Incorrect NODE_ENV!');
-  process.exit(1);
-}
-
 module.exports = {
   devtool: 'cheap-module-eval-source-map',
   context: __dirname,

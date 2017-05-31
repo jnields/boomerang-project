@@ -1,7 +1,5 @@
 .DS_Store
-# /public/
-# /scripts/
-# /server-bundle.js*
+/dev-server.js*
 /.git/
 
 # Logs
