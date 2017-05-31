@@ -49,7 +49,7 @@ module.exports = {
         ],
         use: 'babel-loader',
       },
-            // sass/css files - extract text
+      // sass/css files - extract text
       {
         test: /\.(s[ac]|c)ss$/,
         use: ExtractTextPlugin.extract({
@@ -136,10 +136,29 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'public', 'build'),
     publicPath: '/public/build/',
-    filename: '../../server-bundle.js',
+    filename: '../../server.js',
   },
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }),
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        booleans: true,
+        cascade: true,
+        collapse_vars: true,
+        conditionals: true,
+        comparisons: true,
+        dead_code: true,
+        drop_console: true,
+        drop_debugger: true,
+        evaluate: true,
+        if_return: true,
+        join_vars: true,
+        loops: true,
+        reduce_vars: true,
+        sequences: true,
+        unused: true,
+        warnings: false,
+      },
+    }),
     new ExtractTextPlugin({
       filename: 'bundle.css',
       allChunks: true,

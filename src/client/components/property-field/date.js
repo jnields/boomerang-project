@@ -1,8 +1,8 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker-cssmodules';
 import moment from 'moment';
 import { shape, instanceOf, oneOfType, bool, string } from 'prop-types';
+import '../../styles/date-picker';
 import { propertyShape } from '../../helpers/properties';
 import bs from '../../styles/bootstrap';
 

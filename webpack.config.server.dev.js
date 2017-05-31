@@ -108,6 +108,6 @@ module.exports = {
     }
   },
   output: {
-    filename: 'server-bundle.js',
+    filename: 'server.js',
   },
 };

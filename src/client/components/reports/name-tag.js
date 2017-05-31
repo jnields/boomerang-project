@@ -1,7 +1,7 @@
 import React from 'react';
 import { user as userShape } from '../../helpers/models';
 import s from '../../styles/name-tag';
-import logo from '../../assets/logo.png';
+import logo from '../../../assets/logo.png';
 
 const year = new Date().getFullYear();
 

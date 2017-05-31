@@ -6,9 +6,9 @@
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
+/******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-/******/ 		}
+/******/
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -81,7 +81,7 @@ module.exports = require("sequelize");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_sequelize___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_sequelize__);
 
 
-/* harmony default export */ __webpack_exports__["a"] = (new __WEBPACK_IMPORTED_MODULE_0_sequelize___default.a('boomerang', 'root', process.env.BOOMERANG_PASSWORD));
+/* harmony default export */ __webpack_exports__["a"] = (new __WEBPACK_IMPORTED_MODULE_0_sequelize___default.a('boomerang', 'boomerang', process.env.DB_PASSWORD));
 
 /***/ }),
 /* 2 */
@@ -154,17 +154,13 @@ function match(salt, hash, password) {
   username: {
     type: __WEBPACK_IMPORTED_MODULE_1_sequelize__["STRING"],
     unique: true,
-    allowNull: true
-  },
-  salt: {
-    type: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_sequelize__["CHAR"])(24),
     allowNull: false
   },
-  hash: {
-    type: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_sequelize__["CHAR"])(88),
-    allowNull: false
-  },
-  sessionId: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_sequelize__["CHAR"])(88)
+  salt: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_sequelize__["CHAR"])(24),
+  hash: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_sequelize__["CHAR"])(88),
+  sessionId: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_sequelize__["CHAR"])(88),
+  resetId: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_sequelize__["CHAR"])(88),
+  resetAt: __WEBPACK_IMPORTED_MODULE_1_sequelize__["DATE"]
 }, {
   instanceMethods: {
     correctPassword: function correctPassword(password) {
@@ -243,6 +239,12 @@ function match(salt, hash, password) {
   teacher: __WEBPACK_IMPORTED_MODULE_0_sequelize__["STRING"],
   oriented: __WEBPACK_IMPORTED_MODULE_0_sequelize__["BOOLEAN"],
 
+  activationSent: {
+    type: __WEBPACK_IMPORTED_MODULE_0_sequelize__["BOOLEAN"],
+    allowNull: false,
+    defaultValue: false
+  },
+
   type: {
     type: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_sequelize__["ENUM"])('STUDENT', 'LEADER', 'TEACHER', 'ADMIN'),
     allowNull: false
@@ -262,6 +264,8 @@ module.exports = require("babel-polyfill");
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = InsecurePasswordError;
 /* unused harmony export BadQueryError */
+/* unused harmony export NotFoundError */
+/* unused harmony export BadRequestError */
 function constructError(args) {
   var _this = this;
 
@@ -298,6 +302,20 @@ function InsecurePasswordError() {
 function BadQueryError() {
   for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
     args[_key3] = arguments[_key3];
+  }
+
+  constructError.bind(this)(args);
+}
+function NotFoundError() {
+  for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+    args[_key4] = arguments[_key4];
+  }
+
+  constructError.call.apply(constructError, [this].concat(args));
+}
+function BadRequestError() {
+  for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+    args[_key5] = arguments[_key5];
   }
 
   constructError.bind(this)(args);

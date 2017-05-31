@@ -23,7 +23,7 @@ export default (req, res) => {
   };
 
   const options = {
-    title: 'Express',
+    title: 'Boomerang Project',
     lang: 'en',
     bundlePath: `http://localhost:${bundlePort}/hot-reload-server/bundle.js`,
     markup: '',

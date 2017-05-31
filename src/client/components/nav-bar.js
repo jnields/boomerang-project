@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { user as userShape } from '../helpers/models';
 import styles from '../styles/nav-bar';
 import bs from '../styles/bootstrap';
-import logo from '../assets/logo.png';
+import logo from '../../assets/logo.png';
 
 export default function NavBar({ logOut, user }) {
   const { firstName, lastName } = (user || {});

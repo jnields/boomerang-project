@@ -1,5 +1,5 @@
 exit 1;
-# not intended to be ran directly, just here for reference
+# not intended to be run directly, just here for reference
 
 apt-get update
 apt-get install mysql-server nginx nodejs npm certbot

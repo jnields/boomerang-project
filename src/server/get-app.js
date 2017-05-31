@@ -33,7 +33,7 @@ export default function (router) {
   app.set('view engine', 'pug');
 
   app.use(favicon(
-    path.resolve(__dirname, 'src', 'server', 'assets', 'favicon.ico'),
+    path.resolve(__dirname, 'src', 'assets', 'favicon.ico'),
   ));
   app.use(logger('dev'));
   app.use(bodyParser.json());

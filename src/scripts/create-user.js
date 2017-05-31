@@ -58,8 +58,8 @@ async function saveUser() {
     isolationLevel: 'READ COMMITTED',
   });
   let authMechanism = AuthMechanism.build(
-        { type: 'BASIC', username },
-    );
+    { type: 'BASIC', username },
+  );
   authMechanism.setPassword(password);
   authMechanism = await authMechanism.save({ transaction });
   user.email = username;

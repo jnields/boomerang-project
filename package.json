@@ -2,7 +2,6 @@
   "name": "boomerang-project",
   "version": "1.0.0",
   "description": "Part of the Boomerang Project web app for generation of name tags and database interaction, with excel parsing",
-  "main": "index.js",
   "scripts": {
     "lint": "eslint --ignore-path .gitignore --fix .",
     "clean": "rm -rf ./public server-bundle.js*",
@@ -13,9 +12,7 @@
     "build-client:prod": "webpack --config webpack.config.client.prod.js",
     "build-server:dev": "webpack --config webpack.config.server.dev.js --watch",
     "build-server:prod": "webpack --config webpack.config.server.prod.js",
-    "start": "read -s -p 'Enter password:' PW && if [ \"$NODE_ENV\" = 'production' ]; then DB_PASSWORD=$PW npm run start:prod; else DB_PASSWORD=$PW npm run start:dev; fi;",
-    "start:dev": "npm run build-client:dev & npm run build-server:dev & nodemon --watch server-bundle.js server-bundle.js & trap 'kill $(jobs -p) > /dev/null' INT HUP TERM; wait;",
-    "start:prod": "npm run build && pm2 start server-bundle.js",
+    "start:dev": "npm run build-client:dev & npm run build-server:dev & nodemon --watch server.js server.js & trap 'kill $(jobs -p) > /dev/null' INT HUP TERM; wait;",
     "test": "exit 1",
     "test:watch": "exit 1"
   },
