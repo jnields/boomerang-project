@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 15);
+/******/ 	return __webpack_require__(__webpack_require__.s = 14);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -379,7 +379,7 @@ module.exports = require("crypto");
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__server_helpers_orm__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__server_models__ = __webpack_require__(9);
 
@@ -389,23 +389,16 @@ module.exports = require("crypto");
 
 __WEBPACK_IMPORTED_MODULE_0__server_helpers_orm__["a" /* default */].sync({ force: true }).then(function () {
   console.log('SUCCESS');
-  global.process.exit(0);
+  process.exit(0);
 }, function (e) {
   console.log('ERROR');
   console.log(e);
-  global.process.exit(1);
+  process.exit(1);
 });
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(13)))
 
 /***/ }),
-/* 13 */
-/***/ (function(module, exports) {
-
-module.exports = require("webpack/buildin/global.js");
-
-/***/ }),
-/* 14 */,
-/* 15 */
+/* 13 */,
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(7);

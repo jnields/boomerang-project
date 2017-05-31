@@ -6,11 +6,11 @@ import * as Models from '../server/models';
 orm.sync({ force: true }).then(
   () => {
     console.log('SUCCESS');
-    global.process.exit(0);
+    process.exit(0);
   },
   (e) => {
     console.log('ERROR');
     console.log(e);
-    global.process.exit(1);
+    process.exit(1);
   },
 );
