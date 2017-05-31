@@ -13,6 +13,7 @@ import authentication from './helpers/authentication';
     'DB_PASSWORD',
     'PORT',
     'HOST',
+    'MAIL_USER',
   ];
   if (process.env.NODE_ENV !== 'production') {
     envVars.push('PROXY_PORT');
