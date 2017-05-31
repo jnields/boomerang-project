@@ -10,6 +10,7 @@ import authentication from './helpers/authentication';
 
 (function validateEnvironment() {
   const envVars = [
+    'DB_USER',
     'DB_PASSWORD',
     'PORT',
     'HOST',

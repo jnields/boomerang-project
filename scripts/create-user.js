@@ -81,7 +81,7 @@ module.exports = require("sequelize");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_sequelize___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_sequelize__);
 
 
-/* harmony default export */ __webpack_exports__["a"] = (new __WEBPACK_IMPORTED_MODULE_0_sequelize___default.a('boomerang', 'boomerang', process.env.DB_PASSWORD));
+/* harmony default export */ __webpack_exports__["a"] = (new __WEBPACK_IMPORTED_MODULE_0_sequelize___default.a('boomerang', process.env.DB_USER, process.env.DB_PASSWORD));
 
 /***/ }),
 /* 2 */
