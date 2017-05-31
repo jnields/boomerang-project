@@ -9,6 +9,7 @@ fi
 NODE_ENV=production \
 MAIL_USER='accounts@nields.io' \
 DB_PASSWORD=$pw \
+DB_USER=boomerang \
 PORT=29171 \
 HOST='https://boomerang.nields.io' \
 pm2 start npm -- start
