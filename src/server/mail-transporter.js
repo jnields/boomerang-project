@@ -1,11 +1,9 @@
 import { createTransport } from 'nodemailer';
 
 const mailConfig = {
-  service: 'Gmail',
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASSWORD,
-  },
+  sendmail: true,
+  newline: 'unix',
+  path: '/usr/sbin/sendmail',
 };
 
 export default createTransport(mailConfig);
