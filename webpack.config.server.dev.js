@@ -3,7 +3,7 @@ const builtins = require('repl')._builtinLibs.reduce(
   (result, builtin) => Object.assign({}, result, { [builtin]: true }),
   {}
 );
-
+const webpack = require('webpack');
 const nodePath = path.resolve(__dirname, 'node_modules');
 const nodePathLength = nodePath.length;
 

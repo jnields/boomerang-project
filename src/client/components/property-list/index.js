@@ -45,6 +45,8 @@ export default class PropertyList extends Component {
       asyncBlurFields: arrayOf(string),
       fieldsets: arrayOf(fieldsetShape).isRequired,
 
+      parseError: string,
+
       save: func.isRequired,
       query: func.isRequired,
       update: func.isRequired,
@@ -68,6 +70,7 @@ export default class PropertyList extends Component {
       upload: undefined,
       asyncBlurFields: undefined,
       asyncValidate: undefined,
+      parseError: null,
       assigningGroups: false,
       showModalOnDoubleClick: false,
     };
@@ -143,7 +146,7 @@ export default class PropertyList extends Component {
       // queryError,
       // updateError,
       // deleteError,
-      // parseError,
+      parseError,
       // uploadError,
 
       items,
@@ -255,25 +258,43 @@ export default class PropertyList extends Component {
         </div>
       );
     return (
-      <div className={[bs.row, styles.default].join(' ')}>
-        <div className={bs.colSm12}>
-          {itemContent}
-        </div>
-        <div className={bs.colSm12}>
-          <Buttons {...this.props} addItem={this.addItem} />
-        </div>
-        { parsedItems.length === 0 ? null : (
+      <div className={styles.default}>
+        <div className={bs.row}>
           <div className={bs.colSm12}>
-            <UploadPreview
-              items={parsedItems}
-              isSaving={uploading}
-              query={query}
-              querying={querying}
-              params={params}
-              cancel={clearParsed}
-              fieldsets={fieldsets}
-              save={upload}
-            />
+            {itemContent}
+          </div>
+          <div className={bs.colSm12}>
+            <Buttons {...this.props} addItem={this.addItem} />
+          </div>
+          { parsedItems.length === 0 ? null : (
+            <div className={bs.colSm12}>
+              <UploadPreview
+                items={parsedItems}
+                isSaving={uploading}
+                query={query}
+                querying={querying}
+                params={params}
+                cancel={clearParsed}
+                fieldsets={fieldsets}
+                save={upload}
+              />
+            </div>
+          )}
+        </div>
+        { parseError == null ? null : (
+          <div className={bs.row}>
+            <div className={bs.colSm12}>
+              <div
+                style={{ marginTop: 28, padding: '15px 20px' }}
+                className={[
+                  bs.alert,
+                  bs.alertDanger,
+                ].join(' ')}
+              >
+                Error reading spreadsheet.
+                Make sure file is a ‘.xlsx’ file and column names are in the first row.
+              </div>
+            </div>
           </div>
         )}
       </div>

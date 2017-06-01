@@ -274,7 +274,7 @@ async (dispatch) => {
 
   const propMap = {};
   const translate = value => Object.keys(value).reduce((acc, key) => (
-    propMap[key].setValue
+    propMap[key] && propMap[key].setValue
       ? propMap[key].setValue(acc, value[key])
       : { ...acc, [key]: value[key] }
     ),
@@ -285,7 +285,7 @@ async (dispatch) => {
     if (error) {
       dispatch({ type, name, status: ERROR, error });
     } else {
-      dispatch({ type, name, status: COMPLETE, results: results.map(translate) });
+      dispatch({ type, name, status: COMPLETE, results: (results || []).map(translate) });
     }
   };
   dispatch({ type, name, status: PENDING });
