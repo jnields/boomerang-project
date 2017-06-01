@@ -25,7 +25,7 @@ export default class ReportBase extends Component {
   }
 
   componentWillMount() {
-    if (window !== undefined) {
+    if (browser) {
       this.props.loadReport(getQuery(this.props.location.pathname));
     }
   }

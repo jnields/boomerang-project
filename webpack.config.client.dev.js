@@ -143,5 +143,8 @@ module.exports = {
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NamedModulesPlugin(),
+    new webpack.DefinePlugin({
+      'browser': JSON.stringify(true),
+    }),
   ],
 };

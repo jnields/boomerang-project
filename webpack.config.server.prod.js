@@ -133,6 +133,9 @@ module.exports = {
     filename: '../../server.js',
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'browser': JSON.stringify(false),
+    }),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
         booleans: true,

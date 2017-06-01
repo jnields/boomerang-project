@@ -80,7 +80,7 @@ export default class PropertyList extends Component {
   }
 
   componentWillMount() {
-    if (window !== undefined) {
+    if (browser) {
       this.goToPage(1);
     }
   }

@@ -6,7 +6,8 @@
   "globals": {
     "require": true,
     "module": false,
-    "exports": false
+    "exports": false,
+    "browser": true
   },
   "rules": {
     "no-console": "off",

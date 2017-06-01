@@ -105,4 +105,9 @@ module.exports = {
   output: {
     filename: 'dev-server.js',
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'browser': JSON.stringify(false),
+    }),
+  ],
 };

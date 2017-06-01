@@ -39,7 +39,7 @@ export default class Buttons extends Component {
   }
 
   componentWillMount() {
-    if (window !== undefined) {
+    if (browser) {
       const u8 = new Uint8Array(16);
       window.crypto.getRandomValues(u8);
       const fileId = window.btoa(String.fromCharCode.apply(null, u8));
