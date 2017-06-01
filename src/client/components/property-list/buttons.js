@@ -136,7 +136,7 @@ export default class Buttons extends Component {
                     <button
                       className={[
                         bs.btn,
-                        bs.btnPrimary,
+                        bs.btnDefault,
                       ].join(' ')}
                       onClick={() => closeModal()}
                     >

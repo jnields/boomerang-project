@@ -71,7 +71,7 @@ export default function PropertyForm(props) {
             )}
             <button
               type="button"
-              className={[bs.btn, bs.btnPrimary].join(' ')}
+              className={[bs.btn, bs.btnDefault].join(' ')}
               disabled={submitting || deleting}
               onClick={cancel}
             >
@@ -79,7 +79,7 @@ export default function PropertyForm(props) {
             </button>
             <button
               type="submit"
-              className={[bs.btn, bs.btnDefault].join(' ')}
+              className={[bs.btn, bs.btnPrimary].join(' ')}
               disabled={!valid || submitting || deleting}
             >
               { submitting ? <Spinner /> : null }

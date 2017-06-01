@@ -56,14 +56,14 @@ export default function UploadPreview({
       </div>
       <div className={bs.btnToolbar}>
         <button
-          className={[bs.btn, bs.btnPrimary].join(' ')}
+          className={[bs.btn, bs.btnDefault].join(' ')}
           onClick={cancel}
           disabled={isSaving}
         >
           Cancel
         </button>
         <button
-          className={[bs.btn, bs.btnDefault].join(' ')}
+          className={[bs.btn, bs.btnPrimary].join(' ')}
           onClick={async () => {
             await save(items);
             await query(params);
