@@ -12,4 +12,4 @@ DB_PASSWORD=$pw1 \
 DB_USER=boomerang \
 PORT=29171 \
 HOST='https://boomerang.nields.io' \
-pm2 start npm -- start
+pm2 start npm --name 'boomerang' -- start
