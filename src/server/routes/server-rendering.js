@@ -9,6 +9,11 @@ import App from '../../client/containers/app';
 import reducers from '../../client/reducers';
 import { user as userSchema } from '../../client/helpers/schema';
 
+const prod = process.env.NODE_ENV === 'production';
+const bundlePath = prod
+  ? '/public/build/bundle.js'
+  : `${process.env.HOST}:${process.env.PROXY_PORT}/hot-reload-server/bundle.js`;
+
 export default (req, res) => {
   const user = req.user ? req.user.toJSON() : null;
   const normalized = user
@@ -44,7 +49,7 @@ export default (req, res) => {
   const options = {
     title: 'Boomerang Project',
     lang: 'en',
-    bundlePath: '/public/build/bundle.js',
+    bundlePath,
     markup: renderToString(staticRouter),
     initialState: JSON
       .stringify(initialState)

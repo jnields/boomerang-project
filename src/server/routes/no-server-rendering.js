@@ -2,9 +2,9 @@ import { normalize } from 'normalizr';
 import { user as userSchema } from '../../client/helpers/schema';
 
 const prod = process.env.NODE_ENV === 'production';
-const bundlePort = prod
-  ? process.env.PORT
-  : process.env.PROXY_PORT;
+const bundlePath = prod
+  ? '/public/build/bundle.js'
+  : `${process.env.HOST}:${process.env.PROXY_PORT}/hot-reload-server/bundle.js`;
 
 export default (req, res) => {
   const user = req.user ? req.user.toJSON() : null;
@@ -25,7 +25,7 @@ export default (req, res) => {
   const options = {
     title: 'Boomerang Project',
     lang: 'en',
-    bundlePath: `http://localhost:${bundlePort}/hot-reload-server/bundle.js`,
+    bundlePath,
     markup: '',
     initialState: JSON
       .stringify(initialState)
