@@ -1,6 +1,7 @@
 const autoprefixer = require('autoprefixer');
 const webpack = require('webpack');
 const path = require('path');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
   context: __dirname,
@@ -47,31 +48,33 @@ module.exports = {
         exclude: path.resolve(__dirname, 'src', 'client', 'workers'),
         use: 'babel-loader',
       },
-      // sass/css files - just get names, nothing else
+      // sass/css files - extract text
       {
         test: /\.(s[ac]|c)ss$/,
-        use: [
-          {
-            loader: 'css-loader/locals',
-            options: {
-              camelCase: true,
-              modules: true,
+        use: ExtractTextPlugin.extract({
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                modules: true,
+                camelCase: true,
+              },
             },
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              plugins: () => [autoprefixer()],
+            {
+              loader: 'postcss-loader',
+              options: {
+                plugins: () => [autoprefixer()],
+              },
             },
-          },
-          {
-            loader: 'sass-loader',
-            options: {
-              outputStyle: 'compressed',
-              precision: 8,
+            {
+              loader: 'sass-loader',
+              options: {
+                outputStyle: 'compressed',
+                precision: 8,
+              },
             },
-          },
-        ],
+          ],
+        }),
       },
       // json files
       {
@@ -86,7 +89,7 @@ module.exports = {
             loader: 'file-loader',
             options: {
               name: '[hash].[ext]',
-              emitFile: false,
+              emitFile: true,
             },
           },
         ],
@@ -121,6 +124,10 @@ module.exports = {
       'process.env': {
         NODE_ENV: JSON.stringify('production'),
       },
+    }),
+    new ExtractTextPlugin({
+      filename: 'bundle.css',
+      allChunks: true,
     }),
     new webpack.optimize.UglifyJsPlugin({
       compress: {

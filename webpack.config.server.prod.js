@@ -44,34 +44,34 @@ module.exports = {
         ],
         use: 'babel-loader',
       },
-      // sass/css files - extract text
-      {
-        test: /\.(s[ac]|c)ss$/,
-        use: ExtractTextPlugin.extract({
-          use: [
-            {
-              loader: 'css-loader',
-              options: {
-                modules: true,
-                camelCase: true,
-              },
-            },
-            {
-              loader: 'postcss-loader',
-              options: {
-                plugins: () => [autoprefixer()],
-              },
-            },
-            {
-              loader: 'sass-loader',
-              options: {
-                outputStyle: 'compressed',
-                precision: 8,
-              },
-            },
-          ],
-        }),
-      },
+      // // sass/css files - extract text
+      // {
+      //   test: /\.(s[ac]|c)ss$/,
+      //   use: ExtractTextPlugin.extract({
+      //     use: [
+      //       {
+      //         loader: 'css-loader',
+      //         options: {
+      //           modules: true,
+      //           camelCase: true,
+      //         },
+      //       },
+      //       {
+      //         loader: 'postcss-loader',
+      //         options: {
+      //           plugins: () => [autoprefixer()],
+      //         },
+      //       },
+      //       {
+      //         loader: 'sass-loader',
+      //         options: {
+      //           outputStyle: 'compressed',
+      //           precision: 8,
+      //         },
+      //       },
+      //     ],
+      //   }),
+      // },
       // json files
       {
         test: /\.json$/,
@@ -154,9 +154,9 @@ module.exports = {
         warnings: false,
       },
     }),
-    new ExtractTextPlugin({
-      filename: 'bundle.css',
-      allChunks: true,
-    }),
+    // new ExtractTextPlugin({
+    //   filename: 'bundle.css',
+    //   allChunks: true,
+    // }),
   ],
 };
