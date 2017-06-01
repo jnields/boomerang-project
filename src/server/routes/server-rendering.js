@@ -12,7 +12,7 @@ import { user as userSchema } from '../../client/helpers/schema';
 const prod = process.env.NODE_ENV === 'production';
 const bundlePath = prod
   ? '/public/build/bundle.js'
-  : `${process.env.HOST}:${process.env.PROXY_PORT}/hot-reload-server/bundle.js`;
+  : `http://localhost:${process.env.PROXY_PORT}/hot-reload-server/bundle.js`;
 
 export default (req, res) => {
   const user = req.user ? req.user.toJSON() : null;

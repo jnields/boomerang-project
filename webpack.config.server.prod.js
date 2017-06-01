@@ -142,7 +142,7 @@ module.exports = {
         conditionals: true,
         comparisons: true,
         dead_code: true,
-        drop_console: true,
+        drop_console: false,
         drop_debugger: true,
         evaluate: true,
         if_return: true,
