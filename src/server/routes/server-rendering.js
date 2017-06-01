@@ -42,7 +42,7 @@ export default (req, res) => {
   }
 
   const options = {
-    title: 'Express',
+    title: 'Boomerang Project',
     lang: 'en',
     bundlePath: '/public/build/bundle.js',
     markup: renderToString(staticRouter),
