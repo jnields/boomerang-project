@@ -62,10 +62,8 @@ export default function (router) {
     // eslint-disable-next-line no-unused-vars
     app.use((err, req, res, next) => {
       res.status(err.status || 500);
-      res.render('error', {
-        message: err.message,
-        error: {},
-      });
+      console.error(err);
+      res.send();
     });
   } else {
     // development error handler
