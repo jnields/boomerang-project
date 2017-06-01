@@ -44,34 +44,34 @@ module.exports = {
         ],
         use: 'babel-loader',
       },
-      // // sass/css files - extract text
-      // {
-      //   test: /\.(s[ac]|c)ss$/,
-      //   use: ExtractTextPlugin.extract({
-      //     use: [
-      //       {
-      //         loader: 'css-loader',
-      //         options: {
-      //           modules: true,
-      //           camelCase: true,
-      //         },
-      //       },
-      //       {
-      //         loader: 'postcss-loader',
-      //         options: {
-      //           plugins: () => [autoprefixer()],
-      //         },
-      //       },
-      //       {
-      //         loader: 'sass-loader',
-      //         options: {
-      //           outputStyle: 'compressed',
-      //           precision: 8,
-      //         },
-      //       },
-      //     ],
-      //   }),
-      // },
+      // sass/css files - extract text
+      {
+        test: /\.(s[ac]|c)ss$/,
+        use: ExtractTextPlugin.extract({
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                modules: true,
+                camelCase: true,
+              },
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                plugins: () => [autoprefixer()],
+              },
+            },
+            {
+              loader: 'sass-loader',
+              options: {
+                outputStyle: 'compressed',
+                precision: 8,
+              },
+            },
+          ],
+        }),
+      },
       // json files
       {
         test: /\.json$/,
@@ -113,8 +113,7 @@ module.exports = {
     let translatedRequest = request;
     let external = builtins[request]
       || /(^[^\/.]|(?:!))/.test(request);
-      // starts with "/", "\", or "."; or contains "!"
-
+    // starts with "/", "\", or "."; or contains "!"
     if (!external) {
       const fullPath = path.resolve(context, request);
       external = fullPath.substring(0, nodePathLength) === nodePath;
@@ -154,9 +153,9 @@ module.exports = {
         warnings: false,
       },
     }),
-    // new ExtractTextPlugin({
-    //   filename: 'bundle.css',
-    //   allChunks: true,
-    // }),
+    new ExtractTextPlugin({
+      filename: 'bundle.css',
+      allChunks: true,
+    }),
   ],
 };
