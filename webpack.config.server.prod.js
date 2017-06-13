@@ -134,7 +134,9 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      'browser': JSON.stringify(false),
+      'window': 'undefined',
+      'browser': 'false',
+      'server': 'true',
     }),
     new webpack.optimize.UglifyJsPlugin({
       compress: {

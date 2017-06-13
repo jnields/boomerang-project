@@ -49,6 +49,7 @@ async (dispatch, getState) => {
     api.reports.groups(),
     api.reports.students({ $order: 'gender' }),
   ]);
+  // TODO debug - 'a is undefined'
   const allGroups = [...groupResponse.body];
   const allStudents = [...studentResponse.body];
   const patches = [];

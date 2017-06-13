@@ -107,7 +107,8 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      'browser': JSON.stringify(false),
+      'browser': 'false',
+      'server': 'true'
     }),
   ],
 };
