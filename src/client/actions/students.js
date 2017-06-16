@@ -49,14 +49,19 @@ async (dispatch, getState) => {
     api.reports.groups(),
     api.reports.students({ $order: 'gender' }),
   ]);
-  // TODO debug - 'a is undefined'
   const allGroups = [...groupResponse.body];
   const allStudents = [...studentResponse.body];
   const patches = [];
   for (
-    let i = 0, group = allGroups[i], student = allStudents.pop();
+    let i = 0,
+      group = allGroups[i],
+      student = allStudents.pop();
     group && student;
-    i = (i + 1) === allGroups.length ? 0 : i + 1, group = allGroups[i], student = allStudents.pop()
+    i = (i + 1) === allGroups.length
+        ? 0
+        : i + 1,
+      group = allGroups[i],
+      student = allStudents.pop()
   ) {
     patches.push({ id: student.id, groupId: group.id });
   }

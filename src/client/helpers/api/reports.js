@@ -49,7 +49,7 @@ export default {
       )),
       new Promise((resolve, reject) => {
         xhr.get(
-          '/api/users?group=\u0000&$limit=10000&type=STUDENT',
+          '/api/users?group=%00&$limit=10000&type=STUDENT',
           config,
           (error, response) => {
             if (error) return reject(error);
