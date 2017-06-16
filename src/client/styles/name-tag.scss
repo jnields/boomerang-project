@@ -1,29 +1,6 @@
 @import './variables';
-$height: 200px;
-$padding: 20px;
 
-@media print {
-  .default {
-    width: 45%;
-    box-sizing: border-box;
-    break-inside: avoid;
-    float: left;
-    &:nth-child(even) {
-      margin-right: 2.5%;
-    }
-    &:nth-child(odd) {
-      margin-left: 2.5%;
-    }
-    margin-bottom: 2.5%;
-  }
-}
-.default {
-  height: $height;
-  border: 3px solid #eee;
-  background-color: white;
-  position: relative;
-  padding: 10px;
-  margin-bottom: 30px;
+@mixin position-items($height, $padding) {
   .logo {
     position: absolute;
     top: $padding;
@@ -67,4 +44,114 @@ $padding: 20px;
     bottom: $padding;
     right: $padding;
   }
+}
+
+@mixin printable(
+    $class,
+    $height,
+    $width,
+    $padding,
+    $page-margin-top,
+    $page-margin-left,
+    $tag-margin-bottom,
+    $tag-margin-left,
+    $tags-per-page
+) {
+  .#{$class}-name-tags {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: $page-margin-top 0 0 $page-margin-left;
+    float: none;
+    border: 1px solid green;
+  }
+  .#{$class} {
+    height: $height;
+    width: $width;
+    box-sizing: border-box;
+    float: left;
+    margin-right: 0;
+    margin-bottom: $tag-margin-bottom;
+    // border: none;
+    &:nth-child(2n + 1) {
+      margin-left: 0;
+    }
+    &:nth-child(2n) {
+      margin-left: $tag-margin-left;
+    }
+    &:nth-child(#{$tags-per-page}n) {
+      page-break-after: always;
+    }
+    &:last-child {
+      page-break-after: avoid;
+    }
+    @include position-items($height, $padding);
+  }
+}
+
+.default,
+.a5163,
+.a88395 {
+  $height: 200px;
+  $padding: 20px;
+  height: $height;
+  border: 3px solid #eee;
+  background-color: white;
+  position: relative;
+  padding: 10px;
+  margin-bottom: 30px;
+  @include position-items(200px, 20px);
+}
+
+@page {
+  size: letter portrait;
+  border: none;
+  margin: 0;
+  padding: 0;
+  outline: none;
+}
+
+@media print {
+  body {
+    width: 100% !important;
+    margin: 0 !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    outline: 1px solid red;
+  }
+  @include printable(
+    'default',
+    2.33in,
+    45%,
+    40px,
+    0.58in,
+    0.7in,
+    0.19in,
+    0.38in,
+    10
+  );
+  @include printable(
+    'a5163', // class
+    1.8in,   // height
+    3.8in,   // width
+    10px,    // padding
+    0.62in,  // page-margin-top
+    0.27in,  // page-margin-left
+    0.2in,   // tag-margin-bottom
+    0.39in,  // tag-margin-left
+    10       // tags-per-page
+  );
+  @include printable(
+    'a88395', //class
+    2.33in,   // height
+    3.37in,   // width
+    20px,     // padding
+    0.58in,   // page-margin-top
+    0.7in,    // page-margin-left
+    0.19in,   // tag-margin-bottom
+    0.38in,   // tag-margin-left
+    8         // tags-per-page
+  );
 }

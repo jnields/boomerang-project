@@ -1,13 +1,14 @@
 import React from 'react';
+import { string } from 'prop-types';
 import { user as userShape } from '../../helpers/models';
 import s from '../../styles/name-tag';
 import logo from '../../../assets/logo.png';
 
 const year = new Date().getFullYear();
 
-export default function NameTag({ user }) {
+export default function NameTag({ user, className }) {
   return (
-    <div className={s.default}>
+    <div className={className}>
       <img className={s.logo} src={logo} alt="Boomerang Project" />
       <span className={s.orientation}>
         {`${year} `}<strong>WEB</strong>{' Group'}<br />
@@ -34,4 +35,8 @@ export default function NameTag({ user }) {
     </div>
   );
 }
-NameTag.propTypes = { user: userShape.isRequired };
+NameTag.propTypes = {
+  user: userShape.isRequired,
+  className: string,
+};
+NameTag.defaultProps = { className: s.default };

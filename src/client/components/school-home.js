@@ -1,6 +1,8 @@
 import React from 'react';
 import { string, arrayOf, node, shape, func } from 'prop-types';
 import { Route } from 'react-router-dom';
+import bs from '../styles/bootstrap';
+import { school as schoolShape } from '../helpers/models';
 import TabList from './tab-list';
 import Report from '../containers/reports/report';
 
@@ -10,9 +12,11 @@ export default function SchoolHome({
   location,
   reports,
   leaveReport,
+  school,
 }) {
   return (
     <div>
+      <h2 className={bs.hiddenPrint}>{school.name}</h2>
       <TabList tabs={tabs} location={location} content={content} leaveReport={leaveReport} />
       {reports.map(report => (
         <Route
@@ -48,4 +52,5 @@ SchoolHome.propTypes = {
     href: string.isRequired,
   })).isRequired,
   leaveReport: func.isRequired,
+  school: schoolShape.isRequired,
 };

@@ -4,6 +4,11 @@
     margin-top: $nav-height + 12;
     margin-bottom: 100px;
 }
+@media print {
+  .app {
+    margin: 0;
+  }  
+}
 
 html {
   font-size: 16px !important;

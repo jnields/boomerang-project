@@ -6,4 +6,3 @@ PORT=3000 \
 PROXY_PORT=3001 \
 HOST='http://localhost:3000' \
 npm run start:dev
-
