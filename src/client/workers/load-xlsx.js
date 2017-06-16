@@ -29,6 +29,7 @@ function parseDate(date) {
 
 function mapObject(properties, raw) {
   const result = {};
+  let any = false;
   Object.keys(raw).forEach((key) => {
     let value = raw[key];
     properties.forEach((property) => {
@@ -45,11 +46,12 @@ function mapObject(properties, raw) {
             break;
           default: break;
         }
+        any = any || !!value;
         result[property.name] = value;
       }
     });
   });
-  // console.log(result);
+  if (!any) return null;
   return result;
 }
 
@@ -142,7 +144,7 @@ async function handleMessage({ data: { properties, files } }) {
       }
     });
   });
-  return result.map(obj => mapObject(properties, obj));
+  return result.map(obj => mapObject(properties, obj)).filter(obj => obj);
 }
 
 onmessage = (message) => {
