@@ -39,21 +39,29 @@ export default class NameTagList extends Component {
             bs.hiddenPrint,
           ].join(' ')}
         >
-          {types.map(key => (
-            <div className={bs.radio} key={key}>
-              <label className={bs.radioInline} htmlFor={key}>
-                <input
-                  type="radio"
-                  value={key}
-                  id={key}
-                  onChange={this.handleChange}
-                  checked={this.state.selected === key}
-                /> AVERY® {key}™
-              </label>
-            </div>
-          ))}
+          <fieldset>
+            <legend>Select type:</legend>
+            {types.map(key => (
+              <div className={bs.radioInline} key={key}>
+                <label className={bs.radioInline} htmlFor={key}>
+                  <input
+                    type="radio"
+                    value={key}
+                    id={key}
+                    onChange={this.handleChange}
+                    checked={this.state.selected === key}
+                  /> AVERY® {key}™
+                </label>
+              </div>
+            ))}
+          </fieldset>
         </form>
-        <div className={nameTagClasses[`a${this.state.selected}-name-tags`]}>
+        <div
+          className={[
+            nameTagClasses.nameTags,
+            bs.clearfix,
+          ].join(' ')}
+        >
           {users.map(user => (
             <NameTag
               className={nameTagClasses[`a${this.state.selected}`]}

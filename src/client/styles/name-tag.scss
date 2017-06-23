@@ -1,4 +1,6 @@
 @import './variables';
+$page-base-top: 0.58in;
+$page-base-left: 0.27in;
 
 @mixin position-items($height, $padding) {
   .logo {
@@ -51,21 +53,12 @@
     $height,
     $width,
     $padding,
-    $page-margin-top,
-    $page-margin-left,
+    $start-margin-top,
+    $odd-margin-left,
     $tag-margin-bottom,
-    $tag-margin-left,
+    $even-margin-left,
     $tags-per-page
 ) {
-  .#{$class}-name-tags {
-    position: relative;
-    top: 0;
-    left: 0;
-    width: 100%;
-    margin: $page-margin-top 0 0 $page-margin-left;
-    float: none;
-    border: 1px solid green;
-  }
   .#{$class} {
     height: $height;
     width: $width;
@@ -73,22 +66,28 @@
     float: left;
     margin-right: 0;
     margin-bottom: $tag-margin-bottom;
-    // border: none;
+    border: none;
+
+    &:nth-child(#{$tags-per-page}n + 1),
+    &:nth-child(#{$tags-per-page}n + 2) {
+      margin-top: $start-margin-top;
+    }
     &:nth-child(2n + 1) {
-      margin-left: 0;
+      margin-left: $odd-margin-left;
     }
     &:nth-child(2n) {
-      margin-left: $tag-margin-left;
+      margin-left: $even-margin-left;
     }
     &:nth-child(#{$tags-per-page}n) {
+      page-break-inside: avoid;
       page-break-after: always;
     }
     &:last-child {
       page-break-after: avoid;
     }
-    @include position-items($height, $padding);
   }
 }
+
 
 .default,
 .a5163,
@@ -107,20 +106,20 @@
 @page {
   size: letter portrait;
   border: none;
-  margin: 0;
+  margin: 0in;
   padding: 0;
   outline: none;
 }
 
 @media print {
   body {
-    width: 100% !important;
+    width: 8.5in !important;
     margin: 0 !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    outline: 1px solid red;
   }
+  .name-tags {
+    width: 8.5in;
+  }
+
   @include printable(
     'default',
     2.33in,
