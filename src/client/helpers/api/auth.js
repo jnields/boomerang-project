@@ -1,4 +1,5 @@
 import xhr from 'xhr';
+import windowOrGlobal from 'window-or-global';
 import config from './config';
 import getQuery from './get-query';
 import handleAbort from './handle-abort';
@@ -24,7 +25,7 @@ export default {
     handleAbort({ abort, cancel, resolve });
   }),
   logOut: () => {
-    document.cookie = 'SID=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    windowOrGlobal.document.cookie = 'SID=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   },
   patch: (id, body) => new Promise((resolve, reject) => {
     if (typeof id !== 'number') {

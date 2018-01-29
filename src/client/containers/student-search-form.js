@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { reduxForm } from 'redux-form';
-import { handleSearchSubmit as handleSubmit } from '../actions/students';
+// import { handleSearchSubmit as handleSubmit } from '../actions/students';
 import SearchForm from '../components/search-form';
 
 export default connect(
@@ -10,5 +10,5 @@ export default connect(
   {},
 )(reduxForm({
   form: 'studentQuery',
-  onSubmit: (values, dispatch) => dispatch(handleSubmit(values)),
+  // onSubmit: (values, dispatch) => dispatch(handleSubmit(values)),
 })(SearchForm));

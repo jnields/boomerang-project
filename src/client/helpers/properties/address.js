@@ -1,5 +1,5 @@
 import validate from './validate';
-import states from '../states';
+import states from '../states.json';
 
 const inverse = Object.keys(states).reduce(
   (accumulated, abbr) => ({

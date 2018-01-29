@@ -1,28 +1,53 @@
 {
-    "root": true,
-    "env": {
-        "node": true
-    },
-    "parserOptions": {
-        "ecmaVersion": 6
-    },
-    "settings": {
-        "import/resolver": {
-            "node": {
-                "extensions": [
-                    ".gif", ".png", ".jpeg", ".bmp",
-                    ".js", ".jsx",
-                    ".json",
-                    ".scss", ".sass", ".css"
-                ]
-            }
-        },
-        "import/ignore": [
-            "\\.gif", "\\.png", "\\.jpeg", "\\.bmp",
-            "\\.sass",
-            "\\.scss",
-            "\\.css",
-            "src/client/workers/.*"
-        ]
-    }
+  "root": true,
+  "env": {
+    "shared-node-browser": true
+  },
+  "extends": "airbnb",
+  "parser": "babel-eslint",
+  "settings": {
+    "import/ignore": [
+      "\\.(?!jsx?$)",
+      "src/client/workers/*"
+    ]
+  },
+  "plugins": ["flowtype"],
+  "rules": {
+    "flowtype/boolean-style": "error",
+    "flowtype/define-flow-type": "error",
+    "flowtype/delimiter-dangle": [
+      "error", "always-multiline"
+    ],
+    "flowtype/generic-spacing": "error",
+    "flowtype/no-dupe-keys": "error",
+    "flowtype/no-mutable-array": "off",
+    "flowtype/no-primitive-constructor-types": "error",
+    "flowtype/require-variable-type": "error",
+    "flowtype/no-types-missing-file-annotation": "error",
+    "flowtype/no-unused-expressions": "error",
+    "no-unused-expressions": "off",
+    "flowtype/no-weak-types": "off",
+    "flowtype/object-type-delimiter": "error",
+    "flowtype/require-parameter-type": "off",
+    "flowtype/require-return-type": "off",
+    "flowtype/require-valid-file-annotation": "error",
+    "flowtype/require-variable-type": "off",
+    "flowtype/semi": "error",
+    "flowtype/sort-keys": "off",
+    "flowtype/space-after-type-colon": "error",
+    "flowtype/space-before-generic-bracket": "error",
+    "flowtype/space-before-type-colon": "error",
+    "flowtype/type-id-match": "off",
+    "flowtype/union-intersection-spacing": "error",
+    "flowtype/use-flow-type": "error",
+
+    "import/named": "error",
+    "import/default": "error",
+    "import/namespace": "error",
+    "import/no-commonjs": "error",
+    "import/no-amd": "error",
+    "import/no-nodejs-modules": "off",
+
+    "max-lines": "warn"
+  }
 }

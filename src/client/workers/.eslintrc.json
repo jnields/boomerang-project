@@ -1,5 +1,6 @@
 {
-    "env": {
-        "worker": "true"
-    }
+  "env": {
+    "worker": true,
+    "browser": true
+  }
 }
