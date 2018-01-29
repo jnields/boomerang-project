@@ -1,15 +1,16 @@
+/* eslint-env commonjs */
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import thunk from 'redux-thunk';
 import { createStore, applyMiddleware } from 'redux';
+import window from 'window-or-global';
 
 import App from './containers/app';
 import reducers from './reducers';
 import api from './helpers/api';
 
-window.api = api;
 
 const store = createStore(
   reducers,
@@ -17,22 +18,23 @@ const store = createStore(
   applyMiddleware(thunk),
 );
 
-window.store = store;
 
-function renderApp(Component) {
+const renderApp = (Component) => {
   render(
     <Provider store={store}>
       <BrowserRouter>
         <Component />
       </BrowserRouter>
     </Provider>,
-    document.getElementById('react-root'),
+    window.document.getElementById('react-root'),
   );
-}
-
+};
 renderApp(App);
 
-if (module.hot) {
+if (process.env.NODE_ENV !== 'production' && module.hot) {
+  window.api = api;
+  window.store = store;
+
   module.hot.accept('./reducers', () => {
     try {
       delete require.cache[require.resolve('./reducers')];
@@ -57,4 +59,6 @@ if (module.hot) {
       // ignored
     }
   });
+} else {
+  delete window.INITIAL_STATE;
 }

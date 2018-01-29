@@ -1,0 +1,46 @@
+{
+  "presets": [
+    "react",
+    "stage-3",
+    [
+      "env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ]
+  ],
+  "env": {
+    "client": {
+      "presets": [
+        "react",
+        "stage-3",
+        [
+          "env",
+          {
+            "modules": false,
+            "targets": {
+              "browsers": ">.4% in US"
+            }
+          }
+        ]
+      ]
+    },
+    "server": {
+      "presets": [
+        "react",
+        "stage-3",
+        [
+          "env",
+          {
+            "modules": false,
+            "targets": {
+              "node": "8.9.0"
+            }
+          }
+        ]
+      ]
+    }
+  }
+}

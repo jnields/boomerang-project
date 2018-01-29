@@ -31,11 +31,11 @@ export default function (router) {
   app.use(compression());
 
   // view engine setup
-  app.set('views', path.resolve(__dirname, 'src', 'server', 'views'));
+  app.set('views', path.resolve('./src/server/views'));
   app.set('view engine', 'pug');
 
   app.use(favicon(
-    path.resolve(__dirname, 'src', 'assets', 'favicon.ico'),
+    path.resolve('./src/assets/favicon.ico'),
   ));
   app.use(logger('dev'));
   app.use(bodyParser.json());
@@ -43,7 +43,7 @@ export default function (router) {
   app.use(cookieParser());
   app.use(
     '/public',
-    express.static(path.resolve(__dirname, 'public')),
+    express.static(path.resolve('./dist/public')),
   );
   app.use(authentication);
 
