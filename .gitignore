@@ -1,6 +1,5 @@
-.DS_Store
-/dev-server.js*
-/.git
+public
+dist
 
 # Logs
 /logs
